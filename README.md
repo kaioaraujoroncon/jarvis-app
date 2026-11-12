@@ -1,8 +1,13 @@
-# Jarvis · atalho da Central
+# Jarvis · app da Central (Mark IV)
 
-Página pública e pequena que dá ao atalho do iPhone o ícone do reator, o nome "Jarvis", a tela cheia e as notificações.
-Ela abre o app da Central (Google Apps Script) dentro de um iframe. O app só abre com a conta Google do dono.
+App web instalável (PWA) da Central do Kaio: ícone do reator, nome "Jarvis", tela cheia no iPhone e notificações.
 
-Não há segredos aqui. Os dados ficam no Google, e as inscrições de notificação ficam na planilha privada.
+Desde o Mark IV a tela inteira roda aqui (GitHub Pages), sem login do Google e sem iframe.
+Os dados ficam no Google (Apps Script + planilha privada). Cada aparelho é pareado uma vez com um código
+e recebe um token próprio, guardado só nele; o servidor guarda apenas o hash e pode desconectar o aparelho.
 
-Instalar: abra https://kaioaraujoroncon.github.io/jarvis-app/ no Safari do iPhone e toque em Compartilhar > Adicionar à Tela de Início. Depois abra o ícone e toque em "Ativar notificações".
+Não há segredos neste repositório: só HTML/CSS/JS, ícones e o service worker.
+Os arquivos são gerados a partir do código do Apps Script (repositório privado) por `build_pages.js`.
+
+Instalar no iPhone: abra https://kaioaraujoroncon.github.io/jarvis-app/ no Safari > Compartilhar > Adicionar à Tela de Início.
+Abra pelo ícone, digite o código de pareamento e toque em "Ativar" para receber os avisos.
