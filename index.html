@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Jarvis · Central Mark IV (4.0.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
+<!-- Jarvis · Central Mark V (5.0.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -11,13 +11,13 @@
 <title>Jarvis</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="application-name" content="Jarvis">
-<meta name="description" content="Central Mark IV do Kaio">
+<meta name="description" content="Central Mark V do Kaio">
 <meta name="referrer" content="no-referrer">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
-  /* Central Mark IV · visual sóbrio (mesma paleta: vermelho Stark, dourado, azul reator, grafite).
+  /* Central Mark V · visual sóbrio (mesma paleta: vermelho Stark, dourado, azul reator, grafite).
      Menos brilho, menos emoji, tipografia menor e mais densa. */
   :root {
     --red:#B3141F; --red2:#8E0F18; --gold:#D4A72C; --arc:#3FC1E8;
@@ -27,6 +27,7 @@
     --fonte:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;
   }
   * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
   html { background:var(--bg); }
   html,body { margin:0; min-height:100%; color:var(--tx); font:14px/1.4 var(--fonte); letter-spacing:-.003em; -webkit-text-size-adjust:100%; -webkit-font-smoothing:antialiased; }
   body { background:var(--bg); overscroll-behavior-y:none; }
@@ -239,7 +240,7 @@
   .tabbar button.on { color:var(--tx); }
   .tabbar button.on svg { stroke:var(--gold); }
 
-  .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--tabH) + 64px + env(safe-area-inset-bottom)); width:max-content; max-width:92%; background:#22252E; border:1px solid var(--bd2); border-radius:10px; padding:9px 12px; font-size:13.5px; z-index:20; display:none; box-shadow:0 8px 24px rgba(0,0,0,.4); }
+  .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--tabH) + 64px + env(safe-area-inset-bottom)); width:max-content; max-width:92%; background:#22252E; border:1px solid var(--bd2); border-radius:10px; padding:9px 12px; font-size:13.5px; z-index:95; display:none; box-shadow:0 8px 24px rgba(0,0,0,.4); }
   .toast.bad { border-color:#5A1D22; }
   .toast button { margin-left:10px; background:none; border:none; color:var(--arc); font-weight:600; }
 
@@ -261,6 +262,107 @@
   .folha .ap small { color:var(--mut); }
   .push-card span:first-child { flex:1 1 180px; }
 
+
+  /* ===== Mark V ===== */
+  /* Fundo HUD discreto: brilho suave cor do reator + grade de linhas finas que some para baixo */
+  body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(520px 340px at 50% -80px, rgba(63,193,232,.075), transparent 70%),
+      repeating-linear-gradient(0deg, rgba(63,193,232,.035) 0 1px, transparent 1px 44px),
+      repeating-linear-gradient(90deg, rgba(63,193,232,.03) 0 1px, transparent 1px 44px);
+    -webkit-mask-image:linear-gradient(to bottom, #000 0, rgba(0,0,0,.45) 300px, transparent 560px);
+    mask-image:linear-gradient(to bottom, #000 0, rgba(0,0,0,.45) 300px, transparent 560px); }
+  body { background:transparent; }
+  html.com-foco, html.com-foco body { overflow:hidden; }
+
+  .resumo-linha { display:flex; align-items:flex-end; gap:10px; }
+  .resumo-linha .resumo-dia { flex:1; min-width:0; }
+  .ouvir { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--bd2); background:rgba(21,23,29,.7); color:var(--tx2); border-radius:999px; padding:5px 11px 5px 9px; font-size:12.5px; min-height:32px; }
+  .ouvir svg { fill:currentColor; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; }
+  .ouvir.on { border-color:var(--arc); color:var(--arc); }
+  .dica { color:var(--mut); font-size:12.5px; line-height:1.45; margin-top:14px; text-align:center; }
+  .dica b { color:var(--tx2); }
+  .hap { position:fixed; left:-200px; top:0; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
+
+  /* Trava (Face ID) — acima de tudo */
+  .trava { position:fixed; inset:0; z-index:130; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)); transition:opacity .2s; }
+  .trava::before { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(360px 260px at 50% 38%, rgba(63,193,232,.08), transparent 70%); }
+  .trava.sai { opacity:0; }
+  .trava-in { position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; max-width:300px; text-align:center; }
+  .trava-in .logo-g { width:58px; height:58px; display:block; margin-bottom:10px; }
+  .trava-in .logo-g svg { width:100%; height:100%; display:block; border-radius:14px; }
+  .trava-in b { font-size:17px; font-weight:650; }
+  .trava-in p { color:var(--mut); font-size:13.5px; margin:2px 0 8px; min-height:19px; }
+  .tr-pri { width:100%; background:var(--tx); color:var(--bg); border:0; border-radius:10px; padding:13px; font-weight:600; font-size:15px; }
+  .tr-pri:disabled { opacity:.55; }
+  .tr-sec { background:none; border:0; color:var(--arc); font-size:14px; padding:10px; }
+  .trava .parear input { margin-top:6px; }
+
+  /* Intro do Jarvis */
+  .intro { position:fixed; inset:0; z-index:120; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; transition:opacity .22s; cursor:pointer; }
+  .intro.sai { opacity:0; }
+  .intro-hud { position:relative; width:200px; height:200px; }
+  .intro.curta .intro-hud { width:150px; height:150px; }
+  .intro-hud svg { position:absolute; inset:0; width:100%; height:100%; fill:none; stroke:var(--arc); stroke-linecap:round; overflow:visible; }
+  .intro-hud circle { stroke-width:1; opacity:.55; transform-origin:120px 120px; }
+  .intro-hud .r1 { stroke-dasharray:6 10; opacity:.35; }
+  .intro-hud .r2 { stroke-dasharray:180 436; stroke-width:1.6; opacity:.7; }
+  .intro-hud .r3 { stroke-dasharray:2 7; opacity:.45; }
+  .intro-hud .r4 { stroke-dasharray:90 350; stroke-width:2; opacity:.8; stroke:var(--gold); }
+  .intro-hud .tk { stroke-width:1.4; opacity:.5; }
+  .intro-reator { position:absolute; left:50%; top:50%; width:72px; height:72px; margin:-36px 0 0 -36px; border-radius:50%; display:block; }
+  .intro.curta .intro-reator { width:56px; height:56px; margin:-28px 0 0 -28px; }
+  .intro-reator svg { width:100%; height:100%; display:block; border-radius:50%; }
+  .intro-tx { text-align:center; display:flex; flex-direction:column; gap:4px; }
+  .intro-tx b { font-size:22px; font-weight:650; letter-spacing:-.02em; }
+  .intro-tx span { color:var(--mut); font-size:13.5px; font-variant-numeric:tabular-nums; }
+  .intro.cheia .intro-reator { animation:reatorLiga 1.1s ease-out both, reatorGira 2.2s linear .2s both; }
+  .intro.cheia .r1 { animation:anelMonta .7s .05s ease-out both, anelGira 6s linear infinite; }
+  .intro.cheia .r2 { animation:anelMonta .7s .2s ease-out both, anelGiraR 3.2s linear infinite; }
+  .intro.cheia .r3 { animation:anelMonta .7s .35s ease-out both, anelGira 8s linear infinite; }
+  .intro.cheia .r4 { animation:anelMonta .7s .5s ease-out both, anelGiraR 2.4s linear infinite; }
+  .intro.cheia .tk { animation:aparece .5s .6s ease-out both; }
+  .intro.cheia .intro-tx { animation:textoSobe .5s .75s ease-out both; }
+  .intro.curta .intro-reator { animation:reatorLiga .45s ease-out both; }
+  .intro.curta .r2, .intro.curta .r4 { animation:anelGiraR 1.6s linear infinite; }
+  .intro.curta .intro-tx { animation:aparece .3s .1s ease-out both; }
+  .intro.calmo * { animation:none !important; }
+  @keyframes reatorLiga { 0% { opacity:0; filter:brightness(.3); box-shadow:0 0 0 rgba(63,193,232,0); } 60% { opacity:1; filter:brightness(1.35); box-shadow:0 0 34px rgba(63,193,232,.45); } 100% { opacity:1; filter:none; box-shadow:0 0 18px rgba(63,193,232,.22); } }
+  @keyframes reatorGira { from { transform:rotate(0); } to { transform:rotate(360deg); } }
+  @keyframes anelMonta { from { opacity:0; transform:scale(.6) rotate(-90deg); } }
+  @keyframes anelGira { to { transform:rotate(360deg); } }
+  @keyframes anelGiraR { to { transform:rotate(-360deg); } }
+  @keyframes aparece { from { opacity:0; } }
+  @keyframes textoSobe { from { opacity:0; transform:translateY(8px); } }
+
+  /* Modo foco: um item por vez, tela cheia */
+  .foco { position:fixed; inset:0; z-index:85; background:var(--bg); display:flex; flex-direction:column; padding:calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); overflow:auto; }
+  .foco.passa .foco-card { animation:focoEntra .22s ease-out; }
+  @keyframes focoEntra { from { opacity:0; transform:translateX(18px); } }
+  .foco-top { display:flex; align-items:center; gap:10px; min-height:40px; }
+  .foco-top .ico { background:none; border:0; padding:6px; margin-left:-6px; color:var(--tx2); }
+  .foco-top .ico svg { stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+  .foco-prog { font-size:12.5px; color:var(--mut); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .foco-bar { flex:1; height:3px; background:var(--card2); border-radius:3px; overflow:hidden; }
+  .foco-bar i { display:block; height:100%; background:var(--arc); transition:width .25s; }
+  .foco-card { flex:1; display:flex; flex-direction:column; gap:12px; margin-top:14px; padding:18px 16px; background:var(--card); border:1px solid var(--bd); border-left:3px solid var(--cor); border-radius:12px; transition:transform .15s; }
+  .foco-meta { display:flex; align-items:center; gap:7px; color:var(--mut); font-size:12.5px; }
+  .foco-meta .dot { width:7px; height:7px; border-radius:50%; background:var(--cor); }
+  .foco-tit { font-size:21px; line-height:1.3; font-weight:650; letter-spacing:-.015em; margin:0; }
+  .foco-nota { color:var(--tx2); font-size:14px; line-height:1.5; white-space:pre-wrap; max-height:34vh; overflow:auto; }
+  .foco-opts { display:flex; flex-direction:column; gap:8px; }
+  .foco-opts .opt { min-height:44px; font-size:14.5px; }
+  .foco-opts .opt small { display:block; color:var(--mut); font-size:12px; font-weight:400; margin-top:2px; }
+  .foco-card textarea { width:100%; margin-top:auto; background:var(--bg2); color:var(--tx); border:1px solid var(--bd2); border-radius:10px; padding:10px 12px; font:inherit; font-size:15px; resize:none; }
+  .foco-card textarea:focus { outline:none; border-color:var(--arc); }
+  .foco-acoes { display:grid; grid-template-columns:1fr auto 1.4fr; gap:8px; margin-top:12px; }
+  .foco-acoes .ac { min-height:48px; font-size:15px; }
+  .foco-acoes .ac.feito { background:rgba(30,158,90,.14); border-color:var(--ok); color:#7EE2A8; font-weight:600; }
+  .foco-acoes #focoResp { grid-column:1 / -1; }
+  .foco-fim { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; }
+  .foco-fim b { font-size:20px; } .foco-fim span { color:var(--mut); margin-bottom:10px; }
+  .foco-fim .ac { width:100%; max-width:300px; min-height:46px; }
+
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
 </style>
 
@@ -274,7 +376,7 @@
       <span class="logo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2d38"/><stop offset="1" stop-color="#14161c"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd666"/><stop offset="1" stop-color="#E0B000"/></linearGradient><radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#3FC1E8" stop-opacity=".55"/><stop offset="1" stop-color="#3FC1E8" stop-opacity="0"/></radialGradient></defs><rect rx="112" fill="url(#bg)"/><circle cx="256" cy="256" r="200" fill="url(#glow)"/><path d="M256.0 106.0 A150 150 0 0 1 360.1987555688496 148.09902994920233" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M385.9038105676658 181.0 A150 150 0 0 1 401.5443589413995 292.28828433995017" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M385.9038105676658 331.0 A150 150 0 0 1 297.3456033725499 400.1892543907478" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M256.0 406.0 A150 150 0 0 1 151.8012444311504 363.9009700507977" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M126.0961894323342 331.0 A150 150 0 0 1 110.45564105860052 219.7117156600499" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M126.0961894323342 181.0 A150 150 0 0 1 214.65439662745018 111.81074560925214" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><circle cx="256" cy="256" r="98" fill="none" stroke="#3FC1E8" stroke-opacity=".45" stroke-width="6"/><path d="M256 186 L318 294 L194 294 Z" fill="url(#gold)"/><circle cx="256" cy="258" r="20" fill="#14161c"/></svg></span>
       <div class="marca-tx">
         <div class="marca-t">Jarvis</div>
-        <div class="marca-s" id="versao">Mark IV</div>
+        <div class="marca-s" id="versao">Mark V</div>
       </div>
     </div>
     <button class="sync" id="sync" type="button" title="Estado do salvamento">…</button>
@@ -285,7 +387,10 @@
 <main class="wrap">
 <div class="view" id="v-hoje">
   <div id="banners"></div>
-  <div class="resumo-dia" id="resumoDia"></div>
+  <div class="resumo-linha">
+    <div class="resumo-dia" id="resumoDia"></div>
+    <button class="ouvir" id="btnOuvir" type="button" aria-pressed="false" aria-label="Ouvir o resumo do dia"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none"/></svg><span>Ouvir</span></button>
+  </div>
 
   <section id="secAgenda">
     <h2>Agenda de hoje</h2>
@@ -301,6 +406,7 @@
     <div class="barra-fila">
       <h2>Para decidir</h2>
       <span class="esp"></span>
+      <button class="lnk" id="btnFoco" type="button">Foco</button>
       <button class="lnk" id="btnFiltros" type="button">Filtros</button>
       <button class="lnk" id="btnAtualizar" type="button">Atualizar</button>
     </div>
@@ -359,36 +465,115 @@
 
 <script>window.JARVIS_AMBIENTE = 'pages'; window.DADOS = null;</script>
 <script>
-/* Cliente.html · Mark IV — liga a tela ao Apps Script com o token do aparelho.
+/* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
    - Na tela /exec (reserva): google.script.run.rpc(token, ...).
-   Também: pareamento (código digitado 1x por aparelho), cache para abrir na hora, notificações e Ajustes.
-   Nenhum segredo neste arquivo. O token do aparelho fica só no localStorage dele. */
+   Mark V:
+   - Guarda: tudo o que o app grava (jarvis.* / central.*) fica no localStorage E no IndexedDB; o token também no Cache Storage.
+     Se o iPhone limpar um deles, o app restaura do outro antes de decidir se pede o código.
+   - Erro "não pareado" só desconecta depois de confirmar (2ª tentativa); nunca por falha de rede.
+   - Trava: Face ID (passkey do aparelho, conferida no servidor) ao abrir e depois de 5 min fora do app; código como alternativa.
+   - Abertura: intro do Jarvis, links das notificações (?item= / ?foco=1) e convites (Face ID, notificações) um de cada vez.
+   Nenhum segredo neste arquivo. */
 (function () {
   'use strict';
   var AMB = window.JARVIS_AMBIENTE === 'pages' ? 'pages' : 'exec';
   var EXEC = 'https://script.google.com/macros/s/AKfycbyD-s4JX6BQIjZvCVrn62AaCLz-kmxIQXwDcSti0mA-C8YsYPEEgvMRfhAuD0_bmIML/exec';
-  var LS = { TOKEN: 'jarvis.token', ID: 'jarvis.aparelho.id', CACHE: 'jarvis.cache.dados', PUSHDIA: 'jarvis.push.dia', PUSHNAO: 'jarvis.push.dispensado' };
-  var ACOES = ['carregarDados', 'salvarResposta', 'enviarLote', 'carregarAgenda', 'decidirPlano', 'resumoCentral', 'pushInfo', 'salvarPush', 'testarPush', 'removerPush', 'aparelhos', 'revogar'];
-  var iniciado = false;
+  var LS = { TOKEN: 'jarvis.token', ID: 'jarvis.aparelho.id', CACHE: 'jarvis.cache.dados', PUSHDIA: 'jarvis.push.dia', PUSHNAO: 'jarvis.push.dispensado',
+    FACE: 'jarvis.face', FACENAO: 'jarvis.face.dispensado', USO: 'jarvis.uso', INTRO: 'jarvis.intro.dia' };
+  var ACOES = ['carregarDados', 'salvarResposta', 'enviarLote', 'carregarAgenda', 'decidirPlano', 'resumoCentral', 'pushInfo', 'salvarPush', 'testarPush', 'removerPush', 'aparelhos', 'revogar',
+    'desbloquear', 'desbloquearPin', 'faceRegistrar', 'faceDesligar'];
+  var LIVRES = { parear: 1, entrarFace: 1, desbloquear: 1, desbloquearPin: 1, ping: 1 }; // não esperam a trava
+  var iniciado = false, memToken = '';
   try { localStorage.removeItem('jarvis.modo'); } catch (e) {} // Mark III: modo "abrir direto" não existe mais
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
-  function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function lsSet(k, v) {
+    try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {}
+    if (k === LS.FACE && token()) Guarda.tokenNoCache(token(), lsGet(LS.ID)); // a cópia de segurança leva junto o "Face ID ligado"
+  }
+  function hojeLocal() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  var iOS = /iPhone|iPad/.test(navigator.userAgent);
   var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   function nomeAparelho() {
     var u = navigator.userAgent;
     return (/iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : /Mac/.test(u) ? 'Mac' : 'Computador') +
       (AMB === 'pages' ? (standalone ? ' · app' : ' · navegador') : ' · Google');
   }
-  function token() { return lsGet(LS.TOKEN) || ''; }
+  function token() { return lsGet(LS.TOKEN) || memToken || ''; }
+  function guardarToken(t, id) { memToken = t || ''; lsSet(LS.TOKEN, t); lsSet(LS.ID, id); Guarda.tokenNoCache(t, id); }
+  function espera(ms) { return new Promise(function (ok) { setTimeout(ok, ms); }); }
+
+  /* ---------- Guarda: localStorage espelhado no IndexedDB (+ token no Cache Storage) ---------- */
+  var Guarda = (function () {
+    var PREF = /^(jarvis\.|central\.)/, db = null, fila = [], SP = window.Storage && Storage.prototype, orig = SP ? { set: SP.setItem, rem: SP.removeItem } : null;
+    function ehLocal(s) { try { return s === window.localStorage; } catch (e) { return false; } }
+    function put(k, v) {
+      if (!db) { fila.push([k, v]); return; }
+      try { var s = db.transaction('kv', 'readwrite').objectStore('kv'); if (v == null) s.delete(k); else s.put(String(v), k); } catch (e) {}
+    }
+    if (orig) { // espelha toda escrita do app no IndexedDB
+      SP.setItem = function (k, v) { orig.set.call(this, k, v); if (ehLocal(this) && PREF.test(k)) put(k, v); };
+      SP.removeItem = function (k) { orig.rem.call(this, k); if (ehLocal(this) && PREF.test(k)) put(k, null); };
+    }
+    function abrir() {
+      return new Promise(function (ok) {
+        var feito = false; function fim(v) { if (!feito) { feito = true; ok(v); } }
+        setTimeout(function () { fim(null); }, 800);
+        try {
+          var r = indexedDB.open('jarvis', 1);
+          r.onupgradeneeded = function () { r.result.createObjectStore('kv'); };
+          r.onsuccess = function () { fim(r.result); }; r.onerror = r.onblocked = function () { fim(null); };
+        } catch (e) { fim(null); }
+      });
+    }
+    function lerTudo() {
+      return new Promise(function (ok) {
+        try {
+          var o = {}, c = db.transaction('kv', 'readonly').objectStore('kv').openCursor();
+          c.onsuccess = function () { var x = c.result; if (x) { o[x.key] = x.value; x.continue(); } else ok(o); };
+          c.onerror = function () { ok(o); };
+        } catch (e) { ok({}); }
+      });
+    }
+    function tokenNoCache(t, id) {
+      if (!window.caches || AMB !== 'pages') return;
+      caches.open('jarvis-guarda').then(function (c) { return t ? c.put('guarda.json', new Response(JSON.stringify({ t: t, id: id || '', f: lsGet(LS.FACE) || '' }), { headers: { 'Content-Type': 'application/json' } })) : c.delete('guarda.json'); }).catch(function () {});
+    }
+    function tokenDoCache() {
+      if (!window.caches || AMB !== 'pages') return Promise.resolve(null);
+      return caches.open('jarvis-guarda').then(function (c) { return c.match('guarda.json'); }).then(function (r) { return r ? r.json() : null; }).catch(function () { return null; });
+    }
+    var info = { restaurados: 0, de: '' };
+    function setCru(k, v) { try { orig ? orig.set.call(localStorage, k, v) : localStorage.setItem(k, v); } catch (e) {} }
+    function pronto() {
+      return abrir().then(function (d) {
+        db = d; fila.splice(0).forEach(function (x) { put(x[0], x[1]); });
+        return d ? lerTudo() : {};
+      }).then(function (idb) {
+        var ls = {};
+        try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (PREF.test(k)) ls[k] = localStorage.getItem(k); } } catch (e) {}
+        Object.keys(idb).forEach(function (k) { if (ls[k] == null) { setCru(k, idb[k]); info.restaurados++; if (k === LS.TOKEN) { memToken = idb[k]; info.de = 'IndexedDB'; } } });
+        Object.keys(ls).forEach(function (k) { if (idb[k] == null) put(k, ls[k]); }); // migra o que só estava no localStorage (Mark IV)
+        if (token()) { if (!idb[LS.TOKEN] || !ls[LS.TOKEN]) tokenNoCache(token(), lsGet(LS.ID)); return; }
+        return tokenDoCache().then(function (g) {
+          if (g && g.t) { memToken = g.t; setCru(LS.TOKEN, g.t); if (g.id) { setCru(LS.ID, g.id); put(LS.ID, g.id); } if (g.f) { setCru(LS.FACE, g.f); put(LS.FACE, g.f); } put(LS.TOKEN, g.t); info.restaurados++; info.de = 'Cache Storage'; }
+        });
+      }).then(function () {
+        if (navigator.storage && navigator.storage.persist) navigator.storage.persist().then(function (p) { info.persistente = p; }, function () {});
+        return info;
+      }, function () { return info; });
+    }
+    return { pronto: pronto, tokenNoCache: tokenNoCache, info: function () { return info; } };
+  })();
+  window.JarvisGuarda = Guarda;
 
   /* ---------- Transporte ---------- */
-  function chamar(acao, args) {
+  function erroDe(m, j) { var e = new Error(m); j = j || {}; e.auth = !!j.auth; e.pin = !!j.pin; e.bloqueado = !!j.bloqueado; e.face = j.face; e.faceErro = j.face === true; return e; }
+  function enviar(acao, args) {
     return new Promise(function (ok, falha) {
-      function erro(m, auth, pin) { var e = new Error(m); e.auth = !!auth; e.pin = !!pin; if (auth) desparear('Este aparelho foi desconectado. Digite o código de novo.'); falha(e); }
       function sucesso(r) {
         if (acao === 'carregarDados' && r && !r.erro) { try { localStorage.setItem(LS.CACHE, JSON.stringify(r)); } catch (e) {} }
         ok(r);
@@ -396,8 +581,9 @@
       if (AMB === 'exec' && window.google && google.script && google.script.run) {
         google.script.run.withSuccessHandler(sucesso).withFailureHandler(function (e) {
           var m = String((e && e.message) || e || 'Erro');
-          if (/^NAO_PAREADO/.test(m)) return erro(m.replace(/^NAO_PAREADO:\s*/, ''), true);
-          erro(m, false, /código|tentativas/i.test(m) && acao === 'parear');
+          if (/^NAO_PAREADO/.test(m)) return falha(erroDe(m.replace(/^NAO_PAREADO:\s*/, ''), { auth: true }));
+          if (/^BLOQUEADO/.test(m)) return falha(erroDe(m.replace(/^BLOQUEADO:\s*/, ''), { bloqueado: true }));
+          falha(erroDe(m, { pin: /código|tentativas/i.test(m) && (acao === 'parear' || acao === 'desbloquearPin') }));
         }).rpc(token(), acao, args || [], nomeAparelho());
         return;
       }
@@ -405,8 +591,25 @@
       fetch(EXEC, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow', cache: 'no-store', credentials: 'omit',
         body: JSON.stringify({ acao: acao, token: token(), args: args || [], aparelho: nomeAparelho() }), signal: ctl ? ctl.signal : undefined })
         .then(function (r) { if (!r.ok) throw new Error('O Google respondeu ' + r.status + '.'); return r.json(); })
-        .then(function (j) { clearTimeout(t); if (j && j.ok) sucesso(j.r); else erro((j && j.erro) || 'Erro', j && j.auth, j && j.pin); })
-        .catch(function (e) { clearTimeout(t); var m = String((e && e.message) || e); erro(/abort/i.test(m) ? 'O Google demorou demais. Tente de novo.' : /fetch|network|load failed|json/i.test(m) ? 'Sem conexão com o Google.' : m); });
+        .then(function (j) { clearTimeout(t); if (j && j.ok) sucesso(j.r); else falha(erroDe((j && j.erro) || 'Erro', j)); })
+        .catch(function (e) {
+          clearTimeout(t); if (e && (e.auth || e.bloqueado || e.pin || e.faceErro || e.face)) return falha(e);
+          var m = String((e && e.message) || e);
+          falha(erroDe(/abort/i.test(m) ? 'O Google demorou demais. Tente de novo.' : /fetch|network|load failed|json/i.test(m) ? 'Sem conexão com o Google.' : m));
+        });
+    });
+  }
+  /** Chamada com as regras do app: espera a trava, repete 1x antes de desconectar e pede Face ID se o servidor exigir. */
+  function chamar(acao, args, n) {
+    n = n || 0;
+    var antes = LIVRES[acao] ? Promise.resolve() : Trava.pronta();
+    return antes.then(function () { return enviar(acao, args); }).catch(function (e) {
+      if (e.bloqueado && n < 2) return Trava.exigir(e.message, e.face).then(function () { return chamar(acao, args, n + 1); });
+      if (e.auth && token() && !LIVRES[acao]) {
+        if (n < 1) return espera(1500).then(function () { return chamar(acao, args, n + 1); }); // confirma antes de desconectar
+        desparear('Este aparelho foi desconectado. Entre de novo.');
+      }
+      throw e;
     });
   }
   /** Mesmo formato de google.script.run (usado pelo App/Telas/Voz): JRUN().withSuccessHandler(f).withFailureHandler(g).acao(...) */
@@ -418,25 +621,138 @@
     ACOES.forEach(function (n) { b[n] = function () { var a = Array.prototype.slice.call(arguments); chamar(n, a).then(function (r) { if (s) s(r); }, function (e) { if (f) f(e); }); }; });
     return b;
   };
-  window.Jarvis = { chamar: chamar, ambiente: AMB, sair: sair };
+
+  /* ---------- WebAuthn (Face ID) ---------- */
+  var Face = (function () {
+    function b64u(buf) { var b = new Uint8Array(buf), s = ''; for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+    function deB64u(s) { s = String(s).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; var r = atob(s), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
+    function utf8(s) { return new TextEncoder().encode(s); }
+    // desafio sem ida ao servidor: o servidor exige ≤ 5 min e uso único
+    function desafio() { return utf8('jv1.' + Date.now() + '.' + b64u(crypto.getRandomValues(new Uint8Array(12)))); }
+    function suporta() { return AMB === 'pages' && !!window.PublicKeyCredential && !!navigator.credentials && window.isSecureContext !== false; }
+    var disp = null;
+    function disponivel() {
+      if (!suporta()) return Promise.resolve(false);
+      if (disp) return disp;
+      disp = (PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable ? PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable() : Promise.resolve(false)).catch(function () { return false; });
+      return disp;
+    }
+    function local() { try { return JSON.parse(lsGet(LS.FACE) || 'null'); } catch (e) { return null; } }
+    function registrar() {
+      var id = lsGet(LS.ID) || 'aparelho';
+      return navigator.credentials.create({ publicKey: {
+        challenge: desafio(), rp: { id: location.hostname, name: 'Jarvis' },
+        user: { id: utf8('jarvis-' + id), name: 'Kaio · Jarvis', displayName: 'Kaio · Jarvis (' + nomeAparelho() + ')' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+        authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'required', requireResidentKey: true },
+        attestation: 'none', timeout: 60000 } })
+        .then(function (c) {
+          var p = { id: b64u(c.rawId), cdj: b64u(c.response.clientDataJSON), ao: b64u(c.response.attestationObject) };
+          return chamar('faceRegistrar', [p]).then(function () { lsSet(LS.FACE, JSON.stringify({ id: p.id })); lsSet(LS.USO, String(Date.now())); return p.id; });
+        });
+    }
+    function assercao(f) {
+      var pk = { challenge: desafio(), rpId: location.hostname, userVerification: 'required', timeout: 60000 };
+      if (f && f.id) pk.allowCredentials = [{ type: 'public-key', id: deB64u(f.id), transports: ['internal'] }];
+      return navigator.credentials.get({ publicKey: pk }).then(function (c) {
+        return { id: b64u(c.rawId), cdj: b64u(c.response.clientDataJSON), ad: b64u(c.response.authenticatorData), sig: b64u(c.response.signature) };
+      });
+    }
+    function motivo(e) {
+      var n = e && e.name;
+      return n === 'NotAllowedError' ? 'Face ID cancelado ou sem resposta.' : n === 'InvalidStateError' ? 'Este iPhone já tem um Face ID do Jarvis.' :
+        n === 'SecurityError' ? 'Face ID não permitido neste endereço.' : (e && e.message) || 'Face ID indisponível.';
+    }
+    return { suporta: suporta, disponivel: disponivel, local: local, registrar: registrar, assercao: assercao, motivo: motivo };
+  })();
+
+  /* ---------- Trava (Face ID ao abrir e depois de 5 min fora) ---------- */
+  var Trava = (function () {
+    var BLOQ_MS = 5 * 60 * 1000, aberta = true, fila = [], sessao = null, el = null, auto = false;
+    function marcarUso() { lsSet(LS.USO, String(Date.now())); }
+    function precisa() { if (!Face.local()) return false; var u = Number(lsGet(LS.USO) || 0); return !u || Date.now() - u > BLOQ_MS; }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { if (aberta) marcarUso(); }
+      else if (iniciado && aberta && precisa()) bloquear();
+    });
+    window.addEventListener('pagehide', function () { if (aberta) marcarUso(); });
+    setInterval(function () { if (!document.hidden && aberta && iniciado) marcarUso(); }, 30000);
+    function esperar() { return new Promise(function (ok) { fila.push(ok); }); }
+    function pronta() { if (!aberta) return esperar().then(pronta); if (sessao) return sessao.then(pronta); return Promise.resolve(); }
+    function liberar() { aberta = true; marcarUso(); if (el) { el.classList.add('sai'); var e0 = el; el = null; setTimeout(function () { e0.remove(); }, 200); } fila.splice(0).forEach(function (f) { f(); }); }
+    function msg(t) { var m = $('travaMsg'); if (m) m.textContent = t; }
+    function bloquear(texto) {
+      if (!aberta && el) { if (texto) msg(texto); return esperar(); }
+      aberta = false; auto = false; mostrar(texto); return esperar();
+    }
+    function exigir(texto, faceId) {
+      if (faceId && typeof faceId === 'string' && !Face.local()) lsSet(LS.FACE, JSON.stringify({ id: faceId }));
+      return bloquear(texto);
+    }
+    function mostrar(texto) {
+      el = document.createElement('div'); el.className = 'trava'; el.id = 'trava';
+      var logo = (document.querySelector('.marca .logo') || {}).innerHTML || '';
+      el.innerHTML = '<div class="trava-in"><span class="logo-g" aria-hidden="true">' + logo + '</span><b>Jarvis bloqueado</b>' +
+        '<p id="travaMsg">' + esc(texto || 'Use o Face ID para abrir.') + '</p>' +
+        (Face.suporta() ? '<button type="button" class="tr-pri" id="travaFace">Desbloquear com Face ID</button>' : '') +
+        '<button type="button" class="tr-sec" id="travaCod">Usar o código</button>' +
+        '<form id="travaForm" class="parear" hidden autocomplete="off"><input id="travaPin" inputmode="numeric" pattern="[0-9 ]*" maxlength="11" placeholder="0000 0000" aria-label="Código de pareamento" autocomplete="one-time-code"><button type="submit" id="travaOk">Desbloquear</button></form></div>';
+      document.body.appendChild(el);
+      $('travaCod').onclick = codigo;
+      if ($('travaFace')) $('travaFace').onclick = face;
+      var inp = $('travaPin');
+      inp.addEventListener('input', function () { var d = inp.value.replace(/\D/g, '').slice(0, 8); inp.value = d.length > 4 ? d.slice(0, 4) + ' ' + d.slice(4) : d; });
+      $('travaForm').addEventListener('submit', function (e) {
+        e.preventDefault(); var pin = inp.value.replace(/\D/g, ''); if (pin.length < 6) { msg('O código tem 8 números.'); return; }
+        $('travaOk').disabled = true; msg('Conferindo…');
+        enviar('desbloquearPin', [pin]).then(function () { liberar(); }, function (e2) { $('travaOk').disabled = false; msg(e2.message); inp.select(); });
+      });
+      if (!Face.suporta()) codigo();
+      else if (!auto) { auto = true; setTimeout(face, 80); } // 1 tentativa automática por bloqueio (sem laço); depois, só pelo botão
+    }
+    function codigo() { var f = $('travaForm'); if (!f) return; f.hidden = false; $('travaCod').hidden = true; setTimeout(function () { try { $('travaPin').focus(); } catch (e) {} }, 50); }
+    function face() {
+      var b = $('travaFace'); if (b) b.disabled = true; msg('Olhe para o iPhone…');
+      Face.assercao(Face.local()).then(function (p) {
+        if (!Face.local()) lsSet(LS.FACE, JSON.stringify({ id: p.id }));
+        liberar(); // abre na hora; o servidor confere a assinatura em seguida
+        sessao = enviar('desbloquear', [p]).then(function () { sessao = null; }, function (e) {
+          sessao = null;
+          if (e.auth) { desparear('Este aparelho foi desconectado. Entre de novo.'); return; }
+          if (e.faceErro || e.bloqueado) bloquear(e.message + ' Use o código.');
+          // sem rede: segue aberto com o que está no aparelho; o servidor pede o Face ID de novo na próxima chamada, se precisar
+        });
+      }, function (e) {
+        var b2 = $('travaFace'); if (b2) b2.disabled = false;
+        msg(Face.motivo(e) + ' Toque para tentar de novo ou use o código.');
+      });
+    }
+    return { pronta: pronta, bloquear: bloquear, exigir: exigir, precisa: precisa, aberta: function () { return aberta; }, marcarUso: marcarUso };
+  })();
+  window.JarvisTrava = Trava;
 
   /* ---------- Pareamento ---------- */
   function telaCarga(txt) { var c = $('carga'); if (!c) return; c.style.display = 'flex'; c.classList.remove('sai'); $('cargaTx').innerHTML = txt; }
   function fecharCarga() { var c = $('carga'); if (!c) return; c.classList.add('sai'); setTimeout(function () { c.style.display = 'none'; }, 250); }
   function desparear(msg) {
-    lsSet(LS.TOKEN, null); lsSet(LS.ID, null); lsSet(LS.CACHE, null);
-    if (iniciado) { location.reload(); return; }
+    memToken = ''; guardarToken(null, null); lsSet(LS.CACHE, null); lsSet(LS.FACE, null); // a passkey ia junto com o aparelho
+    if (iniciado) { try { sessionStorage.setItem('jarvis.msg', msg || ''); } catch (e) {} location.reload(); return; }
     mostrarPareamento(msg);
   }
   function mostrarPareamento(msg) {
     var c = $('carga'); c.style.display = 'flex'; c.classList.remove('sai');
+    try { msg = msg || sessionStorage.getItem('jarvis.msg') || ''; sessionStorage.removeItem('jarvis.msg'); } catch (e) {}
+    var noSafari = iOS && AMB === 'pages' && !standalone;
     $('cargaTx').innerHTML =
       '<form class="parear" id="formPar" autocomplete="off">' +
       '<b>Conectar este aparelho</b>' +
       '<p>Digite o código de pareamento do Jarvis. É só uma vez por aparelho.</p>' +
       '<input id="pin" inputmode="numeric" pattern="[0-9 ]*" maxlength="11" placeholder="0000 0000" aria-label="Código de pareamento" autocomplete="one-time-code">' +
       '<button type="submit" id="btnPar">Conectar</button>' +
-      '<p class="erro" id="parErro">' + esc(msg || '') + '</p></form>';
+      '<button type="button" class="lnk" id="btnEntrarFace" hidden>Já usei Face ID neste iPhone · entrar com Face ID</button>' +
+      '<p class="erro" id="parErro">' + esc(msg || '') + '</p>' +
+      (noSafari ? '<p class="dica">No iPhone, use o ícone <b>Jarvis</b> da Tela de Início. O Safari e o ícone guardam o acesso separados: o que conectar aqui não vale para o ícone.</p>' : '') +
+      '</form>';
     var inp = $('pin');
     inp.addEventListener('input', function () { var d = inp.value.replace(/\D/g, '').slice(0, 8); inp.value = d.length > 4 ? d.slice(0, 4) + ' ' + d.slice(4) : d; });
     $('formPar').addEventListener('submit', function (e) {
@@ -444,41 +760,109 @@
       var pin = inp.value.replace(/\D/g, '');
       if (pin.length < 6) { $('parErro').textContent = 'O código tem 8 números.'; return; }
       $('btnPar').disabled = true; $('btnPar').textContent = 'Conectando…'; $('parErro').textContent = '';
-      chamar('parear', [pin]).then(function (r) {
-        lsSet(LS.TOKEN, r.token); lsSet(LS.ID, r.id);
+      enviar('parear', [pin]).then(function (r) {
+        guardarToken(r.token, r.id); Trava.marcarUso();
         telaCarga('Conectado. Carregando…'); carregarPrimeiraVez();
       }, function (e2) { $('btnPar').disabled = false; $('btnPar').textContent = 'Conectar'; $('parErro').textContent = e2.message; inp.select(); });
     });
-    setTimeout(function () { try { inp.focus(); } catch (e) {} }, 300);
+    Face.disponivel().then(function (ok) {
+      var b = $('btnEntrarFace'); if (!ok || !b) return; b.hidden = false;
+      b.onclick = function () {
+        $('parErro').textContent = 'Olhe para o iPhone…';
+        Face.assercao(null).then(function (p) { return enviar('entrarFace', [p]); }).then(function (r) {
+          guardarToken(r.token, r.id); lsSet(LS.FACE, JSON.stringify({ id: r.face })); Trava.marcarUso();
+          telaCarga('Conectado pelo Face ID. Carregando…'); carregarPrimeiraVez();
+        }, function (e) { $('parErro').textContent = e.name ? Face.motivo(e) + ' Use o código.' : e.message; });
+      };
+    });
+    if (!noSafari) setTimeout(function () { try { inp.focus(); } catch (e) {} }, 300);
   }
 
   /* ---------- Início ---------- */
+  var alvo = (function () { // link da notificação: ?item=ID (abre o item pronto para responder) ou ?foco=1
+    var q = {}; try { location.search.replace(/^\?/, '').split('&').forEach(function (p) { var kv = p.split('='); if (kv[0]) q[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || ''); }); } catch (e) {}
+    if (q.item || q.foco) { try { history.replaceState(null, '', location.pathname); } catch (e) {} return { item: q.item || '', foco: !!q.foco }; }
+    return null;
+  })();
+  function abrirAlvo(a) {
+    if (!a) return;
+    Trava.pronta().then(function () {
+      if (window.JarvisFoco) JarvisFoco.abrir({ item: a.item });
+      else if (a.item && window.CentralAPI) CentralAPI.irPara(a.item);
+    });
+  }
+  if (AMB === 'pages' && 'serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
+    var d = e.data || {}; if (d.tipo !== 'abrir' || !iniciado) return;
+    var m = /[?&]item=([^&#]+)/.exec(d.url || ''), f = /[?&]foco=1/.test(d.url || '');
+    if (m || f) abrirAlvo({ item: m ? decodeURIComponent(m[1]) : '', foco: f });
+  });
+
   function rodarAdiados() {
     var ss = document.querySelectorAll('script[type="text/x-central"]');
     for (var i = 0; i < ss.length; i++) { var n = document.createElement('script'); n.text = ss[i].textContent; ss[i].parentNode.replaceChild(n, ss[i]); }
   }
-  function iniciarApp(d) {
+  function abertura() {
+    // intro: completa na 1ª abertura do dia, curta nas outras; depois o link da notificação; depois 1 convite por vez
+    var hoje = hojeLocal(), cheia = lsGet(LS.INTRO) !== hoje;
+    lsSet(LS.INTRO, hoje);
+    var depois = function () { abrirAlvo(alvo); alvo = null; setTimeout(convites, 600); };
+    if (window.JarvisIntro && !(alvo && !cheia)) JarvisIntro.mostrar(cheia ? 'cheia' : 'curta', depois); else depois();
+  }
+  function iniciarApp(d, travar) {
     window.DADOS = d;
     if (!iniciado) { iniciado = true; rodarAdiados(); } else if (window.CentralAPI) { CentralAPI.iniciar(d); if (window.CentralTelas) CentralTelas.desenhar(); }
     fecharCarga();
-    setTimeout(function () { Push.avaliar(d && d.push); }, 800);
+    if (travar) Trava.bloquear().then(abertura); else Trava.pronta().then(abertura);
   }
   function carregarPrimeiraVez() {
-    chamar('carregarDados', []).then(iniciarApp, function (e) {
+    chamar('carregarDados', []).then(function (d) { iniciarApp(d, false); }, function (e) {
       if (e.auth) return;
       telaCarga('<b>Não consegui falar com o Google.</b><p>' + esc(e.message) + '</p><button type="button" id="tentar">Tentar de novo</button>');
       $('tentar').onclick = function () { telaCarga('Carregando…'); carregarPrimeiraVez(); };
     });
   }
   function boot() {
-    if (!token()) { mostrarPareamento(); return; }
-    var cache = null; try { cache = JSON.parse(lsGet(LS.CACHE) || 'null'); } catch (e) {}
-    if (cache && cache.itens) {
-      iniciarApp(cache);
-      // abre na hora com o que já estava no aparelho; atualiza em seguida
-      setTimeout(function () { if (window.CentralAPI) CentralAPI.recarregarSilencioso(); }, 50);
-    } else carregarPrimeiraVez();
+    Guarda.pronto().then(function () {
+      if (!token()) { mostrarPareamento(); return; }
+      var travar = Trava.precisa();
+      if (travar) Trava.bloquear(); // a trava aparece antes de qualquer dado
+      var cache = null; try { cache = JSON.parse(lsGet(LS.CACHE) || 'null'); } catch (e) {}
+      if (cache && cache.itens) {
+        iniciarApp(cache, false);
+        // abre na hora com o que já estava no aparelho; atualiza em seguida (depois do desbloqueio)
+        setTimeout(function () { if (window.CentralAPI) CentralAPI.recarregarSilencioso(); }, 50);
+      } else carregarPrimeiraVez();
+    });
   }
+
+  /* ---------- Convites (um por vez): Face ID, depois notificações ---------- */
+  function convites() {
+    oferecerFace().then(function (mostrou) { if (!mostrou) Push.avaliar(window.DADOS && DADOS.push); });
+  }
+  function oferecerFace() {
+    var nao = lsGet(LS.FACENAO);
+    if (Face.local() || (nao && nao >= hojeLocal()) || $('faceCard')) return Promise.resolve(false);
+    return Face.disponivel().then(function (ok) {
+      var b = $('banners'); if (!ok || !b) return false;
+      var d = document.createElement('div'); d.className = 'banner info push-card'; d.id = 'faceCard';
+      d.innerHTML = '<span>Abrir o Jarvis com Face ID?</span><span class="esp"></span><button type="button" class="ac pri" id="faceSim">Ativar</button><button type="button" class="ac sec" id="faceNao">Agora não</button>';
+      b.insertBefore(d, b.firstChild); return true;
+    });
+  }
+  function ativarFace() {
+    var card = $('faceCard');
+    return Face.registrar().then(function () {
+      if (card) card.remove(); toast('Face ID ativo. O Jarvis pede o rosto ao abrir e depois de 5 min fora.');
+      setTimeout(function () { Push.avaliar(window.DADOS && DADOS.push); }, 400);
+    }, function (e) { toast(e.name ? Face.motivo(e) : e.message, true); });
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#faceSim')) ativarFace();
+    else if (e.target.closest('#faceNao')) {
+      var d = new Date(Date.now() + 7 * 864e5); lsSet(LS.FACENAO, d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2));
+      var c = $('faceCard'); if (c) c.remove(); Push.avaliar(window.DADOS && DADOS.push);
+    }
+  });
 
   /* ---------- Notificações (só no app do GitHub Pages) ---------- */
   var Push = (function () {
@@ -486,7 +870,7 @@
     if (AMB === 'pages' && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').then(function (r) { reg = r; }).catch(function () {});
     function b64(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; var r = atob(s), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
     function pronto() { return reg ? Promise.resolve(reg) : navigator.serviceWorker.ready.then(function (r) { reg = r; return r; }); }
-    function podeAqui() { return suporta && !(/iPhone|iPad/.test(navigator.userAgent) && !standalone); } // iPhone: só o app da Tela de Início recebe
+    function podeAqui() { return suporta && !(iOS && !standalone); } // iPhone: só o app da Tela de Início recebe
     function estado() {
       if (!podeAqui()) return Promise.resolve(suporta ? 'abrir-pelo-icone' : 'sem-suporte');
       if (Notification.permission === 'denied') return Promise.resolve('negado');
@@ -496,12 +880,13 @@
       if (info && info.chave) chave = info.chave;
       if (!chave || !podeAqui()) return;
       estado().then(function (st) {
-        var hoje = new Date().toISOString().slice(0, 10);
+        var hoje = hojeLocal();
         if (st === 'ativo') { // mantém a inscrição em dia na planilha (1x por dia)
           if (lsGet(LS.PUSHDIA) === hoje) return;
           return reg.pushManager.getSubscription().then(function (s) { return chamar('salvarPush', [s.toJSON(), nomeAparelho()]); }).then(function () { lsSet(LS.PUSHDIA, hoje); }, function () {});
         }
-        if (st !== 'desligado' || lsGet(LS.PUSHNAO) === hoje || $('pushCard')) return;
+        var nao = lsGet(LS.PUSHNAO);
+        if (st !== 'desligado' || (nao && nao >= hoje) || $('pushCard') || $('faceCard')) return;
         var b = $('banners'); if (!b) return;
         var d = document.createElement('div'); d.className = 'banner info push-card'; d.id = 'pushCard';
         d.innerHTML = '<span>Receber os avisos do Jarvis neste aparelho?</span><span class="esp"></span><button type="button" class="ac pri" id="pushSim">Ativar</button><button type="button" class="ac sec" id="pushNao">Agora não</button>';
@@ -515,7 +900,7 @@
         if (p !== 'granted') { if (card) card.remove(); toast('Notificações não permitidas. Dá para ligar em Ajustes > Notificações > Jarvis.', true); return; }
         return pronto().then(function (r) { return r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(chave) }); })
           .then(function (s) { return chamar('salvarPush', [s.toJSON(), nomeAparelho()]); })
-          .then(function () { if (card) card.remove(); lsSet(LS.PUSHDIA, new Date().toISOString().slice(0, 10)); toast('Notificações ativas neste aparelho.'); });
+          .then(function () { if (card) card.remove(); lsSet(LS.PUSHDIA, hojeLocal()); toast('Notificações ativas neste aparelho.'); if (window.CentralAPI && CentralAPI.badge) CentralAPI.badge(); });
       }).catch(function (e) { toast('Não deu para ativar: ' + ((e && e.message) || e), true); });
     }
     function testar() {
@@ -535,20 +920,25 @@
     // delegação: o App às vezes reescreve #banners (innerHTML +=), o que apagaria handlers diretos
     document.addEventListener('click', function (e) {
       if (e.target.closest('#pushSim')) ativar();
-      else if (e.target.closest('#pushNao')) { lsSet(LS.PUSHNAO, new Date().toISOString().slice(0, 10)); var c = $('pushCard'); if (c) c.remove(); }
+      else if (e.target.closest('#pushNao')) { // "Agora não" vale por 7 dias
+        var d = new Date(Date.now() + 7 * 864e5); lsSet(LS.PUSHNAO, d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2));
+        var c = $('pushCard'); if (c) c.remove();
+      }
     });
     return { avaliar: avaliar, ativar: ativar, testar: testar, desligar: desligar, estado: estado, chave: function () { return chave; } };
   })();
   window.JarvisPush = Push;
+  window.Jarvis = { chamar: chamar, ambiente: AMB, sair: sair, face: Face, trava: Trava, guarda: Guarda };
 
   /* ---------- Ajustes ---------- */
   function toast(m, ruim) { if (window.CentralAPI) CentralAPI.toast(m, ruim); else alert(m); }
   function sair() {
-    return Push.desligar().then(function () { return chamar('revogar', []).catch(function () {}); }).then(function () { desparear('Aparelho desconectado.'); });
+    return Push.desligar().then(function () { return chamar('revogar', []).catch(function () {}); }).then(function () { lsSet(LS.FACE, null); desparear('Aparelho desconectado.'); });
   }
   function abrirAjustes() {
     var f = document.createElement('div'); f.className = 'folha-fundo';
     f.innerHTML = '<div class="folha" role="dialog" aria-label="Ajustes"><div class="folha-top"><b>Ajustes</b><button type="button" class="lnk" data-x>Fechar</button></div>' +
+      '<div class="folha-sec"><div class="folha-t">Face ID</div><div id="ajFace" class="mut">…</div></div>' +
       '<div class="folha-sec"><div class="folha-t">Notificações</div><div id="ajPush" class="mut">…</div></div>' +
       '<div class="folha-sec"><div class="folha-t">Aparelhos conectados</div><div id="ajAp" class="mut">Carregando…</div></div>' +
       '<div class="folha-sec"><button type="button" class="ac" id="ajAtual">Atualizar dados</button> <button type="button" class="ac perigo" id="ajSair">Desconectar este aparelho</button></div>' +
@@ -556,10 +946,21 @@
     document.body.appendChild(f);
     function fechar() { f.remove(); }
     f.addEventListener('click', function (e) { if (e.target === f || e.target.hasAttribute('data-x')) fechar(); });
-    var D = window.DADOS || {};
-    $('ajVer').textContent = 'Jarvis · Central ' + (D.marca || 'Mark IV') + ' · ' + (AMB === 'pages' ? 'app' : 'Google') + ' · ' + nomeAparelho();
+    var D = window.DADOS || {}, gi = Guarda.info();
+    $('ajVer').textContent = 'Jarvis · Central ' + (D.marca || 'Mark V') + ' · ' + (AMB === 'pages' ? 'app' : 'Google') + ' · ' + nomeAparelho() + (gi.persistente ? ' · armazenamento persistente' : '');
     $('ajAtual').onclick = function () { fechar(); if (window.CentralAPI) CentralAPI.recarregar(); };
     $('ajSair').onclick = function () { if (confirm('Desconectar este aparelho? Para voltar, digite o código de pareamento de novo.')) sair(); };
+    Face.disponivel().then(function (ok) {
+      var el = $('ajFace'); if (!el) return;
+      if (Face.local()) {
+        el.innerHTML = 'Ativo: pede o rosto ao abrir e depois de 5 min fora. <button type="button" class="lnk" id="ajBloq">Bloquear agora</button> <button type="button" class="lnk perigo" id="ajFaceOff">Desligar</button>';
+        $('ajBloq').onclick = function () { fechar(); Trava.bloquear(); };
+        $('ajFaceOff').onclick = function () { chamar('faceDesligar', []).then(function () { lsSet(LS.FACE, null); fechar(); toast('Face ID desligado neste aparelho.'); }, function (e) { toast(e.message, true); }); };
+      } else if (ok) {
+        el.innerHTML = 'Desligado. <button type="button" class="lnk" id="ajFaceOn">Ativar Face ID</button>';
+        $('ajFaceOn').onclick = function () { fechar(); ativarFace(); };
+      } else el.textContent = AMB === 'pages' ? 'Indisponível neste aparelho.' : 'Use o app Jarvis (ícone da Tela de Início).';
+    });
     Push.estado().then(function (st) {
       var el = $('ajPush'); if (!el) return;
       var tx = { ativo: 'Ativas neste aparelho.', desligado: 'Desligadas neste aparelho.', negado: 'Bloqueadas. Ligue em Ajustes do iPhone > Notificações > Jarvis.', 'abrir-pelo-icone': 'No iPhone, só funcionam abrindo pelo ícone Jarvis da Tela de Início.', 'sem-suporte': AMB === 'exec' ? 'Use o app Jarvis (ícone da Tela de Início) para receber avisos.' : 'Este navegador não recebe notificações.' }[st];
@@ -570,7 +971,7 @@
     chamar('aparelhos', []).then(function (r) {
       var el = $('ajAp'); if (!el) return;
       el.innerHTML = (r.aparelhos || []).map(function (a) {
-        return '<div class="ap"><span><b>' + esc(a.nome) + '</b>' + (a.este ? ' · este' : '') + '<br><small>desde ' + esc(String(a.criado).slice(0, 10).split('-').reverse().join('/')) + ' · visto ' + esc(String(a.visto).slice(8, 10) + '/' + String(a.visto).slice(5, 7) + ' ' + String(a.visto).slice(11, 16)) + '</small></span>' +
+        return '<div class="ap"><span><b>' + esc(a.nome) + '</b>' + (a.este ? ' · este' : '') + (a.face ? ' · Face ID' : '') + '<br><small>desde ' + esc(String(a.criado).slice(0, 10).split('-').reverse().join('/')) + ' · visto ' + esc(String(a.visto).slice(8, 10) + '/' + String(a.visto).slice(5, 7) + ' ' + String(a.visto).slice(11, 16)) + '</small></span>' +
           (a.este ? '' : '<button type="button" class="lnk perigo" data-rev="' + esc(a.id) + '">Remover</button>') + '</div>';
       }).join('') || 'Nenhum.';
       el.onclick = function (e) { var b = e.target.closest('[data-rev]'); if (!b) return; chamar('revogar', [b.dataset.rev]).then(function () { b.parentNode.remove(); toast('Aparelho removido.'); }, function (x) { toast(x.message, true); }); };
@@ -758,7 +1159,8 @@
   function naFila() { return Object.keys(lsGet(LS_FILA, {})); }
   function ocupado() { return Object.keys(timers).length > 0 || Object.keys(emVoo).length > 0; }
 
-  window.addEventListener('online', function () { toast('Conexão de volta. Salvando o que ficou no aparelho…'); salvarTudoJa(); });
+  var avisoOnline = 0;
+  window.addEventListener('online', function () { if (naFila().length && Date.now() - avisoOnline > 60000) { avisoOnline = Date.now(); toast('Conexão de volta. Salvando o que ficou no aparelho…'); } salvarTudoJa(); });
   window.addEventListener('offline', function () { atualizarGeral(); });
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') { salvarTudoJa(); return; }
@@ -816,9 +1218,11 @@
 
   function animarXp(xp) {
     if (!xp) return; var el = $('xpfx'); el.textContent = '+' + xp + ' XP'; el.className = 'xpfx'; void el.offsetWidth; el.className = 'xpfx on';
-    if (navigator.vibrate) try { navigator.vibrate(30); } catch (e) {}
   }
+  /* Mark V: vibração leve (iOS 18+: truque do switch nativo; Android: vibrate; senão nada) — precisa rodar dentro do toque */
+  function vibrar() { if (window.JarvisHaptico) JarvisHaptico.tocar(); }
   function festa(t, s) {
+    if (document.querySelector('.festa')) return; // nunca duas comemorações empilhadas
     var f = document.createElement('div'); f.className = 'festa'; f.innerHTML = '<div><b>' + esc(t) + '</b>' + esc(s) + '<br><br><button class="ac pri" type="button">Continuar</button></div>';
     document.body.appendChild(f); f.onclick = function () { f.remove(); };
   }
@@ -873,6 +1277,7 @@
     b.disabled = enviando || nEnv === 0;
     $('fixoInfo').innerHTML = enviando ? 'Enviando ao Jarvis…' : (nEnv ? '<b style="color:#ECEDEF">' + nEnv + '</b> salva(s)' + (autoEm ? ' · envio automático em ' + Math.max(1, Math.ceil((autoEm - Date.now()) / 60000)) + ' min' : ', ainda não enviada(s).') : (c.pend ? c.pend + ' pendente(s) na fila.' : 'Tudo respondido e enviado.'));
     var fx = $('fixo'); if (fx) fx.classList.toggle('on', !!(enviando || nEnv));
+    badge(c.pend);
     var rd = $('resumoDia');
     if (rd) {
       var dt = new Date(hoje + 'T12:00:00'), dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'], mes = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -882,6 +1287,13 @@
         (agenda ? ' · ' + nEv + (nEv === 1 ? ' compromisso' : ' compromissos') : '') + '</span>';
     }
     desenharMissoes();
+  }
+  /* Mark V: número de pendentes no ícone do app (Badging API; no iPhone, com notificações permitidas) */
+  var badgeAnt = null;
+  function badge(n) {
+    if (n == null) { n = contagens().pend; badgeAnt = null; }
+    if (n === badgeAnt || !navigator.setAppBadge) return; badgeAnt = n;
+    try { (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(function () {}); } catch (e) {}
   }
   function kpi(n, t, cls) { return '<div class="kpi ' + (cls || '') + '"><b>' + n + '</b><span>' + t + '</span></div>'; }
 
@@ -1112,10 +1524,10 @@
     var id = card.dataset.id, it = porId[id], r = it.r, a = b.dataset.a;
     if (a === 'nota') { notaAberta[id] = !notaAberta[id]; atualizarCard(id); return; }
     if (a === 'retry') { cancelarRetry(id); salvar(id); return; }
-    if (a === 'planoOk') { decidirPlano(id, 'aprovar'); return; }
+    if (a === 'planoOk') { vibrar(); decidirPlano(id, 'aprovar'); return; }
     if (a === 'planoNao') { if (!(r.texto || '').trim()) { toast('Escreva no campo o que mudar e toque em Rejeitar de novo.', true); var ta0 = card.querySelector('textarea'); if (ta0) ta0.focus(); return; } decidirPlano(id, 'rejeitar'); return; }
     if (a === 'editar') { editando[id] = true; fixos[id] = true; atualizarCard(id); return; }
-    if (a === 'pronto') { salvarTudoJa(); concluir(id); toast('Resposta salva. Vai ao Jarvis em 2 min (ou toque em Enviar agora).'); return; }
+    if (a === 'pronto') { vibrar(); salvarTudoJa(); concluir(id); toast('Resposta salva. Vai ao Jarvis em 2 min (ou toque em Enviar agora).'); return; }
     if (a === 'adiar') {
       if (r.acao === 'adiar') { r.acao = ''; r.adiar = ''; adiarAberto[id] = false; editando[id] = true; fixos[id] = true; agendar(id, true); }
       else { adiarAberto[id] = !adiarAberto[id]; editando[id] = true; atualizarCard(id); }
@@ -1127,11 +1539,11 @@
       var vira = r.acao !== 'feito';
       r.acao = vira ? 'feito' : ''; r.adiar = '';
       agendar(id, true);
-      if (vira) { toastDesfazer('Marcado como feito.', id, { acao: '', adiar: '' }); animarXp(it.xp); concluir(id); }
+      if (vira) { vibrar(); toastDesfazer('Marcado como feito.', id, { acao: '', adiar: '' }); animarXp(it.xp); concluir(id); }
       return;
     }
     else if (a === 'adiarPara') {
-      r.acao = 'adiar'; r.adiar = b.dataset.v; agendar(id, true);
+      r.acao = 'adiar'; r.adiar = b.dataset.v; agendar(id, true); vibrar();
       toastDesfazer('Adiado até ' + ddmm(r.adiar) + '. Some da fila até lá.', id, { acao: '', adiar: '' }); concluir(id); return;
     }
     else if (a === 'limpar') {
@@ -1162,6 +1574,7 @@
     var id = s.c.dataset.id, it = porId[id]; if (!it) return;
     var antes = { escolha: it.r.escolha, texto: it.r.texto, acao: it.r.acao, adiar: it.r.adiar };
     fixos[id] = true;
+    vibrar();
     if (s.dx > 0) { it.r.acao = 'feito'; it.r.adiar = ''; agendar(id, true); toastDesfazer('Já fiz.', id, antes); animarXp(it.xp); }
     else { it.r.acao = 'adiar'; it.r.adiar = somaDias(hoje, 1); agendar(id, true); toastDesfazer('Adiado para amanhã.', id, antes); }
     concluir(id);
@@ -1257,7 +1670,7 @@
       skeleton();
       mostrarBanner('bad', '<b>Não consegui ler a planilha.</b> ' + esc(d.erro) + ' <button class="lnk" id="tentar">Tentar de novo</button>');
       $('tentar').onclick = recarregar;
-      $('versao').textContent = (d.marca || 'Mark III');
+      $('versao').textContent = (d.marca || 'Mark V');
       return;
     }
     fixos = {}; editando = {};
@@ -1270,7 +1683,7 @@
     var por0 = d.xpPorNivel || 100, nv = Math.floor((d.xpKaio || 0) / por0) + 1, nvAnt = lsGet(LS_NIVEL, 0);
     if (nvAnt && nv > nvAnt) setTimeout(function () { festa('Nível ' + nv + '!', 'O Jarvis confirmou seu XP. Continue assim, chefe.'); }, 600);
     lsSet(LS_NIVEL, nv);
-    $('versao').textContent = (d.marca || 'Mark III') + ' · ' + ddmm(hoje);
+    $('versao').textContent = (d.marca || 'Mark V') + ' · ' + ddmm(hoje);
     if (d.setup && !d.setup.ok) mostrarBanner('warn', '<b>Envio ao Jarvis ainda não configurado.</b> ' + esc(d.setup.msg));
     if (rec) mostrarBanner('info', 'Recuperei ' + rec + ' resposta(s) que estavam só neste aparelho. Salvando agora.');
     $('rodape').textContent = 'Cada toque é salvo na hora na planilha. "Enviar ao Jarvis" avisa o Jarvis do que é novo.';
@@ -1310,6 +1723,21 @@
     esc: esc, toast: toast, irPara: irPara, cor: cor, ddmm: ddmm, somaDias: somaDias, ehPendente: ehPendente, bucket: bucket,
     dados: function () { return D; }, agenda: function () { return agenda || []; }, itens: function () { return itens; }, hoje: function () { return hoje; },
     redesenhar: function () { atualizarGeral(); desenharLista(); },
+    badge: function () { badge(null); }, vibrar: vibrar, festa: festa,
+    paraEnviar: function () { return contarParaEnviar(); }, enviarAgora: function () { enviarAgora(false); },
+    /** Mark V (modo foco): responde sem rolar a lista. patch: { acao:'feito'|'adiar', adiar, escolha, texto } */
+    responder: function (id, patch) {
+      var it = porId[id]; if (!it) return null;
+      var r = it.r, antes = { escolha: r.escolha, texto: r.texto, acao: r.acao, adiar: r.adiar };
+      if (patch.escolha != null) r.escolha = patch.escolha;
+      if (patch.texto != null) r.texto = patch.texto;
+      if (patch.acao === 'feito') { r.acao = 'feito'; r.adiar = ''; }
+      if (patch.acao === 'adiar') { r.acao = 'adiar'; r.adiar = patch.adiar; }
+      ultimoDesfazer = { id: id, antes: antes }; fixos[id] = false; editando[id] = false;
+      agendar(id, true); if (patch.acao === 'feito') animarXp(it.xp);
+      concluir(id);
+      return antes;
+    },
     contexto: function () {
       return {
         hoje: hoje, focado: focado, missoes: D.missoes || [],
@@ -1782,7 +2210,7 @@
 </script>
 
 <script type="text/x-central">
-/* Telas.html · Mark IV — navegação Hoje / Prazos / Placar / Bots. Usa só window.CentralAPI (+ CentralEscritorio). */
+/* Telas.html · Mark V — navegação Hoje / Prazos / Placar / Bots. Usa só window.CentralAPI (+ CentralEscritorio). */
 (function () {
   'use strict';
   var API = window.CentralAPI; if (!API) return;
@@ -1850,17 +2278,21 @@
   function parar() { if (window.CentralEscritorio) CentralEscritorio.parar(); }
   document.addEventListener('visibilitychange', function () { if (!document.hidden && vista === 'bots') rodar(); });
 
+  /* Mark V: a comemoração das 3 missões aparece UMA vez por marco (dia + missões), só quando você completa a última
+     nesta abertura. Se já estavam completas ao abrir (ou o marco já foi visto, mesmo em outra abertura), não aparece. */
+  var basePronta = null;
   function bonusMissoes() {
     var D = API.dados(), its = API.itens(), ms = (D.missoes || []).filter(function (m) { return m.titulo; });
     if (ms.length < 3) return;
     var ok = ms.every(function (m) { var it = its.filter(function (x) { return x.id === m.id; })[0]; return !it || !API.ehPendente(it); });
-    var chave = 'central.v2.bonus.' + API.hoje();
-    if (ok && !localStorage.getItem(chave)) {
-      try { localStorage.setItem(chave, '1'); } catch (e) {}
-      var f = document.createElement('div'); f.className = 'festa';
-      f.innerHTML = '<div><b>3 missões feitas</b>Bônus de ' + (D.bonusMissoesXp || 30) + ' XP para o Jarvis confirmar.<br><br><button class="ac pri" type="button">Continuar</button></div>';
-      document.body.appendChild(f); f.onclick = function () { f.remove(); };
-    }
+    var marco = 'central.v5.marco.missoes.' + API.hoje() + '.' + ms.map(function (m) { return m.id; }).sort().join(',');
+    var visto = false; try { visto = !!localStorage.getItem(marco) || !!localStorage.getItem('central.v2.bonus.' + API.hoje()); } catch (e) {}
+    function marcar() { try { localStorage.setItem(marco, '1'); } catch (e) {} }
+    if (basePronta === null) { basePronta = ok; if (ok) marcar(); return; } // 1ª avaliação desta abertura: só memoriza
+    if (!ok) { basePronta = false; return; }
+    if (basePronta || visto) { marcar(); return; }
+    basePronta = true; marcar();
+    API.festa('3 missões feitas', 'Bônus de ' + (D.bonusMissoesXp || 30) + ' XP para o Jarvis confirmar.');
   }
 
   function desenhar() {
@@ -1872,6 +2304,210 @@
   document.addEventListener('click', function () { setTimeout(bonusMissoes, 400); });
   window.addEventListener('resize', desenhar);
   desenhar();
+})();
+</script>
+
+<script type="text/x-central">
+/* Extras.html · Mark V — vibração leve, intro do Jarvis, resumo falado e modo foco. Usa window.CentralAPI. Sem segredos. */
+(function () {
+  'use strict';
+  var API = window.CentralAPI; if (!API) return;
+  var $ = function (id) { return document.getElementById(id); }, esc = API.esc;
+  var calmo = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var iOS = /iPhone|iPad/.test(navigator.userAgent);
+  function pad(n) { return ('0' + n).slice(-2); }
+  function agoraHH() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function pendentes() { return API.itens().filter(API.ehPendente); }
+
+  /* ===== Vibração leve =====
+     iOS Safari não tem navigator.vibrate. No iOS 18+, tocar um <input type="checkbox" switch> nativo dá um toque háptico;
+     usamos um switch invisível, clicado dentro do mesmo toque do usuário. Sem suporte: não faz nada. */
+  var Haptico = (function () {
+    var lab = null;
+    function preparar() {
+      if (lab) return lab;
+      lab = document.createElement('label'); lab.setAttribute('aria-hidden', 'true'); lab.className = 'hap';
+      var i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); i.tabIndex = -1;
+      lab.appendChild(i); lab.addEventListener('click', function (e) { e.stopPropagation(); });
+      document.body.appendChild(lab); return lab;
+    }
+    function tocar() {
+      try {
+        if (navigator.vibrate) { navigator.vibrate(12); return; }
+        if (!iOS) return;
+        preparar().click();
+      } catch (e) {}
+    }
+    return { tocar: tocar };
+  })();
+  window.JarvisHaptico = Haptico;
+
+  /* ===== Intro (reator acende e gira, anéis do HUD se montam, saudação) =====
+     'cheia' ~2 s na 1ª abertura do dia; 'curta' ~0,7 s nas outras; toque pula; reduzir movimento: sem animação. */
+  var Intro = (function () {
+    function mostrar(modo, fim) {
+      var n = pendentes().length, logo = (document.querySelector('.marca .logo') || {}).innerHTML || '';
+      if (calmo && modo === 'curta') { fim && fim(); return; }
+      var el = document.createElement('div'); el.className = 'intro ' + modo + (calmo ? ' calmo' : ''); el.id = 'intro';
+      el.setAttribute('role', 'status'); el.setAttribute('aria-label', 'Ótimo dia, Kaio!');
+      el.innerHTML =
+        '<div class="intro-hud" aria-hidden="true"><svg viewBox="0 0 240 240">' +
+          '<circle class="r1" cx="120" cy="120" r="112"/><circle class="r2" cx="120" cy="120" r="98"/>' +
+          '<circle class="r3" cx="120" cy="120" r="84"/><circle class="r4" cx="120" cy="120" r="70"/>' +
+          '<path class="tk" d="M120 4v10M120 226v10M4 120h10M226 120h10"/></svg>' +
+          '<span class="intro-reator">' + logo + '</span></div>' +
+        '<div class="intro-tx"><b>Ótimo dia, Kaio!</b><span>' + agoraHH() + ' · ' + (n ? n + (n === 1 ? ' pendente' : ' pendentes') : 'nada pendente') + '</span></div>';
+      document.body.appendChild(el);
+      var dur = calmo ? 900 : modo === 'cheia' ? 2000 : 700, acabou = false;
+      function sair() {
+        if (acabou) return; acabou = true; el.classList.add('sai');
+        setTimeout(function () { el.remove(); fim && fim(); }, calmo ? 120 : 220);
+      }
+      el.addEventListener('click', sair);
+      setTimeout(sair, dur);
+    }
+    return { mostrar: mostrar };
+  })();
+  window.JarvisIntro = Intro;
+
+  /* ===== Resumo falado (speechSynthesis pt-BR) ===== */
+  var Fala = (function () {
+    var falando = false;
+    function voz() {
+      var vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+      var pt = vs.filter(function (v) { return /^pt[-_]BR/i.test(v.lang); });
+      return pt.filter(function (v) { return /Luciana|Felipe|Google/i.test(v.name); })[0] || pt[0] || null;
+    }
+    function hora(hhmm) { var p = String(hhmm).split(':'), h = +p[0], m = +p[1]; return h + (m ? ' e ' + m : (h === 1 ? ' hora' : ' horas')); }
+    function lista(its) { return its.slice(0, 5).map(function (it) { return it.titulo; }).join('; ') + (its.length > 5 ? '; e mais ' + (its.length - 5) : ''); }
+    function texto() {
+      var hoje = API.hoje(), p = pendentes(), ag = API.agenda().filter(function (e) { return e.dia === hoje; }), agora = agoraHH();
+      var venc = p.filter(function (it) { return API.bucket(it) === 'vencido'; }), hj = p.filter(function (it) { return it.prazo === hoje; });
+      var miss = p.filter(function (it) { return it.missao; });
+      var prox = ag.filter(function (e) { return e.todoDia || !e.fim || e.fim > agora; });
+      var t = ['Ótimo dia, Kaio! Agora são ' + hora(agora) + '.'];
+      t.push(p.length ? 'Você tem ' + p.length + (p.length === 1 ? ' decisão pendente.' : ' decisões pendentes.') : 'Nada pendente na fila.');
+      if (!ag.length) t.push('Agenda livre hoje.');
+      else if (!prox.length) t.push('Os compromissos de hoje já passaram.');
+      else t.push('Agenda de hoje: ' + prox.slice(0, 6).map(function (e) { return (e.todoDia ? 'o dia todo, ' : 'às ' + hora(e.ini) + ', ') + e.t; }).join('. ') + '.');
+      if (venc.length) t.push('Urgente: ' + venc.length + (venc.length === 1 ? ' item vencido: ' : ' itens vencidos: ') + lista(venc) + '.');
+      if (hj.length) t.push('Vencem hoje: ' + lista(hj) + '.');
+      if (!venc.length && !hj.length) t.push('Nenhum prazo vence hoje.');
+      if (miss.length) t.push('Missões do dia: ' + lista(miss) + '.');
+      return t.join(' ');
+    }
+    function botao(on) { var b = $('btnOuvir'); if (!b) return; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.querySelector('span').textContent = on ? 'Parar' : 'Ouvir'; }
+    function falar() {
+      if (!window.speechSynthesis) { API.toast('Este aparelho não lê em voz alta.', true); return; }
+      if (falando) { speechSynthesis.cancel(); falando = false; botao(false); return; }
+      var u = new SpeechSynthesisUtterance(texto()); u.lang = 'pt-BR'; u.rate = 1.03; var v = voz(); if (v) u.voice = v;
+      u.onend = u.onerror = function () { falando = false; botao(false); };
+      speechSynthesis.cancel(); speechSynthesis.speak(u); falando = true; botao(true);
+    }
+    if (window.speechSynthesis && speechSynthesis.getVoices) try { speechSynthesis.getVoices(); } catch (e) {}
+    document.addEventListener('visibilitychange', function () { if (document.hidden && falando) { speechSynthesis.cancel(); falando = false; botao(false); } });
+    var b = $('btnOuvir'); if (b) { if (!window.speechSynthesis) b.hidden = true; else b.addEventListener('click', falar); }
+    return { texto: texto, falar: falar, falando: function () { return falando; } };
+  })();
+  window.JarvisFala = Fala;
+
+  /* ===== Modo foco: um item por vez, em tela cheia ===== */
+  var Foco = (function () {
+    var el = null, fila = [], i = 0, feitos = 0, sel = '', sw = null;
+    function rank(it) { var b = API.bucket(it); return b === 'vencido' ? 0 : b === 'hoje' ? 1 : it.missao ? 2 : b === 'semana' ? 3 : 4; }
+    function montar(prim) {
+      var ps = pendentes().filter(function (it) { return String(it.tipo).toLowerCase() !== 'plano' && !it.plano; });
+      ps.sort(function (a, b) { return rank(a) - rank(b) || String(a.prazo || '9').localeCompare(String(b.prazo || '9')) || (b.ordem || 0) - (a.ordem || 0); });
+      if (prim) { ps = ps.filter(function (x) { return x.id !== prim.id; }); ps.unshift(prim); }
+      return ps;
+    }
+    function abrir(o) {
+      o = o || {};
+      var alvo = o.item ? API.itens().filter(function (x) { return x.id === o.item; })[0] : null;
+      if (alvo && (String(alvo.tipo).toLowerCase() === 'plano' || alvo.plano)) { if (window.CentralTelas) CentralTelas.ir('hoje'); API.irPara(alvo.id); return; } // plano: abre o card no Hoje
+      if (o.item && !alvo) API.toast('Esse item já saiu da fila.');
+      fila = montar(alvo); i = 0; feitos = 0;
+      if (!el) {
+        el = document.createElement('div'); el.className = 'foco'; el.id = 'foco'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Modo foco');
+        document.body.appendChild(el); document.documentElement.classList.add('com-foco');
+        el.addEventListener('click', clique); el.addEventListener('input', function (e) { if (e.target.id === 'focoTxt') botoes(); });
+        el.addEventListener('touchstart', toque, { passive: true }); el.addEventListener('touchmove', mover, { passive: true }); el.addEventListener('touchend', soltar);
+      }
+      desenhar();
+    }
+    function fechar() { if (!el) return; el.remove(); el = null; document.documentElement.classList.remove('com-foco'); API.redesenhar(); }
+    function pill(it) {
+      var b = API.bucket(it); if (!it.prazo) return '';
+      var t = b === 'vencido' ? 'Venceu ' + API.ddmm(it.prazo) : b === 'hoje' ? 'Vence hoje' : 'Vence ' + API.ddmm(it.prazo);
+      return '<span class="pill ' + (b === 'depois' ? '' : b) + '">' + t + '</span>';
+    }
+    function desenhar() {
+      sel = '';
+      if (i >= fila.length) return fim();
+      var it = fila[i], pc = Math.round(100 * i / fila.length);
+      el.innerHTML =
+        '<div class="foco-top"><button type="button" class="ico" data-f="sair" aria-label="Sair do foco"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
+          '<span class="foco-prog">' + (i + 1) + ' de ' + fila.length + '</span><span class="foco-bar"><i style="width:' + pc + '%"></i></span></div>' +
+        '<div class="foco-card" style="--cor:' + API.cor(it.area) + '" data-id="' + esc(it.id) + '">' +
+          '<div class="foco-meta"><span class="dot"></span>' + esc(it.area) + (it.bot ? ' · ' + esc(it.bot) : '') + '<span class="esp"></span>' + (it.missao ? '<span class="pill star">Missão</span>' : '') + pill(it) + '</div>' +
+          '<h1 class="foco-tit">' + esc(it.titulo) + '</h1>' +
+          (it.nota ? '<div class="foco-nota">' + esc(it.nota) + '</div>' : '') +
+          ((it.opcoes || []).length ? '<div class="foco-opts">' + it.opcoes.map(function (o, k) { return '<button type="button" class="opt" data-f="opt" data-v="' + esc(o) + '">' + esc(o) + (it.efeitos && it.efeitos[k] ? '<small>' + esc(it.efeitos[k]) + '</small>' : '') + '</button>'; }).join('') + '</div>' : '') +
+          '<textarea id="focoTxt" rows="2" placeholder="Resposta ou direcionamento (opcional)"></textarea>' +
+        '</div>' +
+        '<div class="foco-acoes">' +
+          '<button type="button" class="ac" data-f="adiar">Amanhã</button>' +
+          '<button type="button" class="ac sec" data-f="pular">Pular</button>' +
+          '<button type="button" class="ac feito" data-f="feito">Já fiz</button>' +
+          '<button type="button" class="ac pri" data-f="responder" id="focoResp" hidden>Responder</button>' +
+        '</div>';
+    }
+    function botoes() {
+      var t = ($('focoTxt') || {}).value || '', r = $('focoResp'); if (!r) return;
+      r.hidden = !(sel || t.trim());
+      Array.prototype.forEach.call(el.querySelectorAll('.foco-opts .opt'), function (b) { b.classList.toggle('on', b.dataset.v === sel); });
+    }
+    function fim() {
+      var n = API.paraEnviar ? API.paraEnviar() : 0;
+      el.innerHTML = '<div class="foco-top"><button type="button" class="ico" data-f="sair" aria-label="Sair do foco"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="foco-prog">Fim da fila</span><span class="foco-bar"><i style="width:100%"></i></span></div>' +
+        '<div class="foco-fim"><b>' + (pendentes().length ? 'Rodada concluída.' : 'Fila zerada.') + '</b><span>' + feitos + (feitos === 1 ? ' resposta' : ' respostas') + ' nesta rodada' + (pendentes().length ? ' · ' + pendentes().length + ' ainda pendente(s)' : '') + '.</span>' +
+        (n ? '<button type="button" class="ac pri" data-f="enviar">Enviar ao Jarvis agora (' + n + ')</button>' : '') + '<button type="button" class="ac" data-f="sair">Voltar ao Hoje</button></div>';
+    }
+    function proximo() { i++; if (!calmo && el) { el.classList.remove('passa'); void el.offsetWidth; el.classList.add('passa'); } desenhar(); }
+    function agir(tipo) {
+      var it = fila[i]; if (!it) return;
+      var txt = (($('focoTxt') || {}).value || '').trim(), patch = {};
+      if (tipo === 'feito') { patch.acao = 'feito'; if (txt) patch.texto = txt; if (sel) patch.escolha = sel; }
+      else if (tipo === 'adiar') { patch.acao = 'adiar'; patch.adiar = API.somaDias(API.hoje(), 1); if (txt) patch.texto = txt; }
+      else if (tipo === 'responder') { if (!sel && !txt) return; if (sel) patch.escolha = sel; if (txt) patch.texto = txt; }
+      Haptico.tocar();
+      API.responder(it.id, patch); feitos++;
+      var msg = tipo === 'feito' ? 'Já fiz.' : tipo === 'adiar' ? 'Adiado para amanhã.' : 'Resposta salva.';
+      var idx = i;
+      API.toast(msg, false, { rotulo: 'Desfazer', fn: function () { if (window.CentralAPI && CentralAPI.desfazer) CentralAPI.desfazer(); feitos = Math.max(0, feitos - 1); if (el) { i = idx; desenhar(); } } });
+      proximo();
+    }
+    function clique(e) {
+      var b = e.target.closest('[data-f]'); if (!b) return;
+      var f = b.dataset.f;
+      if (f === 'sair') return fechar();
+      if (f === 'pular') { proximo(); return; }
+      if (f === 'opt') { sel = sel === b.dataset.v ? '' : b.dataset.v; botoes(); return; }
+      if (f === 'enviar') { API.enviarAgora(); fechar(); return; }
+      agir(f);
+    }
+    function toque(e) { var c = e.target.closest('.foco-card'); if (!c || e.target.closest('textarea,button')) return; var t = e.touches[0]; sw = { c: c, x: t.clientX, y: t.clientY, dx: 0, on: false }; }
+    function mover(e) {
+      if (!sw) return; var t = e.touches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
+      if (!sw.on) { if (Math.abs(dy) > 14) { sw = null; return; } if (Math.abs(dx) > 14) sw.on = true; else return; }
+      sw.dx = dx; sw.c.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 40) + 'deg)';
+    }
+    function soltar() { if (!sw) return; var s = sw; sw = null; s.c.style.transform = ''; if (!s.on || Math.abs(s.dx) < 90) return; agir(s.dx > 0 ? 'feito' : 'adiar'); }
+    document.addEventListener('keydown', function (e) { if (el && e.key === 'Escape') fechar(); });
+    var bf = $('btnFoco'); if (bf) bf.addEventListener('click', function () { if (!pendentes().length) { API.toast('Nada pendente. Fila zerada.'); return; } abrir({}); });
+    return { abrir: abrir, fechar: fechar, aberto: function () { return !!el; }, estado: function () { return { i: i, n: fila.length, feitos: feitos, id: fila[i] && fila[i].id }; } };
+  })();
+  window.JarvisFoco = Foco;
 })();
 </script>
 

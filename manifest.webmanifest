@@ -2,7 +2,7 @@
   "id": "/jarvis-app/",
   "name": "Jarvis · Central",
   "short_name": "Jarvis",
-  "description": "Central Mark IV do Kaio: decisões, prazos, agenda e bots.",
+  "description": "Central Mark V do Kaio: decisões, prazos, agenda e bots.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
