@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Jarvis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jarvis">
+<meta name="application-name" content="Jarvis">
+<meta name="theme-color" content="#0E0F13">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  /* Shell da Central Mark III: só dá ícone, nome e tela cheia. Nenhum segredo aqui. */
+  html,body { margin:0; height:100%; background:#0E0F13; overflow:hidden; }
+  body { padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); box-sizing:border-box; }
+  iframe { border:0; width:100%; height:100%; display:block; background:#0E0F13; }
+  #carga { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:#9AA0AB; font:14px -apple-system,sans-serif; background:#0E0F13; transition:opacity .4s; }
+  #carga img { width:84px; height:84px; animation:pulsa 1.6s infinite; }
+  @keyframes pulsa { 50% { filter:drop-shadow(0 0 14px rgba(63,193,232,.8)); } }
+  #dica { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(18px + env(safe-area-inset-bottom)); background:#20232c; color:#ECEDEF; border:1px solid #D4A72C; border-radius:12px; padding:10px 14px; font:14px -apple-system,sans-serif; display:none; z-index:5; }
+  #dica button { margin-left:8px; background:none; border:0; color:#3FC1E8; font-weight:700; font-size:14px; }
+  #push { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(18px + env(safe-area-inset-bottom)); display:none; align-items:center; gap:10px; z-index:6;
+    background:#20232c; color:#ECEDEF; border:1px solid #3FC1E8; border-radius:14px; padding:10px 12px 10px 14px; font:14px -apple-system,sans-serif; box-shadow:0 8px 30px rgba(0,0,0,.45); white-space:nowrap; }
+  #push button { background:#3FC1E8; color:#0E0F13; border:0; border-radius:10px; padding:8px 12px; font-weight:700; font-size:14px; }
+  #push .x { background:none; color:#9AA0AB; padding:4px 6px; font-weight:400; }
+  #aviso { position:fixed; left:50%; top:calc(12px + env(safe-area-inset-top)); transform:translateX(-50%); background:#20232c; color:#ECEDEF; border-radius:12px; padding:9px 14px; font:14px -apple-system,sans-serif; display:none; z-index:7; border:1px solid #2c303a; }
+</style>
+</head>
+<body>
+<div id="carga"><img src="icon-180.png" alt=""><div>Ligando o Jarvis…</div></div>
+<iframe id="app" title="Central Mark III" allow="microphone; clipboard-write"></iframe>
+<div id="push"><span>🔔 Avisos do Jarvis</span><button id="ativar" type="button">Ativar notificações</button><button class="x" id="pushx" type="button" aria-label="Agora não">✕</button></div>
+<div id="aviso" role="status"></div>
+<div id="dica">Não carregou? <button id="direto" type="button">Abrir direto</button><button id="fecha" type="button">✕</button></div>
+<script>
+(function () {
+  var EXEC = 'https://script.google.com/macros/s/AKfycbyD-s4JX6BQIjZvCVrn62AaCLz-kmxIQXwDcSti0mA-C8YsYPEEgvMRfhAuD0_bmIML/exec';
+  var modo = localStorage.getItem('jarvis.modo'); // 'direto' = abre o app fora do iframe (login do Google bloqueado no iframe)
+  if (modo === 'direto') { location.replace(EXEC); return; }
+  var f = document.getElementById('app'), c = document.getElementById('carga'), d = document.getElementById('dica');
+  var carregou = false;
+  f.onload = function () { c.style.opacity = 0; setTimeout(function () { c.style.display = 'none'; }, 400); };
+  f.src = EXEC + '?shell=1';
+  setTimeout(function () { if (carregou) return; d.style.display = 'block'; setTimeout(function () { d.style.display = 'none'; }, 9000); }, 7000);
+  document.getElementById('direto').onclick = function () { localStorage.setItem('jarvis.modo', 'direto'); location.href = EXEC; };
+  document.getElementById('fecha').onclick = function () { d.style.display = 'none'; };
+
+  /* ---------- Notificações (Web Push) ---------- */
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var suporta = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  var reg = null, chave = null, appWin = null, appOrigem = '', pb = document.getElementById('push'), av = document.getElementById('aviso');
+  function aviso(t, ms) { av.textContent = t; av.style.display = 'block'; clearTimeout(aviso.t); aviso.t = setTimeout(function () { av.style.display = 'none'; }, ms || 4000); }
+  function b64(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; var r = atob(s), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
+  function aparelho() { var u = navigator.userAgent; return (/iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : 'Computador') + (standalone ? ' · atalho' : ' · navegador'); }
+  function enviarInscricao(sub, testar) { if (appWin && sub) appWin.postMessage({ jarvis: 'inscricao', sub: sub.toJSON(), aparelho: aparelho(), testar: testar }, appOrigem); }
+  if (suporta) navigator.serviceWorker.register('sw.js').then(function (r) { reg = r; }).catch(function () {});
+
+  function avaliar() {
+    if (!suporta || !reg || !chave) return;
+    if (!standalone && /iPhone|iPad/.test(navigator.userAgent)) return; // no iPhone, só o atalho da Tela de Início recebe notificações
+    reg.pushManager.getSubscription().then(function (s) {
+      if (s && Notification.permission === 'granted') { enviarInscricao(s, false); pb.style.display = 'none'; return; } // mantém a planilha em dia
+      if (Notification.permission === 'denied') return;
+      if (localStorage.getItem('jarvis.push.dispensado') === new Date().toISOString().slice(0, 10)) return;
+      pb.style.display = 'flex';
+    });
+  }
+  document.getElementById('pushx').onclick = function () { pb.style.display = 'none'; localStorage.setItem('jarvis.push.dispensado', new Date().toISOString().slice(0, 10)); };
+  document.getElementById('ativar').onclick = function () {
+    // iOS: o pedido de permissão precisa nascer deste toque.
+    Notification.requestPermission().then(function (p) {
+      if (p !== 'granted') { pb.style.display = 'none'; aviso('Notificações não permitidas. Dá para ligar em Ajustes > Notificações > Jarvis.', 6000); return; }
+      return (reg || navigator.serviceWorker.ready).pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(chave) }).then(function (s) {
+        pb.style.display = 'none'; aviso('Ligando as notificações…'); enviarInscricao(s, true);
+      });
+    }).catch(function (e) { aviso('Não deu para ativar: ' + (e && e.message || e), 6000); });
+  };
+
+  window.addEventListener('message', function (e) {
+    if (!/^https:\/\/[a-z0-9-]+\.googleusercontent\.com$/.test(e.origin) || !e.data || typeof e.data !== 'object') return;
+    var m = e.data;
+    if (m.jarvis === 'pronto') { carregou = true; d.style.display = 'none'; appWin = e.source; appOrigem = e.origin; chave = m.chave; if (reg) avaliar(); else if (suporta) navigator.serviceWorker.ready.then(function (r) { reg = r; avaliar(); }); }
+    else if (m.jarvis === 'inscrito') { if (m.ok && m.nova) aviso('Notificações ativas ✓'); else if (!m.ok) aviso('Não salvei a inscrição: ' + (m.erro || 'erro'), 6000); }
+    else if (m.jarvis === 'teste') { if (!m.ok) aviso('Inscrição salva, mas o teste não chegou. Tente de novo mais tarde.', 6000); }
+  });
+})();
+</script>
+</body>
+</html>
