@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Jarvis · Central Mark VI (6.0.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
+<!-- Jarvis · Central Mark VI (6.1.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -288,6 +288,10 @@
   .trava { position:fixed; inset:0; z-index:130; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)); transition:opacity .2s; }
   .trava::before { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(360px 260px at 50% 38%, rgba(63,193,232,.08), transparent 70%); }
   .trava.sai { opacity:0; }
+  /* Mark VI: travado = só a trava aparece; escudo = app em segundo plano (nada no seletor de apps do iOS) */
+  html.travado body > *:not(.trava):not(#carga) { visibility:hidden !important; }
+  html.escudo body::after { content:""; position:fixed; inset:0; z-index:9999; background:var(--bg); }
+  html.escudo body > * { filter:blur(18px); }
   .trava-in { position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; max-width:300px; text-align:center; }
   .trava-in .logo-g { width:58px; height:58px; display:block; margin-bottom:10px; }
   .trava-in .logo-g svg { width:100%; height:100%; display:block; border-radius:14px; }
@@ -472,7 +476,8 @@
    - Guarda: tudo o que o app grava (jarvis.* / central.*) fica no localStorage E no IndexedDB; o token também no Cache Storage.
      Se o iPhone limpar um deles, o app restaura do outro antes de decidir se pede o código.
    - Erro "não pareado" só desconecta depois de confirmar (2ª tentativa); nunca por falha de rede.
-   - Trava: Face ID (passkey do aparelho, conferida no servidor) ao abrir e depois de 5 min fora do app; código como alternativa.
+   - Trava (Mark VI): Face ID (passkey do aparelho, conferida no servidor) em TODA abertura e toda volta do segundo plano
+     (tolerância de 15 s para trocas rápidas de app); conteúdo escondido enquanto travado e no seletor de apps; código como alternativa.
    - Abertura: intro do Jarvis, links das notificações (?item= / ?foco=1) e convites (Face ID, notificações) um de cada vez.
    Nenhum segredo neste arquivo. */
 (function () {
@@ -482,8 +487,8 @@
   var LS = { TOKEN: 'jarvis.token', ID: 'jarvis.aparelho.id', CACHE: 'jarvis.cache.dados', PUSHDIA: 'jarvis.push.dia', PUSHNAO: 'jarvis.push.dispensado',
     FACE: 'jarvis.face', FACENAO: 'jarvis.face.dispensado', USO: 'jarvis.uso', INTRO: 'jarvis.intro.dia' };
   var ACOES = ['carregarDados', 'salvarResposta', 'enviarLote', 'carregarAgenda', 'decidirPlano', 'resumoCentral', 'pushInfo', 'salvarPush', 'testarPush', 'removerPush', 'aparelhos', 'revogar',
-    'desbloquear', 'desbloquearPin', 'faceRegistrar', 'faceDesligar'];
-  var LIVRES = { parear: 1, entrarFace: 1, desbloquear: 1, desbloquearPin: 1, ping: 1 }; // não esperam a trava
+    'desbloquear', 'desbloquearPin', 'faceRegistrar', 'faceDesligar', 'travar', 'voz'];
+  var LIVRES = { parear: 1, entrarFace: 1, desbloquear: 1, desbloquearPin: 1, ping: 1, travar: 1 }; // não esperam a trava
   var iniciado = false, memToken = '';
   try { localStorage.removeItem('jarvis.modo'); } catch (e) {} // Mark III: modo "abrir direto" não existe mais
 
@@ -666,24 +671,42 @@
     return { suporta: suporta, disponivel: disponivel, local: local, registrar: registrar, assercao: assercao, motivo: motivo };
   })();
 
-  /* ---------- Trava (Face ID ao abrir e depois de 5 min fora) ---------- */
+  /* ---------- Trava (Mark VI: Face ID em toda abertura e toda volta do segundo plano) ---------- */
   var Trava = (function () {
-    var BLOQ_MS = 5 * 60 * 1000, aberta = true, fila = [], sessao = null, el = null, auto = false;
+    var GRACA_MS = 15 * 1000, aberta = true, fila = [], sessao = null, el = null, auto = false, foraEm = 0;
     function marcarUso() { lsSet(LS.USO, String(Date.now())); }
-    function precisa() { if (!Face.local()) return false; var u = Number(lsGet(LS.USO) || 0); return !u || Date.now() - u > BLOQ_MS; }
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { if (aberta) marcarUso(); }
-      else if (iniciado && aberta && precisa()) bloquear();
-    });
-    window.addEventListener('pagehide', function () { if (aberta) marcarUso(); });
+    /** frio = abertura do app (arranque): sempre pede. Volta do segundo plano: pede se ficou fora mais de 15 s. */
+    function precisa(frio) {
+      if (!Face.local()) return false;
+      if (frio) return true;
+      var u = foraEm || Number(lsGet(LS.USO) || 0); return !u || Date.now() - u > GRACA_MS;
+    }
+    function escudo(on) { document.documentElement.classList.toggle('escudo', !!on); }
+    function saiu() {
+      if (!Face.local()) return;
+      escudo(true); // some antes da foto do seletor de apps
+      if (aberta) { foraEm = Date.now(); marcarUso(); }
+      // o servidor encurta a sessão (15 s); se voltar rápido, a próxima chamada a renova
+      try { if (token()) fetch(EXEC, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, credentials: 'omit',
+        body: JSON.stringify({ acao: 'travar', token: token(), args: [], aparelho: nomeAparelho() }) }).catch(function () {}); } catch (e) {}
+    }
+    function voltou() {
+      if (!iniciado || !Face.local()) { escudo(false); return; }
+      if (aberta && precisa(false)) bloquear();
+      foraEm = 0; escudo(false);
+    }
+    document.addEventListener('visibilitychange', function () { if (document.hidden) saiu(); else voltou(); });
+    window.addEventListener('pagehide', saiu);
+    window.addEventListener('pageshow', function (e) { if (e.persisted) voltou(); });
+    window.addEventListener('blur', function () { if (Face.local() && document.hidden) escudo(true); });
     setInterval(function () { if (!document.hidden && aberta && iniciado) marcarUso(); }, 30000);
     function esperar() { return new Promise(function (ok) { fila.push(ok); }); }
     function pronta() { if (!aberta) return esperar().then(pronta); if (sessao) return sessao.then(pronta); return Promise.resolve(); }
-    function liberar() { aberta = true; marcarUso(); if (el) { el.classList.add('sai'); var e0 = el; el = null; setTimeout(function () { e0.remove(); }, 200); } fila.splice(0).forEach(function (f) { f(); }); }
+    function liberar() { aberta = true; marcarUso(); document.documentElement.classList.remove('travado'); if (el) { el.classList.add('sai'); var e0 = el; el = null; setTimeout(function () { e0.remove(); }, 200); } fila.splice(0).forEach(function (f) { f(); }); }
     function msg(t) { var m = $('travaMsg'); if (m) m.textContent = t; }
     function bloquear(texto) {
       if (!aberta && el) { if (texto) msg(texto); return esperar(); }
-      aberta = false; auto = false; mostrar(texto); return esperar();
+      aberta = false; auto = false; document.documentElement.classList.add('travado'); mostrar(texto); return esperar();
     }
     function exigir(texto, faceId) {
       if (faceId && typeof faceId === 'string' && !Face.local()) lsSet(LS.FACE, JSON.stringify({ id: faceId }));
@@ -781,20 +804,21 @@
   /* ---------- Início ---------- */
   var alvo = (function () { // link da notificação: ?item=ID (abre o item pronto para responder) ou ?foco=1
     var q = {}; try { location.search.replace(/^\?/, '').split('&').forEach(function (p) { var kv = p.split('='); if (kv[0]) q[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || ''); }); } catch (e) {}
-    if (q.item || q.foco) { try { history.replaceState(null, '', location.pathname); } catch (e) {} return { item: q.item || '', foco: !!q.foco }; }
+    if (q.item || q.foco || q.hoje) { try { history.replaceState(null, '', location.pathname); } catch (e) {} return { item: q.item || '', foco: !!q.foco, hoje: !!q.hoje }; }
     return null;
   })();
   function abrirAlvo(a) {
     if (!a) return;
     Trava.pronta().then(function () {
+      if (a.hoje) { if (window.CentralTelas) CentralTelas.ir('hoje'); return; } // Mark VI: lembrete de compromisso abre o Hoje
       if (window.JarvisFoco) JarvisFoco.abrir({ item: a.item });
       else if (a.item && window.CentralAPI) CentralAPI.irPara(a.item);
     });
   }
   if (AMB === 'pages' && 'serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
     var d = e.data || {}; if (d.tipo !== 'abrir' || !iniciado) return;
-    var m = /[?&]item=([^&#]+)/.exec(d.url || ''), f = /[?&]foco=1/.test(d.url || '');
-    if (m || f) abrirAlvo({ item: m ? decodeURIComponent(m[1]) : '', foco: f });
+    var m = /[?&]item=([^&#]+)/.exec(d.url || ''), f = /[?&]foco=1/.test(d.url || ''), h = /[?&]hoje=1/.test(d.url || '');
+    if (m || f || h) abrirAlvo({ item: m ? decodeURIComponent(m[1]) : '', foco: f, hoje: h });
   });
 
   function rodarAdiados() {
@@ -824,7 +848,7 @@
   function boot() {
     Guarda.pronto().then(function () {
       if (!token()) { mostrarPareamento(); return; }
-      var travar = Trava.precisa();
+      var travar = Trava.precisa(true); // Mark VI: toda abertura pede Face ID
       if (travar) Trava.bloquear(); // a trava aparece antes de qualquer dado
       var cache = null; try { cache = JSON.parse(lsGet(LS.CACHE) || 'null'); } catch (e) {}
       if (cache && cache.itens) {
@@ -2308,7 +2332,7 @@
 </script>
 
 <script type="text/x-central">
-/* Extras.html · Mark V — vibração leve, intro do Jarvis, resumo falado e modo foco. Usa window.CentralAPI. Sem segredos. */
+/* Extras.html · Mark V/VI — vibração leve, intro do Jarvis, resumo falado (voz neural, Mark VI) e modo foco. Usa window.CentralAPI. Sem segredos. */
 (function () {
   'use strict';
   var API = window.CentralAPI; if (!API) return;
@@ -2358,6 +2382,7 @@
           '<span class="intro-reator">' + logo + '</span></div>' +
         '<div class="intro-tx"><b>Ótimo dia, Kaio!</b><span>' + agoraHH() + ' · ' + (n ? n + (n === 1 ? ' pendente' : ' pendentes') : 'nada pendente') + '</span></div>';
       document.body.appendChild(el);
+      if (modo === 'cheia' && window.JarvisFala) JarvisFala.saudar(); // Mark VI: saudação com a voz neural
       var dur = calmo ? 900 : modo === 'cheia' ? 2000 : 700, acabou = false;
       function sair() {
         if (acabou) return; acabou = true; el.classList.add('sai');
@@ -2370,13 +2395,15 @@
   })();
   window.JarvisIntro = Intro;
 
-  /* ===== Resumo falado (speechSynthesis pt-BR) ===== */
+  /* ===== Resumo falado (Mark VI: voz neural masculina pt-BR em MP3; speechSynthesis só como reserva) =====
+     O MP3 do resumo é gerado todo dia no computador do Jarvis e vem pela API (aparelho pareado), nunca pelo Pages.
+     A saudação "Ótimo dia, Kaio!" (sem dados pessoais) fica no app: voz/otimo-dia.mp3. */
   var Fala = (function () {
-    var falando = false;
+    var falando = false, audio = null, url = '', urlDia = '', pedindo = false;
     function voz() {
       var vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
       var pt = vs.filter(function (v) { return /^pt[-_]BR/i.test(v.lang); });
-      return pt.filter(function (v) { return /Luciana|Felipe|Google/i.test(v.name); })[0] || pt[0] || null;
+      return pt.filter(function (v) { return /Felipe|Daniel|Antonio|Google/i.test(v.name); })[0] || pt[0] || null;
     }
     function hora(hhmm) { var p = String(hhmm).split(':'), h = +p[0], m = +p[1]; return h + (m ? ' e ' + m : (h === 1 ? ' hora' : ' horas')); }
     function lista(its) { return its.slice(0, 5).map(function (it) { return it.titulo; }).join('; ') + (its.length > 5 ? '; e mais ' + (its.length - 5) : ''); }
@@ -2396,18 +2423,47 @@
       if (miss.length) t.push('Missões do dia: ' + lista(miss) + '.');
       return t.join(' ');
     }
-    function botao(on) { var b = $('btnOuvir'); if (!b) return; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.querySelector('span').textContent = on ? 'Parar' : 'Ouvir'; }
-    function falar() {
-      if (!window.speechSynthesis) { API.toast('Este aparelho não lê em voz alta.', true); return; }
-      if (falando) { speechSynthesis.cancel(); falando = false; botao(false); return; }
-      var u = new SpeechSynthesisUtterance(texto()); u.lang = 'pt-BR'; u.rate = 1.03; var v = voz(); if (v) u.voice = v;
+    function botao(on, tx) { var b = $('btnOuvir'); if (!b) return; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.querySelector('span').textContent = tx || (on ? 'Parar' : 'Ouvir'); }
+    function parar() {
+      if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
+      if (window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
+      falando = false; botao(false);
+    }
+    function reserva() { // voz do aparelho (robótica), só quando o MP3 não existe
+      if (!window.speechSynthesis) { API.toast('O resumo em áudio de hoje ainda não está pronto.', true); parar(); return; }
+      var u = new SpeechSynthesisUtterance(texto()); u.lang = 'pt-BR'; u.rate = 0.98; u.pitch = 0.9; var v = voz(); if (v) u.voice = v;
       u.onend = u.onerror = function () { falando = false; botao(false); };
       speechSynthesis.cancel(); speechSynthesis.speak(u); falando = true; botao(true);
     }
+    function blobDe(b64) { var s = atob(b64), n = s.length, a = new Uint8Array(n); for (var i = 0; i < n; i++) a[i] = s.charCodeAt(i); return new Blob([a], { type: 'audio/mpeg' }); }
+    function tocar(src) {
+      audio = new Audio(src); audio.preload = 'auto';
+      audio.onended = function () { falando = false; audio = null; botao(false); };
+      audio.onerror = function () { audio = null; reserva(); };
+      falando = true; botao(true);
+      var p = audio.play(); if (p && p.catch) p.catch(function () { audio = null; reserva(); });
+    }
+    function falar() {
+      if (falando || pedindo) { pedindo = false; parar(); return; }
+      if (url && urlDia === API.hoje()) { tocar(url); return; }
+      // o "toque" do usuário destrava o áudio no iOS: cria o player já aqui e só troca a fonte depois
+      if (!window.JRUN || !JRUN().voz) { reserva(); return; }
+      pedindo = true; botao(true, 'Carregando…');
+      var pre = new Audio(); try { pre.play().catch(function () {}); } catch (e) {}
+      JRUN().withSuccessHandler(function (r) {
+        if (!pedindo) return; pedindo = false;
+        if (r && r.mp3 && r.data === API.hoje()) { if (url) URL.revokeObjectURL(url); url = URL.createObjectURL(blobDe(r.mp3)); urlDia = r.data; tocar(url); }
+        else reserva();
+      }).withFailureHandler(function () { if (!pedindo) return; pedindo = false; reserva(); }).voz();
+    }
+    /** Saudação neural (sem dados pessoais). Se o iPhone não deixar tocar sem toque, fica em silêncio. */
+    function saudar() {
+      try { var a = new Audio('voz/otimo-dia.mp3'); a.volume = 0.9; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    }
     if (window.speechSynthesis && speechSynthesis.getVoices) try { speechSynthesis.getVoices(); } catch (e) {}
-    document.addEventListener('visibilitychange', function () { if (document.hidden && falando) { speechSynthesis.cancel(); falando = false; botao(false); } });
-    var b = $('btnOuvir'); if (b) { if (!window.speechSynthesis) b.hidden = true; else b.addEventListener('click', falar); }
-    return { texto: texto, falar: falar, falando: function () { return falando; } };
+    document.addEventListener('visibilitychange', function () { if (document.hidden && (falando || pedindo)) { pedindo = false; parar(); } });
+    var b = $('btnOuvir'); if (b) b.addEventListener('click', falar);
+    return { texto: texto, falar: falar, saudar: saudar, falando: function () { return falando; } };
   })();
   window.JarvisFala = Fala;
 
