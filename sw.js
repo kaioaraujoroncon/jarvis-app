@@ -1,9 +1,9 @@
 /* Jarvis · service worker do app (Mark V): notificações (com badge e link direto para o item) + abre rápido/offline. Sem segredos.
    Rede primeiro para os arquivos do app; os dados (script.google.com) não passam pelo cache.
    O cache "jarvis-guarda" (cópia do token do aparelho, feita pelo app) nunca é apagado aqui. */
-var CACHE = 'jarvis-6.1.1';
+var CACHE = 'jarvis-6.2.0';
 var GUARDA = 'jarvis-guarda';
-var ARQS = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'badge-72.png'];
+var ARQS = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'badge-72.png', 'voz/vinheta.mp3'];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ARQS); }).then(function () { return self.skipWaiting(); })); });
 self.addEventListener('activate', function (e) {
   e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k !== CACHE && k !== GUARDA; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));

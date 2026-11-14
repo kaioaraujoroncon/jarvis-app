@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Jarvis · Central Mark VI (6.1.1) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
+<!-- Jarvis · Central Mark VI (6.2.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -305,34 +305,49 @@
   .trava .parear input { margin-top:6px; }
 
   /* Intro do Jarvis */
-  .intro { position:fixed; inset:0; z-index:120; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; transition:opacity .22s; cursor:pointer; }
-  .intro.sai { opacity:0; }
-  .intro-hud { position:relative; width:200px; height:200px; }
-  .intro.curta .intro-hud { width:150px; height:150px; }
-  .intro-hud svg { position:absolute; inset:0; width:100%; height:100%; fill:none; stroke:var(--arc); stroke-linecap:round; overflow:visible; }
-  .intro-hud circle { stroke-width:1; opacity:.55; transform-origin:120px 120px; }
-  .intro-hud .r1 { stroke-dasharray:6 10; opacity:.35; }
-  .intro-hud .r2 { stroke-dasharray:180 436; stroke-width:1.6; opacity:.7; }
-  .intro-hud .r3 { stroke-dasharray:2 7; opacity:.45; }
-  .intro-hud .r4 { stroke-dasharray:90 350; stroke-width:2; opacity:.8; stroke:var(--gold); }
-  .intro-hud .tk { stroke-width:1.4; opacity:.5; }
-  .intro-reator { position:absolute; left:50%; top:50%; width:72px; height:72px; margin:-36px 0 0 -36px; border-radius:50%; display:block; }
-  .intro.curta .intro-reator { width:56px; height:56px; margin:-28px 0 0 -28px; }
+  /* Intro Mark VI 6.2.0: preto com leve degradê petróleo e colmeia quase invisível; ciano principal, dourado fosco e vermelho só em detalhes. */
+  .intro { --cy:45vh; --r:110px; --ouro:#C9A24A; position:fixed; inset:0; z-index:120; overflow:hidden; cursor:pointer; transition:opacity .28s ease, background-color .6s ease;
+    background-color:#040708;
+    background-image:radial-gradient(ellipse 120% 80% at 50% var(--cy), rgba(10,52,60,.55) 0%, rgba(5,22,26,.5) 42%, rgba(2,5,6,0) 78%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48' viewBox='0 0 28 48'%3E%3Cpath d='M14 0l14 8v16l-14 8L0 24V8z M14 32v16' fill='none' stroke='%233FC1E8' stroke-opacity='.05' stroke-width='1'/%3E%3C/svg%3E");
+    background-size:auto, 28px 48px; }
+  .intro.sai { opacity:0; pointer-events:none; }
+  .intro-cv { position:absolute; inset:0; display:block; }
+  .intro-reator { position:absolute; left:50%; top:var(--cy); width:64px; height:64px; margin:-32px 0 0 -32px; border-radius:50%; display:block; filter:drop-shadow(0 0 14px rgba(63,193,232,.55)); animation:introReator .95s ease-in .1s both; }
   .intro-reator svg { width:100%; height:100%; display:block; border-radius:50%; }
-  .intro-tx { text-align:center; display:flex; flex-direction:column; gap:4px; }
-  .intro-tx b { font-size:22px; font-weight:650; letter-spacing:-.02em; }
-  .intro-tx span { color:var(--mut); font-size:13.5px; font-variant-numeric:tabular-nums; }
-  .intro.cheia .intro-reator { animation:reatorLiga 1.1s ease-out both, reatorGira 2.2s linear .2s both; }
-  .intro.cheia .r1 { animation:anelMonta .7s .05s ease-out both, anelGira 6s linear infinite; }
-  .intro.cheia .r2 { animation:anelMonta .7s .2s ease-out both, anelGiraR 3.2s linear infinite; }
-  .intro.cheia .r3 { animation:anelMonta .7s .35s ease-out both, anelGira 8s linear infinite; }
-  .intro.cheia .r4 { animation:anelMonta .7s .5s ease-out both, anelGiraR 2.4s linear infinite; }
-  .intro.cheia .tk { animation:aparece .5s .6s ease-out both; }
-  .intro.cheia .intro-tx { animation:textoSobe .5s .75s ease-out both; }
-  .intro.curta .intro-reator { animation:reatorLiga .45s ease-out both; }
-  .intro.curta .r2, .intro.curta .r4 { animation:anelGiraR 1.6s linear infinite; }
-  .intro.curta .intro-tx { animation:aparece .3s .1s ease-out both; }
-  .intro.calmo * { animation:none !important; }
+  @keyframes introReator { 0% { opacity:0; transform:scale(.8); } 30% { opacity:1; transform:scale(1); } 100% { opacity:0; transform:scale(1.9); filter:blur(3px) drop-shadow(0 0 20px rgba(63,193,232,.8)); } }
+  .intro-hud-l, .intro-hud-r { position:absolute; top:calc(14px + env(safe-area-inset-top)); font:500 9.5px/1 var(--fonte); letter-spacing:.22em; color:var(--ouro); opacity:0; transition:opacity .6s ease .2s; }
+  .intro-hud-l { left:calc(16px + env(safe-area-inset-left)); }
+  .intro-hud-r { right:calc(16px + env(safe-area-inset-right)); color:rgba(63,193,232,.7); display:flex; align-items:center; gap:6px; }
+  .intro-hud-r i { width:5px; height:5px; border-radius:50%; background:var(--red); box-shadow:0 0 6px rgba(179,20,31,.8); display:inline-block; }
+  .intro.f-esfera .intro-hud-l, .intro.f-esfera .intro-hud-r { opacity:.8; }
+  .intro-tx { position:absolute; left:0; right:0; top:var(--cy); transform:translateY(-50%); text-align:center; display:flex; flex-direction:column; align-items:center; gap:6px; pointer-events:none; opacity:0; }
+  .intro.curta .intro-tx { top:calc(var(--cy) + var(--r) * 1.6 + 12px); transform:none; }
+  .intro.f-oi .intro-tx { animation:introOi .6s cubic-bezier(.2,.7,.2,1) both; }
+  .intro-hora { font:200 52px/1 "SF Pro Display",-apple-system,"Helvetica Neue",sans-serif; letter-spacing:.06em; font-variant-numeric:tabular-nums; color:#E6F7FC; text-shadow:0 0 18px rgba(63,193,232,.45); }
+  .intro-tx b { font:300 19px/1.25 "SF Pro Display",-apple-system,"Helvetica Neue",sans-serif; letter-spacing:.02em; color:var(--tx); }
+  .intro.curta .intro-tx b { font-size:20px; }
+  .intro-tx span { font:400 11px/1.3 var(--fonte); letter-spacing:.18em; text-transform:uppercase; color:var(--ouro); opacity:.85; }
+  .intro-pula { position:absolute; left:0; right:0; bottom:calc(18px + env(safe-area-inset-bottom)); text-align:center; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:rgba(140,146,157,.55); animation:aparece .6s 1.4s ease-out both; }
+  .intro.f-monta { background-color:rgba(4,7,8,0); background-image:none; }
+  .intro.f-monta .intro-pula, .intro.f-monta .intro-hud-l, .intro.f-monta .intro-hud-r { opacity:0; transition:opacity .3s; }
+  .intro.f-fim .intro-cv, .intro.f-fim .intro-tx { opacity:0; transition:opacity .35s ease; }
+  @keyframes introOi { from { opacity:0; letter-spacing:.2em; filter:blur(4px); } to { opacity:1; filter:none; } }
+  /* o app por baixo: topo e abas se montam um por um no fim da intro longa */
+  body.intro-esconde .wrap, body.intro-esconde #fixo { opacity:0; }
+  body.intro-esconde .topo-in > *, body.intro-esconde #nav button { opacity:0; }
+  .wrap { transition:opacity .4s ease; }
+  body.intro-monta .topo-in > * { animation:montaDesce .5s cubic-bezier(.2,.7,.2,1) both; }
+  body.intro-monta .topo-in > :nth-child(2) { animation-delay:.12s; }
+  body.intro-monta .topo-in > :nth-child(3) { animation-delay:.24s; }
+  body.intro-monta #nav button { animation:montaSobe .5s cubic-bezier(.2,.7,.2,1) both; }
+  body.intro-monta #nav button:nth-child(1) { animation-delay:.3s; } body.intro-monta #nav button:nth-child(2) { animation-delay:.42s; }
+  body.intro-monta #nav button:nth-child(3) { animation-delay:.54s; } body.intro-monta #nav button:nth-child(4) { animation-delay:.66s; }
+  @keyframes montaDesce { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:none; } }
+  @keyframes montaSobe { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+  .intro.calmo *, body.intro-monta.calmo * { animation:none !important; transition:none !important; }
+  .intro.calmo .intro-tx { opacity:1; }
+  @media (prefers-reduced-motion: reduce) { body.intro-monta .topo-in > *, body.intro-monta #nav button { animation:none; } .intro-reator { display:none; } }
   @keyframes reatorLiga { 0% { opacity:0; filter:brightness(.3); box-shadow:0 0 0 rgba(63,193,232,0); } 60% { opacity:1; filter:brightness(1.35); box-shadow:0 0 34px rgba(63,193,232,.45); } 100% { opacity:1; filter:none; box-shadow:0 0 18px rgba(63,193,232,.22); } }
   @keyframes reatorGira { from { transform:rotate(0); } to { transform:rotate(360deg); } }
   @keyframes anelMonta { from { opacity:0; transform:scale(.6) rotate(-90deg); } }
@@ -492,7 +507,7 @@
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '6.2.0'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -852,7 +867,8 @@
   }
   function abertura() {
     // intro: completa na 1ª abertura do dia, curta nas outras; depois o link da notificação; depois 1 convite por vez
-    var hoje = hojeLocal(), cheia = lsGet(LS.INTRO) !== hoje;
+    // Mark VI 6.2.0: o "dia" é o de São Paulo (intro longa uma vez por dia, mesmo com o iPhone em outro fuso)
+    var I = window.JarvisIntro, hoje = I && I.diaSP ? I.diaSP() : hojeLocal(), cheia = I && I.modoDoDia ? I.modoDoDia(lsGet(LS.INTRO)) === 'cheia' : lsGet(LS.INTRO) !== hoje;
     lsSet(LS.INTRO, hoje);
     var depois = function () { abrirAlvo(alvo); alvo = null; setTimeout(convites, 600); };
     if (window.JarvisIntro && !(alvo && !cheia)) JarvisIntro.mostrar(cheia ? 'cheia' : 'curta', depois); else depois();
@@ -1722,13 +1738,15 @@
       .carregarDados();
   }
 
+  // Mark VI 6.2.0: o rótulo mostra a versão do app (vem do build do Pages; no Apps Script fica só a Marca)
+  function rotuloVersao(d) { var v = window.JARVIS_APP_VERSAO; return (d.marca || 'Mark V') + (v && String(v).indexOf('__') < 0 ? ' ' + v : ''); }
   function iniciar(d) {
     $('banners').innerHTML = '';
     if (d.erro) {
       skeleton();
       mostrarBanner('bad', '<b>Não consegui ler a planilha.</b> ' + esc(d.erro) + ' <button class="lnk" id="tentar">Tentar de novo</button>');
       $('tentar').onclick = recarregar;
-      $('versao').textContent = (d.marca || 'Mark V');
+      $('versao').textContent = rotuloVersao(d);
       return;
     }
     fixos = {}; editando = {};
@@ -1741,7 +1759,7 @@
     var por0 = d.xpPorNivel || 100, nv = Math.floor((d.xpKaio || 0) / por0) + 1, nvAnt = lsGet(LS_NIVEL, 0);
     if (nvAnt && nv > nvAnt) setTimeout(function () { festa('Nível ' + nv + '!', 'O Jarvis confirmou seu XP. Continue assim, chefe.'); }, 600);
     lsSet(LS_NIVEL, nv);
-    $('versao').textContent = (d.marca || 'Mark V') + ' · ' + ddmm(hoje);
+    $('versao').textContent = rotuloVersao(d) + ' · ' + ddmm(hoje);
     if (d.setup && !d.setup.ok) mostrarBanner('warn', '<b>Envio ao Jarvis ainda não configurado.</b> ' + esc(d.setup.msg));
     if (rec) mostrarBanner('info', 'Recuperei ' + rec + ' resposta(s) que estavam só neste aparelho. Salvando agora.');
     $('rodape').textContent = 'Cada toque é salvo na hora na planilha. "Enviar ao Jarvis" avisa o Jarvis do que é novo.';
@@ -2400,32 +2418,168 @@
   })();
   window.JarvisHaptico = Haptico;
 
-  /* ===== Intro (reator acende e gira, anéis do HUD se montam, saudação) =====
-     'cheia' ~2 s na 1ª abertura do dia; 'curta' ~0,7 s nas outras; toque pula; reduzir movimento: sem animação. */
+  /* ===== Intro (Mark VI 6.2.0) — original: esfera de partículas ciano, anéis ondulados, "JARVIS" de partículas,
+     saudação com hora e data no centro, topo e abas se montando. Detalhes em dourado discreto, vermelho só como ponto.
+     'cheia' (~6 s) só na 1ª abertura do dia (data de São Paulo), com a vinheta; 'curta' (~1,3 s) nas outras, sem som.
+     Toque pula. Reduzir movimento: quadro parado, sem morfose. Canvas 2D, densidade de pixels limitada a 2. */
   var Intro = (function () {
-    function mostrar(modo, fim) {
-      var n = pendentes().length, logo = (document.querySelector('.marca .logo') || {}).innerHTML || '';
-      if (calmo && modo === 'curta') { fim && fim(); return; }
-      var el = document.createElement('div'); el.className = 'intro ' + modo + (calmo ? ' calmo' : ''); el.id = 'intro';
-      el.setAttribute('role', 'status'); el.setAttribute('aria-label', 'Ótimo dia, Kaio!');
-      el.innerHTML =
-        '<div class="intro-hud" aria-hidden="true"><svg viewBox="0 0 240 240">' +
-          '<circle class="r1" cx="120" cy="120" r="112"/><circle class="r2" cx="120" cy="120" r="98"/>' +
-          '<circle class="r3" cx="120" cy="120" r="84"/><circle class="r4" cx="120" cy="120" r="70"/>' +
-          '<path class="tk" d="M120 4v10M120 226v10M4 120h10M226 120h10"/></svg>' +
-          '<span class="intro-reator">' + logo + '</span></div>' +
-        '<div class="intro-tx"><b>Ótimo dia, Kaio!</b><span>' + agoraHH() + ' · ' + (n ? n + (n === 1 ? ' pendente' : ' pendentes') : 'nada pendente') + '</span></div>';
-      document.body.appendChild(el);
-      if (modo === 'cheia' && window.JarvisFala) JarvisFala.saudar(); // Mark VI: saudação com a voz neural
-      var dur = calmo ? 900 : modo === 'cheia' ? 2000 : 700, acabou = false;
-      function sair() {
-        if (acabou) return; acabou = true; el.classList.add('sai');
-        setTimeout(function () { el.remove(); fim && fim(); }, calmo ? 120 : 220);
-      }
-      el.addEventListener('click', sair);
-      setTimeout(sair, dur);
+    var TZ = 'America/Sao_Paulo', CIANO = '63,193,232', OURO = '201,162,74', VERM = '179,20,31';
+    function partesSP(d) {
+      d = d || new Date();
+      try {
+        var o = {}; new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+          .formatToParts(d).forEach(function (p) { o[p.type] = p.value; });
+        return { dia: o.year + '-' + o.month + '-' + o.day, h: (+o.hour) % 24, m: +o.minute };
+      } catch (e) { return { dia: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), h: d.getHours(), m: d.getMinutes() }; }
     }
-    return { mostrar: mostrar };
+    function diaSP(d) { return partesSP(d).dia; }
+    /** 05:00–11:59 dia · 12:00–17:59 tarde · 18:00–04:59 noite (hora de São Paulo). */
+    function saudacao(d) { var h = partesSP(d).h; return h >= 5 && h < 12 ? 'Ótimo dia, Kaio!' : h >= 12 && h < 18 ? 'Ótima tarde, Kaio!' : 'Ótima noite, Kaio!'; }
+    /** 'cheia' na 1ª abertura do dia (último dia visto ≠ hoje em SP), senão 'curta'. */
+    function modoDoDia(ultimo, d) { return ultimo === diaSP(d) ? 'curta' : 'cheia'; }
+    function horaTx(d) { var p = partesSP(d); return pad(p.h) + ':' + pad(p.m); }
+    function dataTx(d) {
+      try { return new Intl.DateTimeFormat('pt-BR', { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long' }).format(d || new Date()); }
+      catch (e) { return ''; }
+    }
+
+    /* Vinheta: o iOS só deixa tocar som depois de um toque. O primeiro toque (botão do Face ID, código, qualquer toque)
+       "destrava" este mesmo elemento de áudio em silêncio; na intro ele toca. Bloqueado: fica em silêncio. */
+    var vinheta = null, liberado = false, tocandoIntro = false;
+    function audio() { if (!vinheta) { try { vinheta = new Audio('voz/vinheta.mp3'); vinheta.preload = 'auto'; } catch (e) { vinheta = null; } } return vinheta; }
+    function destravar() {
+      if (liberado || tocandoIntro) return; var a = audio(); if (!a) return;
+      try { a.muted = true; var p = a.play(); if (p && p.then) p.then(function () { if (!tocandoIntro) { a.pause(); a.currentTime = 0; } a.muted = false; liberado = true; }, function () { a.muted = false; }); } catch (e) {}
+    }
+    ['touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, destravar, true); });
+    function tocarVinheta() {
+      var a = audio(); if (!a) return; tocandoIntro = true;
+      try { a.muted = false; a.currentTime = 0; a.volume = 0.85; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    }
+    function pararVinheta() { tocandoIntro = false; try { if (vinheta && !vinheta.paused) { vinheta.pause(); vinheta.currentTime = 0; } } catch (e) {} }
+
+    /* ---- partículas ---- */
+    function esfera(n) { // pontos espalhados por igual na esfera (espiral de Fibonacci)
+      var ps = [], g = Math.PI * (3 - Math.sqrt(5));
+      for (var i = 0; i < n; i++) { var y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(1 - y * y), t = g * i; ps.push({ x: Math.cos(t) * r, y: y, z: Math.sin(t) * r, f: Math.random() * 6.283, j: Math.random(), px: 0, py: 0, tx: 0, ty: 0, alvo: false }); }
+      return ps;
+    }
+    function pontosTexto(txt, larg, max) { // amostra os pixels de "JARVIS" para virar alvo das partículas
+      var c = document.createElement('canvas'), w = Math.round(larg), h = Math.round(larg * 0.26); c.width = w; c.height = h;
+      var x = c.getContext('2d'); x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.font = '300 ' + Math.round(h * 0.82) + 'px -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif';
+      var esp = h * 0.16, letras = txt.split(''), tot = 0; letras.forEach(function (l) { tot += x.measureText(l).width + esp; }); tot -= esp;
+      var cx = (w - tot) / 2; letras.forEach(function (l) { var lw = x.measureText(l).width; x.fillText(l, cx + lw / 2, h / 2); cx += lw + esp; });
+      var dd = x.getImageData(0, 0, w, h).data, pts = [], passo = Math.max(2, Math.round(Math.sqrt(w * h / (max * 9))));
+      for (var yy = 0; yy < h; yy += passo) for (var xx = 0; xx < w; xx += passo) if (dd[(yy * w + xx) * 4 + 3] > 140) pts.push({ x: xx - w / 2, y: yy - h / 2 });
+      for (var i = pts.length - 1; i > 0; i--) { var k = Math.floor(Math.random() * (i + 1)), t = pts[i]; pts[i] = pts[k]; pts[k] = t; }
+      return pts.slice(0, max);
+    }
+    function ease(t) { t = t < 0 ? 0 : t > 1 ? 1 : t; return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function faixa(t, a, b) { return t <= a ? 0 : t >= b ? 1 : (t - a) / (b - a); }
+
+    var ativo = null;
+    function mostrar(modo, fim) {
+      if (ativo) ativo.sair(true);
+      var cheia = modo === 'cheia', agora = new Date(), oi = saudacao(agora);
+      var logo = (document.querySelector('.marca .logo') || {}).innerHTML || '';
+      var versao = (window.JARVIS_APP_VERSAO && String(window.JARVIS_APP_VERSAO).indexOf('__') < 0) ? window.JARVIS_APP_VERSAO : '';
+      var el = document.createElement('div'); el.className = 'intro ' + (cheia ? 'longa' : 'curta') + (calmo ? ' calmo' : ''); el.id = 'intro';
+      el.setAttribute('role', 'status'); el.setAttribute('aria-label', oi);
+      el.innerHTML =
+        '<canvas class="intro-cv" aria-hidden="true"></canvas>' +
+        (cheia ? '<div class="intro-hud-l" aria-hidden="true">MARK VI' + (versao ? ' · ' + esc(versao) : '') + '</div>' +
+                 '<div class="intro-hud-r" aria-hidden="true"><i></i>SISTEMA ONLINE</div>' +
+                 '<span class="intro-reator" aria-hidden="true">' + logo + '</span>' : '') +
+        '<div class="intro-tx">' + (cheia ? '<div class="intro-hora">' + horaTx(agora) + '</div>' : '') +
+          '<b>' + esc(oi) + '</b>' + (cheia ? '<span>' + esc(dataTx(agora)) + '</span>' : '') + '</div>' +
+        (cheia ? '<div class="intro-pula" aria-hidden="true">toque para pular</div>' : '');
+      document.body.appendChild(el);
+      var b = document.body;
+      if (cheia) { b.classList.add('intro-esconde'); tocarVinheta(); }
+
+      var cv = el.querySelector('canvas'), cx2 = cv.getContext && cv.getContext('2d');
+      var dpr = Math.min(window.devicePixelRatio || 1, 2), W = 0, H = 0, R = 0, CX = 0, CY = 0;
+      function medir() { W = window.innerWidth; H = window.innerHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.width = W + 'px'; cv.style.height = H + 'px';
+        R = Math.min(W, H) * (cheia ? 0.3 : 0.2); CX = W / 2; CY = H * (cheia ? 0.45 : 0.42); el.style.setProperty('--cy', CY + 'px'); el.style.setProperty('--r', R + 'px'); }
+      medir();
+      var N = cheia ? 760 : 380, ps = esfera(N), alvos = [];
+      if (cheia && !calmo) { alvos = pontosTexto('JARVIS', Math.min(W * 0.78, 420), Math.round(N * 0.72)); for (var i = 0; i < alvos.length; i++) { ps[i].alvo = true; ps[i].tx = alvos[i].x; ps[i].ty = alvos[i].y; } }
+      var DUR = calmo ? (cheia ? 1800 : 1000) : (cheia ? 6300 : 1300), t0 = performance.now(), raf = 0, acabou = false, falou = false, fases = {};
+
+      function fase(nome) { if (fases[nome]) return; fases[nome] = true; el.classList.add(nome); el.setAttribute('data-fase', nome);
+        if (nome === 'f-oi' && cheia && !falou && window.JarvisFala) { falou = true; JarvisFala.saudar(); } // saudação falada de sempre, depois da vinheta
+        if (nome === 'f-monta') { b.classList.add('intro-monta'); }
+      }
+      function quadro(agoraMs) {
+        var t = (agoraMs - t0) / 1000, x = cx2; if (!x) return;
+        x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
+        var nasce = cheia ? ease(faixa(t, 0.35, 1.5)) : ease(faixa(t, 0, 0.35)), apaga = cheia ? 1 - 0.45 * ease(faixa(t, 4.0, 4.6)) : 1;
+        if (cheia) { if (t > 0.35) fase('f-esfera'); if (t > 1.9) fase('f-nome'); if (t > 4.0) fase('f-oi'); if (t > 4.9) fase('f-monta'); if (t > 5.9) fase('f-fim'); }
+        else if (t > 0.1) fase('f-oi');
+        if (calmo) { nasce = 1; apaga = cheia ? 0.6 : 1; }
+        var pulso = cheia ? 1 : 1 + 0.06 * Math.sin(t * 6.5), Rr = R * pulso * (0.35 + 0.65 * nasce);
+        // brilho de fundo
+        var gl = x.createRadialGradient(CX, CY, 0, CX, CY, R * 1.9); gl.addColorStop(0, 'rgba(' + CIANO + ',' + (0.16 * nasce * apaga) + ')'); gl.addColorStop(1, 'rgba(' + CIANO + ',0)');
+        x.fillStyle = gl; x.fillRect(0, 0, W, H);
+        x.globalCompositeOperation = 'lighter';
+        // anéis concêntricos ondulados
+        var an = cheia ? [1.14, 1.27, 1.42, 1.58] : [1.18, 1.36];
+        for (var k = 0; k < an.length; k++) {
+          var mont = cheia ? ease(faixa(t, 0.6 + k * 0.18, 1.4 + k * 0.18)) : nasce; if (calmo) mont = 1; if (mont <= 0) continue;
+          x.beginPath(); var seg = 96;
+          for (var s = 0; s <= seg * mont; s++) { var a = s / seg * 6.2832 - 1.5708 + k * 0.7 + t * (k % 2 ? -0.12 : 0.09);
+            var rr = R * an[k] * pulso + R * 0.022 * Math.sin(a * (3 + k) + t * (1.1 + k * 0.3)) + R * 0.012 * Math.sin(a * (7 - k) - t * 1.7);
+            var px = CX + Math.cos(a) * rr, py = CY + Math.sin(a) * rr; if (s) x.lineTo(px, py); else x.moveTo(px, py); }
+          x.strokeStyle = 'rgba(' + CIANO + ',' + ((0.34 - k * 0.06) * apaga) + ')'; x.lineWidth = k === 1 ? 1.3 : 0.8; x.stroke();
+        }
+        // dourado discreto: marcas de régua no anel externo + um ponto que orbita; vermelho: um único ponto
+        if (cheia) {
+          var tk = calmo ? 1 : ease(faixa(t, 1.2, 2.0)); x.globalCompositeOperation = 'source-over';
+          if (tk > 0) { var Rt = R * 1.74, nT = 60; x.strokeStyle = 'rgba(' + OURO + ',' + (0.55 * tk * apaga) + ')'; x.lineWidth = 1; x.beginPath();
+            for (var m = 0; m < nT * tk; m++) { var aa = m / nT * 6.2832 - 1.5708, l = m % 15 === 0 ? 9 : m % 5 === 0 ? 5 : 2.5;
+              x.moveTo(CX + Math.cos(aa) * Rt, CY + Math.sin(aa) * Rt); x.lineTo(CX + Math.cos(aa) * (Rt + l), CY + Math.sin(aa) * (Rt + l)); }
+            x.stroke();
+            var ao = t * 0.9 - 1.5708, ro = R * 1.27; x.fillStyle = 'rgba(' + OURO + ',' + (0.85 * tk * apaga) + ')'; x.beginPath(); x.arc(CX + Math.cos(ao) * ro, CY + Math.sin(ao) * ro, 2.2, 0, 6.2832); x.fill();
+            var av = 0.78; x.fillStyle = 'rgba(' + VERM + ',' + ((0.55 + 0.35 * Math.sin(t * 3)) * tk * apaga) + ')'; x.beginPath(); x.arc(CX + Math.cos(av) * R * 1.58, CY + Math.sin(av) * R * 1.58, 1.8, 0, 6.2832); x.fill(); }
+          x.globalCompositeOperation = 'lighter';
+        }
+        // esfera de partículas (gira, respira) e, na intro longa, "JARVIS" se forma e se desfaz
+        var rotY = t * 0.42, cy = Math.cos(rotY), sy = Math.sin(rotY), tl = 0.38, ct = Math.cos(tl), st = Math.sin(tl);
+        var forma = cheia && !calmo ? ease(faixa(t, 1.9, 2.75)) : 0, desf = cheia && !calmo ? ease(faixa(t, 3.35, 4.1)) : 0;
+        for (var i2 = 0; i2 < N; i2++) {
+          var p = ps[i2], onda = 1 + 0.045 * Math.sin(p.y * 4 + t * 1.6 + p.f) , ex = nasce < 1 ? (1 - nasce) * p.j * 0.8 : 0;
+          var x1 = p.x * cy + p.z * sy, z1 = -p.x * sy + p.z * cy, y2 = p.y * ct - z1 * st, z2 = p.y * st + z1 * ct;
+          var rr2 = Rr * onda * (1 + ex), sx = CX + x1 * rr2, syy = CY + y2 * rr2, prof = (z2 + 1) / 2, al = (0.18 + 0.72 * prof) * nasce * apaga, tam = 0.8 + prof * 1.1;
+          if (p.alvo && forma > 0) {
+            var atr = Math.min(1, Math.max(0, forma * 1.25 - p.j * 0.25)), vol = Math.min(1, Math.max(0, desf * 1.25 - p.j * 0.25));
+            var m2 = atr * (1 - vol), espal = Math.sin(vol * Math.PI) * 26 * (p.j - 0.5);
+            sx = sx + (CX + p.tx - sx) * m2 + espal; syy = syy + (CY + p.ty - syy) * m2 + espal * 0.6;
+            al = al + (0.95 - al) * m2 - Math.sin(vol * Math.PI) * 0.35; tam = tam + (1.5 - tam) * m2;
+          } else if (forma > 0) { al *= 1 - 0.7 * forma * (1 - desf); }
+          if (al <= 0.01) continue;
+          x.fillStyle = 'rgba(' + CIANO + ',' + al.toFixed(3) + ')'; x.fillRect(sx - tam / 2, syy - tam / 2, tam, tam);
+        }
+        x.globalCompositeOperation = 'source-over';
+      }
+      function loop(ms) { if (acabou) return; quadro(ms); if (ms - t0 >= DUR) { sair(); return; } raf = requestAnimationFrame(loop); }
+      function limparCorpo() { b.classList.remove('intro-esconde'); b.classList.remove('intro-monta'); }
+      function sair(ja) {
+        if (acabou) return; acabou = true; cancelAnimationFrame(raf); ativo = null;
+        if (cheia && !falou && window.JarvisFala) { falou = true; JarvisFala.saudar(); } // como antes: a intro longa sempre traz a saudação falada
+        if (ja) pararVinheta(); else tocandoIntro = false;
+        el.classList.add('sai'); limparCorpo();
+        window.removeEventListener('resize', medir); document.removeEventListener('visibilitychange', oculto);
+        setTimeout(function () { el.remove(); if (window.JarvisZerarJanela) JarvisZerarJanela(); fim && fim(); }, calmo ? 120 : 280);
+      }
+      function oculto() { if (document.hidden) sair(true); }
+      el.addEventListener('click', function () { sair(true); });
+      window.addEventListener('resize', medir); document.addEventListener('visibilitychange', oculto);
+      ativo = { sair: sair };
+      if (calmo) { quadro(t0 + (cheia ? 5000 : 500)); fase('f-oi'); if (cheia) { fase('f-esfera'); } setTimeout(function () { sair(); }, DUR); }
+      else raf = requestAnimationFrame(loop);
+    }
+    return { mostrar: mostrar, saudacao: saudacao, diaSP: diaSP, modoDoDia: modoDoDia, horaTx: horaTx, dataTx: dataTx };
   })();
   window.JarvisIntro = Intro;
 
