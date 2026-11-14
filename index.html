@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Jarvis · Central Mark VI (6.2.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
+<!-- Jarvis · Central Mark VI (6.3.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -333,10 +333,65 @@
   .intro.f-monta .intro-pula, .intro.f-monta .intro-hud-l, .intro.f-monta .intro-hud-r { opacity:0; transition:opacity .3s; }
   .intro.f-fim .intro-cv, .intro.f-fim .intro-tx { opacity:0; transition:opacity .35s ease; }
   @keyframes introOi { from { opacity:0; letter-spacing:.2em; filter:blur(4px); } to { opacity:1; filter:none; } }
+  /* Intro cinematográfica (Mark VI 6.3): HUD holográfico — mono, ciano, dourado fosco e um fio vermelho. */
+  .intro.cinema { --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace; background-color:#020405; }
+  .intro.cinema .intro-cv { will-change:transform; }
+  .cn-tampa { position:absolute; left:0; right:0; background:#000; z-index:3; transition:transform .75s cubic-bezier(.7,0,.2,1); }
+  .cn-tampa.cima { top:0; height:var(--cy); box-shadow:0 1px 0 rgba(63,193,232,.9), 0 2px 18px rgba(63,193,232,.45); }
+  .cn-tampa.baixo { top:var(--cy); bottom:0; box-shadow:0 -1px 0 rgba(63,193,232,.9), 0 -2px 18px rgba(63,193,232,.45); }
+  .cn-scan { position:absolute; left:0; right:0; top:var(--cy); height:1px; z-index:4; background:linear-gradient(90deg, transparent, rgba(220,250,255,1) 50%, transparent); box-shadow:0 0 14px 2px rgba(63,193,232,.8); transform:scaleX(0); }
+  .intro.f-scan .cn-scan { animation:cnScan .9s cubic-bezier(.2,.8,.2,1) both; }
+  .intro.f-boot .cn-tampa.cima { transform:translateY(-101%); } .intro.f-boot .cn-tampa.baixo { transform:translateY(101%); }
+  .intro.f-boot .cn-tampa { box-shadow:none; transition:transform .75s cubic-bezier(.7,0,.2,1), box-shadow .6s .5s; }
+  @keyframes cnScan { 0% { transform:scaleX(0); opacity:1; } 35% { transform:scaleX(1); opacity:1; } 100% { transform:scaleX(1); opacity:0; } }
+  .cn-boot { position:absolute; left:calc(14px + env(safe-area-inset-left)); top:calc(16px + env(safe-area-inset-top)); z-index:2; font:500 9.5px/1.65 var(--mono); letter-spacing:.06em; color:rgba(63,193,232,.85); white-space:pre; transition:opacity .4s, transform .5s; }
+  .cn-l { opacity:0; } .cn-l.on { opacity:1; animation:cnGlitch .32s steps(2) both; }
+  .cn-p { color:rgba(63,193,232,.3); } .cn-s { color:#C9A24A; }
+  .cn-l:first-child .cn-r { color:#E6F7FC; }
+  .intro.f-paineis .cn-boot { opacity:0; transform:translateY(-8px); }
+  @keyframes cnGlitch { 0% { opacity:0; transform:translateX(-3px); text-shadow:2px 0 rgba(179,20,31,.8), -2px 0 rgba(63,193,232,.8); } 40% { opacity:.6; transform:translateX(2px); } 70% { opacity:.3; } 100% { opacity:1; transform:none; text-shadow:none; } }
+  .cn-marca { position:absolute; left:0; right:0; top:var(--cy); transform:translateY(-50%); display:flex; flex-direction:column; align-items:center; gap:10px; pointer-events:none; opacity:0; z-index:2; }
+  .cn-nome { font:200 44px/1 "SF Pro Display",-apple-system,"Helvetica Neue",sans-serif; letter-spacing:.42em; margin-right:-.42em; color:transparent;
+    background:linear-gradient(100deg, rgba(63,193,232,.0) 0%, rgba(63,193,232,.0) 38%, rgba(240,253,255,1) 50%, rgba(63,193,232,.0) 62%, rgba(63,193,232,0) 100%) no-repeat, linear-gradient(rgba(150,225,245,.95), rgba(63,193,232,.85));
+    background-size:250% 100%, 100% 100%; background-position:120% 0, 0 0; -webkit-background-clip:text; background-clip:text; filter:drop-shadow(0 0 10px rgba(63,193,232,.55)); }
+  .cn-risco { width:0; height:1px; background:linear-gradient(90deg, transparent, #B3141F 20%, #E5484D 50%, #B3141F 80%, transparent); box-shadow:0 0 8px rgba(229,72,77,.6); }
+  .cn-sub { font:500 9px/1 var(--mono); letter-spacing:.4em; margin-right:-.4em; color:#C9A24A; opacity:.85; }
+  .intro.f-nome .cn-marca { animation:cnMarca 1.45s .55s both; }
+  .intro.f-nome .cn-nome { animation:cnBrilho 1.1s .85s cubic-bezier(.4,0,.2,1) both; }
+  .intro.f-nome .cn-risco { animation:cnRisco .7s .9s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes cnMarca { 0% { opacity:0; } 8% { opacity:.9; } 12% { opacity:.2; } 18% { opacity:1; } 82% { opacity:1; filter:none; } 100% { opacity:0; filter:blur(6px); } }
+  @keyframes cnBrilho { from { background-position:120% 0, 0 0; } to { background-position:-30% 0, 0 0; } }
+  @keyframes cnRisco { from { width:0; } to { width:min(62vw,260px); } }
+  .cn-pn { position:absolute; z-index:2; min-width:118px; max-width:44vw; padding:8px 10px 9px; border:1px solid rgba(63,193,232,.22); background:linear-gradient(180deg, rgba(8,28,33,.72), rgba(4,12,14,.6)); border-radius:3px;
+    display:flex; flex-direction:column; gap:3px; opacity:0; left:50%; top:var(--cy); transform:translate(-50%,-50%) scale(.4); transition:transform .75s cubic-bezier(.16,1,.3,1), opacity .4s, left .75s cubic-bezier(.16,1,.3,1), top .75s cubic-bezier(.16,1,.3,1); }
+  .cn-pn::before, .cn-pn::after { content:''; position:absolute; width:7px; height:7px; border-color:#C9A24A; border-style:solid; opacity:.8; }
+  .cn-pn::before { left:-1px; top:-1px; border-width:1px 0 0 1px; } .cn-pn::after { right:-1px; bottom:-1px; border-width:0 1px 1px 0; }
+  .cn-pn i { font:500 8.5px/1 var(--mono); font-style:normal; letter-spacing:.22em; color:#C9A24A; }
+  .cn-pn b { font:200 26px/1.05 "SF Pro Display",-apple-system,"Helvetica Neue",sans-serif; color:#E6F7FC; font-variant-numeric:tabular-nums; letter-spacing:.03em; text-shadow:0 0 12px rgba(63,193,232,.4); }
+  .cn-pn span { font:400 10px/1.25 var(--fonte); color:rgba(197,201,209,.75); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cn-pn.br.alerta { border-color:rgba(229,72,77,.45); } .cn-pn.br.alerta b { color:#FF6B70; text-shadow:0 0 12px rgba(229,72,77,.55); } .cn-pn.br.alerta i { color:#E5484D; }
+  .intro.f-paineis .cn-pn { opacity:1; }
+  .intro.f-paineis .cn-pn.tl { left:calc(14px + env(safe-area-inset-left)); top:calc(18px + env(safe-area-inset-top)); transform:none; }
+  .intro.f-paineis .cn-pn.tr { left:calc(100% - 14px - env(safe-area-inset-right)); top:calc(18px + env(safe-area-inset-top)); transform:translateX(-100%); transition-delay:.08s; }
+  .intro.f-paineis .cn-pn.bl { left:calc(14px + env(safe-area-inset-left)); top:calc(100% - 56px - env(safe-area-inset-bottom)); transform:translateY(-100%); transition-delay:.16s; }
+  .intro.f-paineis .cn-pn.br { left:calc(100% - 14px - env(safe-area-inset-right)); top:calc(100% - 56px - env(safe-area-inset-bottom)); transform:translate(-100%,-100%); transition-delay:.24s; }
+  .intro.f-paineis .cn-pn > * { animation:cnGlitch .4s .5s steps(2) both; }
+  .intro.f-zoom .cn-pn { opacity:0; transition:opacity .45s, transform .6s cubic-bezier(.5,0,.8,.4); }
+  .intro.f-zoom .cn-pn.tl { transform:translate(-40%,-40%) scale(1.3); } .intro.f-zoom .cn-pn.tr { transform:translate(-60%,-40%) scale(1.3); }
+  .intro.f-zoom .cn-pn.bl { transform:translate(-40%,-60%) scale(1.3); } .intro.f-zoom .cn-pn.br { transform:translate(-60%,-60%) scale(1.3); }
+  .cn-oi { position:absolute; left:0; right:0; top:calc(var(--cy) + var(--r) * 1.75 + 6px); text-align:center; z-index:2; opacity:0; pointer-events:none; }
+  .cn-oi b { font:300 20px/1.2 "SF Pro Display",-apple-system,"Helvetica Neue",sans-serif; letter-spacing:.03em; color:#ECEDEF; text-shadow:0 0 14px rgba(63,193,232,.35); }
+  .intro.f-oi .cn-oi { animation:cnOi .7s steps(1) both, cnGlitch .5s both; opacity:1; }
+  @keyframes cnOi { 0% { opacity:0; } 10% { opacity:1; } 20% { opacity:.25; } 30%,100% { opacity:1; } }
+  .intro.f-zoom .cn-oi, .intro.f-zoom .intro-pula { opacity:0 !important; transition:opacity .35s; animation:none; }
+  .intro.cinema.f-zoom { background-color:rgba(2,4,5,.0); transition:background-color .55s ease .45s, opacity .3s; }
+  .intro.cinema .intro-pula { z-index:2; }
   /* o app por baixo: topo e abas se montam um por um no fim da intro longa */
   body.intro-esconde .wrap, body.intro-esconde #fixo { opacity:0; }
   body.intro-esconde .topo-in > *, body.intro-esconde #nav button { opacity:0; }
   .wrap { transition:opacity .4s ease; }
+  body.intro-esconde.intro-monta .wrap { opacity:1; } /* 6.3: a câmera entra no Hoje já visível */
+  .intro.cinema.f-monta .intro-cv { transition:none; }
   body.intro-monta .topo-in > * { animation:montaDesce .5s cubic-bezier(.2,.7,.2,1) both; }
   body.intro-monta .topo-in > :nth-child(2) { animation-delay:.12s; }
   body.intro-monta .topo-in > :nth-child(3) { animation-delay:.24s; }
@@ -507,7 +562,7 @@
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '6.2.0'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '6.3.0'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -2443,20 +2498,52 @@
       catch (e) { return ''; }
     }
 
-    /* Vinheta: o iOS só deixa tocar som depois de um toque. O primeiro toque (botão do Face ID, código, qualquer toque)
-       "destrava" este mesmo elemento de áudio em silêncio; na intro ele toca. Bloqueado: fica em silêncio. */
-    var vinheta = null, liberado = false, tocandoIntro = false;
+    /* Vinheta (Mark VI 6.3): o iOS só deixa tocar som depois de um toque. O primeiro toque (botão do Face ID, código, qualquer toque)
+       destrava o elemento de áudio em silêncio e liga o AudioContext. Na intro, com o contexto ligado, a vinheta toca por WebAudio
+       com um AnalyserNode (a onda em volta do núcleo segue o som); sem contexto, toca pelo <audio> e a onda é sintética.
+       Bloqueado: silêncio, sem erro. O <audio> nunca é ligado ao contexto (assim nunca fica mudo por um contexto suspenso). */
+    var vinheta = null, liberado = false, tocandoIntro = false, actx = null, bufVinheta = null, bytesVinheta = null, fonte = null, analisador = null, binsAudio = null;
+    var AC = window.AudioContext || window.webkitAudioContext;
     function audio() { if (!vinheta) { try { vinheta = new Audio('voz/vinheta.mp3'); vinheta.preload = 'auto'; } catch (e) { vinheta = null; } } return vinheta; }
+    try { if (window.fetch) fetch('voz/vinheta.mp3').then(function (r) { return r.ok ? r.arrayBuffer() : null; }).then(function (b) { bytesVinheta = b; decodificar(); }).catch(function () {}); } catch (e) {}
+    function decodificar() {
+      if (!actx || !bytesVinheta || bufVinheta) return;
+      try { var b = bytesVinheta.slice(0); var p = actx.decodeAudioData(b, function (d) { bufVinheta = d; }, function () {}); if (p && p.then) p.then(function (d) { bufVinheta = d; }, function () {}); } catch (e) {}
+    }
+    function contexto() { if (!actx && AC) { try { actx = new AC(); decodificar(); } catch (e) { actx = null; } } return actx; }
     function destravar() {
+      var c = contexto(); if (c && c.state === 'suspended') { try { c.resume(); } catch (e) {} }
       if (liberado || tocandoIntro) return; var a = audio(); if (!a) return;
       try { a.muted = true; var p = a.play(); if (p && p.then) p.then(function () { if (!tocandoIntro) { a.pause(); a.currentTime = 0; } a.muted = false; liberado = true; }, function () { a.muted = false; }); } catch (e) {}
     }
     ['touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, destravar, true); });
+    /** Toca a vinheta; devolve true se a onda vai seguir o áudio de verdade (WebAudio). */
     function tocarVinheta() {
-      var a = audio(); if (!a) return; tocandoIntro = true;
+      tocandoIntro = true; var c = contexto();
+      if (c && c.state === 'running' && bufVinheta) {
+        try {
+          analisador = c.createAnalyser(); analisador.fftSize = 256; analisador.smoothingTimeConstant = 0.72; binsAudio = new Uint8Array(analisador.frequencyBinCount);
+          var g = c.createGain(); g.gain.value = 0.85; fonte = c.createBufferSource(); fonte.buffer = bufVinheta;
+          fonte.connect(analisador); analisador.connect(g); g.connect(c.destination); fonte.start(0);
+          window.__vinhetaVia = 'webaudio'; return true;
+        } catch (e) { analisador = null; }
+      }
+      var a = audio(); if (!a) return false;
       try { a.muted = false; a.currentTime = 0; a.volume = 0.85; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+      window.__vinhetaVia = 'audio'; return false;
     }
-    function pararVinheta() { tocandoIntro = false; try { if (vinheta && !vinheta.paused) { vinheta.pause(); vinheta.currentTime = 0; } } catch (e) {} }
+    /** Níveis 0..1 do espectro (n faixas) ou null quando não há analisador. */
+    function niveisAudio(n) {
+      if (!analisador || !binsAudio) return null; analisador.getByteFrequencyData(binsAudio);
+      var out = [], m = binsAudio.length * 0.7; for (var i = 0; i < n; i++) out.push(binsAudio[Math.floor(i / n * m)] / 255); return out;
+    }
+    function pararVinheta() {
+      tocandoIntro = false;
+      try { if (fonte) { fonte.stop(); fonte = null; } } catch (e) {}
+      try { if (vinheta && !vinheta.paused) { vinheta.pause(); vinheta.currentTime = 0; } } catch (e) {}
+      analisador = null;
+    }
+    contexto(); // cria já (suspenso no iOS) para decodificar a vinheta antes da intro; o 1º toque liga
 
     /* ---- partículas ---- */
     function esfera(n) { // pontos espalhados por igual na esfera (espiral de Fibonacci)
@@ -2478,6 +2565,196 @@
     function ease(t) { t = t < 0 ? 0 : t > 1 ? 1 : t; return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
     function faixa(t, a, b) { return t <= a ? 0 : t >= b ? 1 : (t - a) / (b - a); }
 
+    /* ---- dados reais para o HUD (o que o app já carregou; sem dados: ONLINE) ---- */
+    var AREAS = [['GESTÃO', 'GESTAO'], ['DINHEIRO', 'DINHEIRO'], ['COMERCIAL', 'COMERCIAL'], ['MANUTENÇÃO', 'MANUTENCAO'], ['SMASH POINT', 'SMASH POINT'], ['PESSOAL', 'PESSOAL']];
+    function semAc(s) { return String(s || '').normalize ? String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase() : String(s || '').toUpperCase(); }
+    function dadosHud() {
+      var r = { ok: false, abertos: 0, urgentes: 0, area: {}, prox: null };
+      try {
+        var ps = pendentes(); r.ok = true; r.abertos = ps.length;
+        ps.forEach(function (it) {
+          var a = semAc(String(it.area || '').split('·')[0]).trim(); r.area[a] = (r.area[a] || 0) + 1;
+          var b = API.bucket ? API.bucket(it) : ''; if (b === 'vencido' || b === 'hoje') r.urgentes++;
+        });
+      } catch (e) { r.ok = false; }
+      try {
+        var hoje = API.hoje ? API.hoje() : diaSP(), ag = API.agenda ? API.agenda() : [], hm = horaTx();
+        var fut = ag.filter(function (e) { return e && e.dia === hoje && !e.todoDia && (e.fim || e.ini) > hm; }).sort(function (a, b) { return a.ini < b.ini ? -1 : 1; });
+        r.prox = fut[0] || null; r.agendaOk = !!(ag && ag.length);
+      } catch (e) {}
+      return r;
+    }
+    function linhaBoot(rotulo, status) { var pontos = Math.max(2, 22 - rotulo.length - status.length); return { r: rotulo + ' ', p: new Array(pontos + 1).join('.'), s: ' ' + status }; }
+
+    /* ---- intro longa cinematográfica (~8,3 s) ----
+       0,0 linha de varredura abre a tela · 0,35 texto de boot (áreas com os itens abertos de verdade) · 1,2 anéis do reator
+       · 1,75 ignição do núcleo (clarão) e onda radial pela vinheta · 2,0 esfera 3D com camadas em paralaxe (inclinação do
+       iPhone só se a permissão já existir; nunca pede) · 3,0 "JARVIS" de partículas com brilho passando e linha vermelha
+       · 4,6 painéis voam para os cantos (hora/data, próximo compromisso, em aberto, urgentes) e a saudação · 6,6 a câmera
+       atravessa o reator e entra no Hoje; topo e abas se montam. */
+    function cinema(el, oi, versao, fim) {
+      var b = document.body, d0 = dadosHud(), agora = new Date();
+      var face = (function () { try { return !!localStorage.getItem('jarvis.face'); } catch (e) { return false; } })();
+      var boot = [linhaBoot('J.A.R.V.I.S.', 'INICIALIZANDO'), linhaBoot('BIOMETRIA', face ? 'FACE ID · OK' : 'APARELHO · OK')];
+      AREAS.forEach(function (a) { var n = d0.area[a[1]]; boot.push(linhaBoot(a[0], !d0.ok ? 'ONLINE' : n ? n + (n === 1 ? ' ABERTO' : ' ABERTOS') : 'EM DIA')); });
+      boot.push(linhaBoot('NÚCLEO', 'IGNIÇÃO · OK'));
+      el.innerHTML =
+        '<canvas class="intro-cv" aria-hidden="true"></canvas>' +
+        '<div class="cn-tampa cima" aria-hidden="true"></div><div class="cn-tampa baixo" aria-hidden="true"></div><div class="cn-scan" aria-hidden="true"></div>' +
+        '<div class="cn-boot" aria-hidden="true">' + boot.map(function (l, i) { return '<div class="cn-l" data-i="' + i + '"><span class="cn-r"></span><span class="cn-p"></span><span class="cn-s"></span></div>'; }).join('') + '</div>' +
+        '<div class="cn-marca" aria-hidden="true"><div class="cn-nome">JARVIS</div><div class="cn-risco"></div><div class="cn-sub">MARK VI' + (versao ? ' · ' + esc(versao) : '') + '</div></div>' +
+        '<div class="cn-pn tl" aria-hidden="true"><i>HORA</i><b class="cn-hora">' + horaTx(agora) + '</b><span>' + esc(dataTx(agora)) + '</span></div>' +
+        '<div class="cn-pn tr" aria-hidden="true"><i>PRÓXIMO</i><b class="cn-prox-h">--:--</b><span class="cn-prox-t">Agenda</span></div>' +
+        '<div class="cn-pn bl" aria-hidden="true"><i>EM ABERTO</i><b class="cn-ab">' + (d0.ok ? d0.abertos : '—') + '</b><span>na Central</span></div>' +
+        '<div class="cn-pn br" aria-hidden="true"><i>URGENTES</i><b class="cn-ur">' + (d0.ok ? d0.urgentes : '—') + '</b><span>vencidos ou hoje</span></div>' +
+        '<div class="cn-oi"><b>' + esc(oi) + '</b></div>' +
+        '<div class="intro-pula" aria-hidden="true">toque para pular</div>';
+      el.classList.add('cinema');
+      b.classList.add('intro-esconde');
+      var audioReal = tocarVinheta();
+
+      var cv = el.querySelector('canvas'), x = cv.getContext && cv.getContext('2d');
+      var dpr = Math.min(window.devicePixelRatio || 1, 2), W = 0, H = 0, R = 0, CX = 0, CY = 0;
+      function medir() { W = window.innerWidth; H = window.innerHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.width = W + 'px'; cv.style.height = H + 'px';
+        R = Math.min(W, H) * 0.29; CX = W / 2; CY = H * 0.45; el.style.setProperty('--cy', CY + 'px'); el.style.setProperty('--r', R + 'px'); }
+      medir();
+      // camadas de profundidade: núcleo denso, casca externa ao contrário, poeira ao fundo
+      var nucleo = esfera(620), casca = esfera(260), poeira = [], k;
+      for (k = 0; k < 140; k++) poeira.push({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: 0.25 + Math.random() * 0.75, f: Math.random() * 6.28 });
+      var alvos = pontosTexto('JARVIS', Math.min(W * 0.8, 430), 470);
+      for (k = 0; k < alvos.length && k < nucleo.length; k++) { nucleo[k].alvo = true; nucleo[k].tx = alvos[k].x; nucleo[k].ty = alvos[k].y; }
+      // anéis do reator: raio, largura, velocidade (sinal = sentido), tipo
+      var ANEIS = [
+        { r: 0.50, w: 1.6, v: 0.9, t: 'seg', n: 3, f: 0.22, a: 0.75 }, { r: 0.58, w: 0.8, v: -0.5, t: 'tick', n: 72, a: 0.45 },
+        { r: 0.68, w: 2.2, v: 0.35, t: 'seg', n: 6, f: 0.11, a: 0.55 }, { r: 0.80, w: 0.7, v: -0.22, t: 'dash', n: 120, a: 0.35 },
+        { r: 1.18, w: 1.0, v: 0.12, t: 'seg', n: 4, f: 0.18, a: 0.45 }, { r: 1.30, w: 0.7, v: -0.08, t: 'tick', n: 120, a: 0.32, ouro: 1 },
+        { r: 1.44, w: 1.4, v: 0.16, t: 'seg', n: 2, f: 0.32, a: 0.38 }, { r: 1.62, w: 0.6, v: -0.05, t: 'solid', a: 0.2 }
+      ];
+      var tilt = { x: 0, y: 0, tx: 0, ty: 0 };
+      function inclina(e) { if (e && e.gamma != null) { tilt.tx = Math.max(-1, Math.min(1, e.gamma / 25)); tilt.ty = Math.max(-1, Math.min(1, ((e.beta || 45) - 45) / 25)); } }
+      window.addEventListener('deviceorientation', inclina); // sem pedir permissão: no iOS só chega se ela já existir
+      var DUR = 8.3, t0 = performance.now(), raf = 0, acabou = false, fases = {}, falou = false, ondaSint = new Array(96);
+      var lin = el.querySelectorAll('.cn-l'), TL = [0.35, 0.62, 0.95, 1.12, 1.29, 1.46, 1.63, 1.80, 2.05], typed = [];
+      function fase(n) { if (fases[n]) return; fases[n] = true; el.classList.add(n); el.setAttribute('data-fase', n);
+        if (n === 'f-monta') b.classList.add('intro-monta');
+        if (n === 'f-oi' && !falou) { falou = true; falarSaudacao(); }
+        if (n === 'f-paineis') { var d = dadosHud(); // a agenda pode ter chegado depois do início
+          var q = function (s) { return el.querySelector(s); };
+          if (d.prox) { q('.cn-prox-h').textContent = d.prox.ini || '--:--'; q('.cn-prox-t').textContent = String(d.prox.t || '').slice(0, 24); }
+          else { q('.cn-prox-h').textContent = '—'; q('.cn-prox-t').textContent = d.agendaOk ? 'nada mais hoje' : 'agenda livre'; }
+          if (d.ok) { q('.cn-ab').textContent = d.abertos; q('.cn-ur').textContent = d.urgentes; if (d.urgentes) q('.cn-pn.br').classList.add('alerta'); } }
+      }
+      function digita(t) {
+        for (var i = 0; i < lin.length; i++) {
+          var l = boot[i], tot = l.r.length + l.p.length + l.s.length, n = Math.floor(Math.max(0, t - TL[i]) * 90); if (n <= 0 || typed[i] >= tot) continue;
+          n = Math.min(tot, n); if (typed[i] === n) continue; typed[i] = n;
+          var e = lin[i]; if (!e.classList.contains('on')) e.classList.add('on');
+          e.children[0].textContent = l.r.slice(0, n); e.children[1].textContent = l.p.slice(0, Math.max(0, n - l.r.length)); e.children[2].textContent = l.s.slice(0, Math.max(0, n - l.r.length - l.p.length));
+        }
+      }
+      function arco(r, a0, a1) { x.beginPath(); x.arc(CX, CY, r, a0, a1); x.stroke(); }
+      function quadro(ms) {
+        var t = (ms - t0) / 1000; if (!x) return;
+        if (t > 0.05) fase('f-scan'); if (t > 0.35) fase('f-boot'); if (t > 1.2) fase('f-reator'); if (t > 1.75) fase('f-nucleo');
+        if (t > 3.0) fase('f-nome'); if (t > 4.4) fase('f-paineis'); if (t > 4.7) fase('f-oi'); if (t > 6.6) fase('f-zoom'); if (t > 7.2) fase('f-monta'); if (t > 7.7) fase('f-fim');
+        digita(t);
+        tilt.x += (tilt.tx - tilt.x) * 0.08; tilt.y += (tilt.ty - tilt.y) * 0.08;
+        x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
+        // câmera: atravessa o reator no fim
+        var zt = faixa(t, 6.6, 7.7), zoom = 1 + Math.pow(zt, 2.2) * 14, sumir = 1 - ease(faixa(t, 7.0, 7.55));
+        var ox = tilt.x * 10, oy = tilt.y * 8;
+        x.globalCompositeOperation = 'lighter';
+        // poeira ao fundo (paralaxe lenta)
+        for (k = 0; k < poeira.length; k++) { var pp = poeira[k], zz = Math.min(1, pp.z * (1 + zt * 3));
+          var px = CX + (pp.x * W * 0.6 + ox * pp.z * 2 + Math.sin(t * 0.3 + pp.f) * 6) * (1 + zt * pp.z * 4), py = CY + (pp.y * H * 0.55 + oy * pp.z * 2 + t * 4 * pp.z) * (1 + zt * pp.z * 4);
+          x.fillStyle = 'rgba(' + CIANO + ',' + (0.12 * zz * ease(faixa(t, 0.6, 1.6)) * sumir).toFixed(3) + ')'; x.fillRect(px, py, 1.2 * zz + zt * 2, 1.2 * zz + zt * 2); }
+        x.save(); x.translate(CX + ox * 0.4, CY + oy * 0.4); x.scale(zoom, zoom); x.translate(-CX, -CY);
+        // ignição: clarão do núcleo com bloom
+        var ign = faixa(t, 1.75, 2.6), flash = t > 1.75 ? Math.exp(-(t - 1.75) * 4.2) : 0, vivo = ease(faixa(t, 1.6, 2.1));
+        var nv = niveisAudio(96), nivelMed = 0;
+        if (!nv) { nv = ondaSint; var bt = (t - 0.2) * 2.1, env = Math.max(0, 1 - ((bt % 1) * 1.4)); for (k = 0; k < 96; k++) { nv[k] = 0.18 + 0.22 * env * (0.6 + 0.4 * Math.sin(k * 0.55 + t * 9)) + 0.08 * Math.sin(k * 1.7 - t * 5); } }
+        for (k = 0; k < 96; k++) nivelMed += nv[k]; nivelMed /= 96;
+        if (vivo > 0) {
+          var gR = R * (0.55 + flash * 1.6 + nivelMed * 0.25), g = x.createRadialGradient(CX, CY, 0, CX, CY, gR);
+          g.addColorStop(0, 'rgba(235,252,255,' + Math.min(1, 0.55 * vivo + flash).toFixed(3) + ')'); g.addColorStop(0.18, 'rgba(' + CIANO + ',' + (0.5 * vivo + flash * 0.4).toFixed(3) + ')'); g.addColorStop(1, 'rgba(' + CIANO + ',0)');
+          x.fillStyle = g; x.beginPath(); x.arc(CX, CY, gR, 0, 6.2832); x.fill();
+          if (flash > 0.02) { x.fillStyle = 'rgba(' + CIANO + ',' + (flash * 0.18).toFixed(3) + ')'; x.fillRect(0, 0, W, H); }
+          // onda radial em volta do núcleo (segue a vinheta)
+          var rb = R * 0.3; x.beginPath();
+          for (k = 0; k <= 96; k++) { var kk = k % 96, ang = kk / 96 * 6.2832 - 1.5708, lv = nv[kk < 48 ? kk : 95 - kk], rr0 = rb + lv * R * 0.22 * vivo;
+            if (k) x.lineTo(CX + Math.cos(ang) * rr0, CY + Math.sin(ang) * rr0); else x.moveTo(CX + Math.cos(ang) * rr0, CY + Math.sin(ang) * rr0); }
+          x.closePath(); x.strokeStyle = 'rgba(' + CIANO + ',' + (0.75 * vivo).toFixed(3) + ')'; x.lineWidth = 1.2; x.stroke();
+          x.strokeStyle = 'rgba(230,250,255,' + (0.5 * vivo).toFixed(3) + ')'; x.lineWidth = 0.6; arco(rb * 0.82, 0, 6.2832);
+        }
+        // anéis com marcas, arcos segmentados e marcadores dourados
+        for (k = 0; k < ANEIS.length; k++) {
+          var A = ANEIS[k], mo = ease(faixa(t, 1.2 + k * 0.09, 1.9 + k * 0.09)); if (mo <= 0) continue;
+          var rr = R * A.r * (0.85 + 0.15 * mo) * (1 + nivelMed * 0.04 * (k % 2 ? -1 : 1)), rot = t * A.v + k, al = A.a * mo;
+          x.lineWidth = A.w; x.strokeStyle = 'rgba(' + (A.ouro ? OURO : CIANO) + ',' + al.toFixed(3) + ')';
+          if (A.t === 'solid') arco(rr, rot, rot + 6.2832 * mo);
+          else if (A.t === 'seg') { for (var s = 0; s < A.n; s++) { var a0 = rot + s / A.n * 6.2832; arco(rr, a0, a0 + 6.2832 / A.n * (1 - A.f) * mo); } }
+          else if (A.t === 'dash') { x.setLineDash([1.5, 3.5]); arco(rr, rot, rot + 6.2832 * mo); x.setLineDash([]); }
+          else { x.beginPath(); for (var m = 0; m < A.n * mo; m++) { var aa = rot + m / A.n * 6.2832, lg = m % 10 === 0 ? 9 : 4;
+              x.moveTo(CX + Math.cos(aa) * rr, CY + Math.sin(aa) * rr); x.lineTo(CX + Math.cos(aa) * (rr + lg), CY + Math.sin(aa) * (rr + lg)); } x.stroke(); }
+        }
+        // marcadores: 3 triângulos dourados no anel externo + um ponto vermelho
+        var mk = ease(faixa(t, 1.9, 2.5));
+        if (mk > 0) { x.globalCompositeOperation = 'source-over'; x.fillStyle = 'rgba(' + OURO + ',' + (0.85 * mk).toFixed(3) + ')';
+          for (k = 0; k < 3; k++) { var am = -t * 0.18 + k * 2.0944, rm = R * 1.36; x.save(); x.translate(CX + Math.cos(am) * rm, CY + Math.sin(am) * rm); x.rotate(am + 1.5708);
+            x.beginPath(); x.moveTo(0, -4); x.lineTo(3, 2); x.lineTo(-3, 2); x.closePath(); x.fill(); x.restore(); }
+          var av = t * 0.6; x.fillStyle = 'rgba(' + VERM + ',' + ((0.6 + 0.3 * Math.sin(t * 5)) * mk).toFixed(3) + ')'; x.beginPath(); x.arc(CX + Math.cos(av) * R * 0.8, CY + Math.sin(av) * R * 0.8, 1.9, 0, 6.2832); x.fill();
+          x.globalCompositeOperation = 'lighter'; }
+        // esfera 3D (perspectiva), duas camadas girando em sentidos opostos; vira "JARVIS" e volta
+        var nasce = ease(faixa(t, 2.0, 3.0)), forma = ease(faixa(t, 3.0, 3.7)), desf = ease(faixa(t, 4.35, 5.0)), Rs = R * (0.25 + 0.75 * nasce) * (1 + nivelMed * 0.06);
+        var ry = t * 0.5 + tilt.x * 0.5, cy1 = Math.cos(ry), sy1 = Math.sin(ry), tl = 0.42 + tilt.y * 0.3, ct = Math.cos(tl), st = Math.sin(tl), F = 3.2;
+        function ponto(p, raio, rotY, onda) {
+          var c1 = Math.cos(rotY), s1 = Math.sin(rotY), x1 = p.x * c1 + p.z * s1, z1 = -p.x * s1 + p.z * c1, y2 = p.y * ct - z1 * st, z2 = p.y * st + z1 * ct;
+          var w = 1 + 0.05 * Math.sin(p.y * 5 + t * 2 + p.f) * onda, pe = F / (F - z2), sx = CX + x1 * raio * w * pe + ox * z2, sy = CY + y2 * raio * w * pe + oy * z2;
+          return [sx, sy, (z2 + 1) / 2, pe];
+        }
+        var zEsc = Math.pow(zoom, 0.75); // no zoom as partículas não viram blocos
+        if (nasce > 0) {
+          for (k = 0; k < casca.length; k++) { var q = ponto(casca[k], Rs * 1.32, -ry * 0.6, 0.5), aC = (0.08 + 0.3 * q[2]) * nasce * (1 - 0.6 * forma * (1 - desf));
+            x.fillStyle = 'rgba(' + CIANO + ',' + aC.toFixed(3) + ')'; var tq = 1.1 * q[3] / zEsc; x.fillRect(q[0], q[1], tq, tq); }
+          for (k = 0; k < nucleo.length; k++) {
+            var p = nucleo[k], q2 = ponto(p, Rs, ry, 1), sx = q2[0], sy = q2[1], al2 = (0.16 + 0.75 * q2[2]) * nasce, tm = (0.7 + q2[2] * 1.2) * q2[3] / zEsc;
+            if (p.alvo && forma > 0) {
+              var at = Math.min(1, Math.max(0, forma * 1.3 - p.j * 0.3)), vo = Math.min(1, Math.max(0, desf * 1.3 - p.j * 0.3)), m2 = at * (1 - vo), es = Math.sin(vo * Math.PI) * 34 * (p.j - 0.5);
+              sx += (CX + p.tx - sx) * m2 + es; sy += (CY + p.ty - sy) * m2 + es * 0.5; al2 += (0.9 - al2) * m2; tm += (1.4 - tm) * m2;
+              al2 *= 1 - 0.72 * m2 * ease(faixa(t, 3.75, 4.05)); // a marca holográfica assume; as partículas viram brilho de fundo
+            } else if (forma > 0) al2 *= 1 - 0.75 * forma * (1 - desf);
+            if (al2 > 0.01) { x.fillStyle = 'rgba(' + CIANO + ',' + al2.toFixed(3) + ')'; x.fillRect(sx - tm / 2, sy - tm / 2, tm, tm); }
+          }
+        }
+        x.restore();
+        // clarão ao atravessar o núcleo
+        var pas = Math.exp(-Math.pow((t - 7.2) / 0.14, 2));
+        if (pas > 0.02) { x.fillStyle = 'rgba(200,245,255,' + (pas * 0.35).toFixed(3) + ')'; x.fillRect(0, 0, W, H); }
+        x.globalCompositeOperation = 'source-over';
+        if (sumir < 1) cv.style.opacity = sumir.toFixed(3);
+      }
+      function loop(ms) { if (acabou) return; quadro(ms); if (ms - t0 >= DUR * 1000) { sair(); return; } raf = requestAnimationFrame(loop); }
+      function sair(ja) {
+        if (acabou) return; acabou = true; cancelAnimationFrame(raf); ativo = null;
+        if (!falou) { falou = true; falarSaudacao(); } // como antes: a intro longa sempre traz a saudação falada
+        if (ja) pararVinheta(); else tocandoIntro = false;
+        el.classList.add('sai'); b.classList.remove('intro-esconde'); b.classList.remove('intro-monta');
+        window.removeEventListener('resize', medir); window.removeEventListener('deviceorientation', inclina); document.removeEventListener('visibilitychange', oculto);
+        setTimeout(function () { el.remove(); if (window.JarvisZerarJanela) JarvisZerarJanela(); fim && fim(); }, ja ? 260 : 320);
+      }
+      function oculto() { if (document.hidden) sair(true); }
+      el.addEventListener('click', function () { sair(true); });
+      window.addEventListener('resize', medir); document.addEventListener('visibilitychange', oculto);
+      ativo = { sair: sair, audioReal: audioReal };
+      raf = requestAnimationFrame(loop);
+    }
+
+    /* Voz da saudação: um só ponto de troca. Hoje: JarvisFala.saudar(periodo) (voz/otimo-dia.mp3, como antes).
+       Para a voz nova: JarvisIntro.definirVoz(function (periodo) { ... }) ou troque VOZ_SAUDACAO em JarvisFala. */
+    var vozSaudacao = function (periodo) { if (window.JarvisFala && JarvisFala.saudar) JarvisFala.saudar(periodo); };
+    function periodo(d) { var h = partesSP(d).h; return h >= 5 && h < 12 ? 'dia' : h >= 12 && h < 18 ? 'tarde' : 'noite'; }
+    function falarSaudacao() { try { vozSaudacao(periodo()); } catch (e) {} }
+
     var ativo = null;
     function mostrar(modo, fim) {
       if (ativo) ativo.sair(true);
@@ -2486,6 +2763,7 @@
       var versao = (window.JARVIS_APP_VERSAO && String(window.JARVIS_APP_VERSAO).indexOf('__') < 0) ? window.JARVIS_APP_VERSAO : '';
       var el = document.createElement('div'); el.className = 'intro ' + (cheia ? 'longa' : 'curta') + (calmo ? ' calmo' : ''); el.id = 'intro';
       el.setAttribute('role', 'status'); el.setAttribute('aria-label', oi);
+      if (cheia && !calmo) { document.body.appendChild(el); cinema(el, oi, versao, fim); return; } // Mark VI 6.3: intro cinematográfica
       el.innerHTML =
         '<canvas class="intro-cv" aria-hidden="true"></canvas>' +
         (cheia ? '<div class="intro-hud-l" aria-hidden="true">MARK VI' + (versao ? ' · ' + esc(versao) : '') + '</div>' +
@@ -2508,7 +2786,7 @@
       var DUR = calmo ? (cheia ? 1800 : 1000) : (cheia ? 6300 : 1300), t0 = performance.now(), raf = 0, acabou = false, falou = false, fases = {};
 
       function fase(nome) { if (fases[nome]) return; fases[nome] = true; el.classList.add(nome); el.setAttribute('data-fase', nome);
-        if (nome === 'f-oi' && cheia && !falou && window.JarvisFala) { falou = true; JarvisFala.saudar(); } // saudação falada de sempre, depois da vinheta
+        if (nome === 'f-oi' && cheia && !falou) { falou = true; falarSaudacao(); } // saudação falada de sempre, depois da vinheta
         if (nome === 'f-monta') { b.classList.add('intro-monta'); }
       }
       function quadro(agoraMs) {
@@ -2566,7 +2844,7 @@
       function limparCorpo() { b.classList.remove('intro-esconde'); b.classList.remove('intro-monta'); }
       function sair(ja) {
         if (acabou) return; acabou = true; cancelAnimationFrame(raf); ativo = null;
-        if (cheia && !falou && window.JarvisFala) { falou = true; JarvisFala.saudar(); } // como antes: a intro longa sempre traz a saudação falada
+        if (cheia && !falou) { falou = true; falarSaudacao(); } // como antes: a intro longa sempre traz a saudação falada
         if (ja) pararVinheta(); else tocandoIntro = false;
         el.classList.add('sai'); limparCorpo();
         window.removeEventListener('resize', medir); document.removeEventListener('visibilitychange', oculto);
@@ -2579,7 +2857,8 @@
       if (calmo) { quadro(t0 + (cheia ? 5000 : 500)); fase('f-oi'); if (cheia) { fase('f-esfera'); } setTimeout(function () { sair(); }, DUR); }
       else raf = requestAnimationFrame(loop);
     }
-    return { mostrar: mostrar, saudacao: saudacao, diaSP: diaSP, modoDoDia: modoDoDia, horaTx: horaTx, dataTx: dataTx };
+    return { mostrar: mostrar, saudacao: saudacao, diaSP: diaSP, modoDoDia: modoDoDia, horaTx: horaTx, dataTx: dataTx, periodo: periodo, dadosHud: dadosHud,
+      definirVoz: function (fn) { if (typeof fn === 'function') vozSaudacao = fn; } };
   })();
   window.JarvisIntro = Intro;
 
@@ -2645,8 +2924,12 @@
       }).withFailureHandler(function () { if (!pedindo) return; pedindo = false; reserva(); }).voz();
     }
     /** Saudação neural (sem dados pessoais). Se o iPhone não deixar tocar sem toque, fica em silêncio. */
-    function saudar() {
-      try { var a = new Audio('voz/otimo-dia.mp3'); a.volume = 0.9; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    /* Arquivos da saudação falada por período. Hoje só existe o de 'dia' (os outros usam o mesmo, como antes).
+       Quando o Kaio escolher a voz nova: gerar os MP3 e trocar só aqui (ex.: tarde: 'voz/otima-tarde.mp3'). */
+    var VOZ_SAUDACAO = { dia: 'voz/otimo-dia.mp3', tarde: '', noite: '' };
+    function saudar(periodo) {
+      var f = VOZ_SAUDACAO[periodo] || VOZ_SAUDACAO.dia;
+      try { var a = new Audio(f); a.volume = 0.9; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
     }
     if (window.speechSynthesis && speechSynthesis.getVoices) try { speechSynthesis.getVoices(); } catch (e) {}
     document.addEventListener('visibilitychange', function () { if (document.hidden && (falando || pedindo)) { pedindo = false; parar(); } });
