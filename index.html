@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Jarvis · Central Mark VI (6.1.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
+<!-- Jarvis · Central Mark VI (6.1.1) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -29,8 +29,10 @@
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   html { background:var(--bg); }
-  html,body { margin:0; min-height:100%; color:var(--tx); font:14px/1.4 var(--fonte); letter-spacing:-.003em; -webkit-text-size-adjust:100%; -webkit-font-smoothing:antialiased; }
-  body { background:var(--bg); overscroll-behavior-y:none; }
+  html,body { margin:0; height:100%; overflow:hidden; color:var(--tx); font:14px/1.4 var(--fonte); letter-spacing:-.003em; -webkit-text-size-adjust:100%; -webkit-font-smoothing:antialiased; }
+  body { background:var(--bg); overscroll-behavior:none; }
+  /* Mark VI 6.1.1: a rolagem fica num contêiner próprio (a janela não rola), altura 100dvh. Evita a tabbar "subir" no iOS depois do teclado. */
+  .rolagem { position:fixed; top:0; left:0; right:0; height:100vh; height:100dvh; overflow-x:hidden; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; }
   button { font:inherit; cursor:pointer; color:inherit; -webkit-tap-highlight-color:transparent; }
   .mut { color:var(--mut); font-size:12.5px; }
   .esp { flex:1; }
@@ -253,7 +255,7 @@
 
   /* Ajustes (folha) */
   .folha-fundo { position:fixed; inset:0; z-index:90; background:rgba(8,9,12,.6); display:flex; align-items:flex-end; justify-content:center; }
-  .folha { width:100%; max-width:560px; background:var(--card); border:1px solid var(--bd2); border-bottom:0; border-radius:14px 14px 0 0; padding:12px 16px calc(16px + env(safe-area-inset-bottom)); max-height:85vh; overflow:auto; }
+  .folha { width:100%; max-width:560px; background:var(--card); border:1px solid var(--bd2); border-bottom:0; border-radius:14px 14px 0 0; padding:12px 16px calc(16px + env(safe-area-inset-bottom)); max-height:85vh; max-height:85dvh; overflow:auto; }
   .folha-top { display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid var(--bd); font-size:15px; }
   .folha-sec { padding:12px 0; border-bottom:1px solid var(--bd); font-size:13.5px; }
   .folha-sec:last-child { border-bottom:0; }
@@ -273,7 +275,7 @@
     -webkit-mask-image:linear-gradient(to bottom, #000 0, rgba(0,0,0,.45) 300px, transparent 560px);
     mask-image:linear-gradient(to bottom, #000 0, rgba(0,0,0,.45) 300px, transparent 560px); }
   body { background:transparent; }
-  html.com-foco, html.com-foco body { overflow:hidden; }
+  html.com-foco, html.com-foco body, html.com-foco .rolagem { overflow:hidden; }
 
   .resumo-linha { display:flex; align-items:flex-end; gap:10px; }
   .resumo-linha .resumo-dia { flex:1; min-width:0; }
@@ -374,6 +376,7 @@
 <body>
 <div id="carga" class="carga"><span class="logo-g" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2d38"/><stop offset="1" stop-color="#14161c"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd666"/><stop offset="1" stop-color="#E0B000"/></linearGradient><radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#3FC1E8" stop-opacity=".55"/><stop offset="1" stop-color="#3FC1E8" stop-opacity="0"/></radialGradient></defs><rect rx="112" fill="url(#bg)"/><circle cx="256" cy="256" r="200" fill="url(#glow)"/><path d="M256.0 106.0 A150 150 0 0 1 360.1987555688496 148.09902994920233" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M385.9038105676658 181.0 A150 150 0 0 1 401.5443589413995 292.28828433995017" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M385.9038105676658 331.0 A150 150 0 0 1 297.3456033725499 400.1892543907478" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M256.0 406.0 A150 150 0 0 1 151.8012444311504 363.9009700507977" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M126.0961894323342 331.0 A150 150 0 0 1 110.45564105860052 219.7117156600499" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M126.0961894323342 181.0 A150 150 0 0 1 214.65439662745018 111.81074560925214" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><circle cx="256" cy="256" r="98" fill="none" stroke="#3FC1E8" stroke-opacity=".45" stroke-width="6"/><path d="M256 186 L318 294 L194 294 Z" fill="url(#gold)"/><circle cx="256" cy="258" r="20" fill="#14161c"/></svg></span><div id="cargaTx">Carregando…</div></div>
 
+<div class="rolagem" id="rolagem">
 <header class="topo">
   <div class="topo-in">
     <div class="marca">
@@ -451,6 +454,7 @@
 <div class="view" id="v-bots" hidden><h2>Escritório</h2><div class="bots" id="botsGrid"></div></div>
   <p class="rodape mut" id="rodape"></p>
 </main>
+</div><!-- /rolagem: só este contêiner rola; a janela fica sempre no 0 (Mark VI 6.1.1) -->
 
 <div class="xpfx" id="xpfx"></div>
 <div class="fixo" id="fixo">
@@ -466,6 +470,27 @@
   <button type="button" data-v="bots"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.8" r="1"/><circle cx="9.5" cy="13" r="1.1"/><circle cx="14.5" cy="13" r="1.1"/></svg>Bots</button>
 </nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* Mark VI 6.1.1 · iOS (app da Tela de Início): quando o teclado fecha, o iOS pode deixar a janela deslocada
+   e a tabbar/barra "Enviar"/toast (position:fixed) ficam no meio da tela. A rolagem agora é do #rolagem;
+   a janela nunca deveria sair do 0, então qualquer deslocamento é desfeito quando não há campo com foco. */
+(function () {
+  var de = document.documentElement;
+  function campoFocado() { var a = document.activeElement; return !!(a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable)); }
+  function zerar() {
+    if (campoFocado()) return;
+    if (window.scrollY || window.pageYOffset || de.scrollTop || document.body.scrollTop) { window.scrollTo(0, 0); de.scrollTop = 0; document.body.scrollTop = 0; }
+  }
+  var t1, t2;
+  function logo() { clearTimeout(t1); clearTimeout(t2); t1 = setTimeout(zerar, 50); t2 = setTimeout(zerar, 400); }
+  window.JarvisZerarJanela = function () { zerar(); logo(); };
+  document.addEventListener('focusout', function (e) { var t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) logo(); }, true);
+  window.addEventListener('scroll', function () { if (!campoFocado()) logo(); }, { passive: true });
+  if (window.visualViewport) { visualViewport.addEventListener('resize', logo); visualViewport.addEventListener('scroll', logo); }
+  window.addEventListener('orientationchange', logo); window.addEventListener('pageshow', logo);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) logo(); });
+})();
+</script>
 
 <script>window.JARVIS_AMBIENTE = 'pages'; window.DADOS = null;</script>
 <script>
@@ -1217,22 +1242,30 @@
     clearTimeout(autoTimer); autoEm = 0;
     enviando = true; atualizarGeral();
     salvarTudoJa();
-    var t0 = Date.now();
+    var t0 = Date.now(), lote = (enviarAgora._n = (enviarAgora._n || 0) + 1);
+    // Mark VI 6.1.1: o "Enviando…" nunca fica preso (erro, exceção, trava do Face ID ou Google sem resposta)
+    function soltar() { if (enviarAgora._n !== lote) return false; enviarAgora._n++; clearTimeout(guarda); enviando = false; return true; }
+    var guarda = setTimeout(function () {
+      if (!soltar()) return;
+      toast('O envio está demorando. Suas respostas estão guardadas; tente de novo em instantes.', true);
+      atualizarGeral();
+    }, 75000);
     (function esperar() {
       if (ocupado() && Date.now() - t0 < 15000) return setTimeout(esperar, 250);
       var faltam = naFila().length;
       JRUN()
         .withSuccessHandler(function (res) {
-          enviando = false;
+          var meu = soltar(); res = res || {};
+          try {
           pendEnvioServidor = res.pendentesEnvio;
           if (res.ok && res.ids) res.ids.forEach(function (id) { var it = porId[id]; if (it && naFila().indexOf(id) < 0) { it.r.enviado = 'ENVIADO'; atualizarCard(id); } });
           if (res.setup === false) mostrarBanner('warn', '<b>Envio ao Jarvis ainda não configurado.</b> ' + esc(res.msg));
           var extra = faltam ? ' ' + faltam + ' ainda não chegou(aram) à planilha; envio de novo quando salvar.' : '';
-          toast(res.msg + extra, !res.ok);
-          atualizarGeral();
+          if (meu || res.ok) toast((res.msg || (res.ok ? 'Enviado ao Jarvis.' : 'Não enviou.')) + extra, !res.ok);
+          } finally { atualizarGeral(); }
         })
         .withFailureHandler(function (err) {
-          enviando = false;
+          if (!soltar()) return;
           toast('Não enviou: ' + ((err && err.message) || 'sem conexão com o Google') + '. Nada se perdeu; tente de novo.', true);
           atualizarGeral();
         })
@@ -1663,6 +1696,7 @@
     t.className = 'toast' + (ruim ? ' bad' : '');
     t.innerHTML = esc(msg) + (acao ? '<button type="button" id="toastAcao">' + esc(acao.rotulo) + '</button>' : '');
     t.style.display = 'block';
+    t.onclick = function (e) { if (!e.target.closest('button')) { clearTimeout(toast._t); t.style.display = 'none'; } }; // toque fecha
     if (acao) $('toastAcao').onclick = function () { t.style.display = 'none'; acao.fn(); };
     clearTimeout(toast._t); toast._t = setTimeout(function () { t.style.display = 'none'; }, ruim ? 9000 : (acao ? 6000 : 3500));
   }
@@ -2245,7 +2279,7 @@
     vista = v;
     Array.prototype.forEach.call($('nav').children, function (b) { b.className = b.dataset.v === v ? 'on' : ''; });
     ['hoje', 'prazos', 'placar', 'bots'].forEach(function (k) { $('v-' + k).hidden = k !== v; });
-    window.scrollTo(0, 0); desenhar();
+    var rl = $('rolagem'); if (rl) rl.scrollTop = 0; window.scrollTo(0, 0); desenhar();
     if (v === 'bots') rodar(); else parar();
   }
   $('nav').addEventListener('click', function (e) { var b = e.target.closest('[data-v]'); if (b) ir(b.dataset.v); });
