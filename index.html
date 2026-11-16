@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Jarvis · Central Mark VIII (8.0.0) · a partir daqui o código-fonte é ESTE arquivo (GitHub); o build_pages.js do Apps Script não deve mais sobrescrevê-lo. -->
+<!-- Jarvis · Central Mark VIII (8.1.0) · a partir daqui o código-fonte é ESTE arquivo (GitHub); o build_pages.js do Apps Script não deve mais sobrescrevê-lo. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -291,7 +291,7 @@
   .trava::before { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(360px 260px at 50% 38%, rgba(63,193,232,.08), transparent 70%); }
   .trava.sai { opacity:0; }
   /* Mark VI: travado = só a trava aparece; escudo = app em segundo plano (nada no seletor de apps do iOS) */
-  html.travado body > *:not(.trava):not(#carga) { visibility:hidden !important; }
+  html.travado body > *:not(.trava):not(#carga):not(.intro) { visibility:hidden !important; }
   html.escudo body::after { content:""; position:fixed; inset:0; z-index:9999; background:var(--bg); }
   html.escudo body > * { filter:blur(18px); }
   .trava-in { position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; max-width:300px; text-align:center; }
@@ -434,6 +434,9 @@
   .intro.f-zoom .intro-pula { opacity:0; transition:opacity .35s; animation:none; }
   .intro.cinema.f-zoom { background-color:rgba(2,4,5,0); background-image:none; }
   .intro.cinema.f-fim .intro-cv { opacity:0; }
+  /* Mark VIII: versão rápida das aberturas seguintes — transições e animações encurtadas junto com a linha do tempo */
+  .intro.rapido, .intro.rapido * { transition-duration:.42s !important; transition-delay:0s !important; }
+  .intro.rapido .cn-pn > * { animation-duration:.3s !important; animation-delay:0s !important; }
   .intro.cinema .intro-pula { z-index:2; }
   body.intro-nucleo #hudCv { opacity:0; }
   /* o app por baixo: topo e abas se montam um por um no fim da intro longa */
@@ -614,7 +617,7 @@
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '8.0.0'; window.JARVIS_APP_MARCA = 'Mark VIII'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '8.1.0'; window.JARVIS_APP_MARCA = 'Mark VIII'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -849,7 +852,7 @@
     setInterval(function () { if (!document.hidden && aberta && iniciado) marcarUso(); }, 30000);
     function esperar() { return new Promise(function (ok) { fila.push(ok); }); }
     function pronta() { if (!aberta) return esperar().then(pronta); if (sessao) return sessao.then(pronta); return Promise.resolve(); }
-    function liberar() { aberta = true; marcarUso(); document.documentElement.classList.remove('travado'); if (el) { el.classList.add('sai'); var e0 = el; el = null; setTimeout(function () { e0.remove(); }, 200); } fila.splice(0).forEach(function (f) { f(); }); }
+    function liberar() { aberta = true; marcarUso(); setTimeout(function () { document.documentElement.classList.remove('travado'); }, 0); /* Mark VIII: o app só aparece depois que a entrada (intro) já cobriu a tela */ if (el) { el.classList.add('sai'); var e0 = el; el = null; setTimeout(function () { e0.remove(); }, 200); } fila.splice(0).forEach(function (f) { f(); }); }
     function msg(t) { var m = $('travaMsg'); if (m) m.textContent = t; }
     function bloquear(texto) {
       if (!aberta && el) { if (texto) msg(texto); return esperar(); }
@@ -863,13 +866,15 @@
       el = document.createElement('div'); el.className = 'trava'; el.id = 'trava';
       var logo = (document.querySelector('.marca .logo') || {}).innerHTML || '';
       el.innerHTML = '<div class="trava-in"><span class="logo-g" aria-hidden="true">' + logo + '</span><b>Jarvis bloqueado</b>' +
-        '<p id="travaMsg">' + esc(texto || 'Use o Face ID para abrir.') + '</p>' +
+        '<p id="travaMsg">' + esc(texto || 'Toque em qualquer lugar para abrir com Face ID.') + '</p>' +
         (Face.suporta() ? '<button type="button" class="tr-pri" id="travaFace">Desbloquear com Face ID</button>' : '') +
         '<button type="button" class="tr-sec" id="travaCod">Usar o código</button>' +
         '<form id="travaForm" class="parear" hidden autocomplete="off"><input id="travaPin" inputmode="numeric" pattern="[0-9 ]*" maxlength="11" placeholder="0000 0000" aria-label="Código de pareamento" autocomplete="one-time-code"><button type="submit" id="travaOk">Desbloquear</button></form></div>';
       document.body.appendChild(el);
       $('travaCod').onclick = codigo;
       if ($('travaFace')) $('travaFace').onclick = face;
+      // Mark VIII: o iOS só libera o Face ID com um toque; então a tela inteira é o botão (o toque pode ser em qualquer lugar)
+      el.addEventListener('click', function (ev) { if (ev.target.closest && ev.target.closest('button,input,form,a')) return; var bf = $('travaFace'); if (bf && !bf.disabled) face(); });
       var inp = $('travaPin');
       inp.addEventListener('input', function () { var d = inp.value.replace(/\D/g, '').slice(0, 8); inp.value = d.length > 4 ? d.slice(0, 4) + ' ' + d.slice(4) : d; });
       $('travaForm').addEventListener('submit', function (e) {
@@ -878,10 +883,12 @@
         enviar('desbloquearPin', [pin]).then(function () { liberar(); }, function (e2) { $('travaOk').disabled = false; msg(e2.message); inp.select(); });
       });
       if (!Face.suporta()) codigo();
-      else if (!auto) { auto = true; setTimeout(face, 80); } // 1 tentativa automática por bloqueio (sem laço); depois, só pelo botão
+      else if (!auto) { auto = true; automatico = true; setTimeout(face, 80); } // 1 tentativa automática por bloqueio (sem laço); depois, só pelo botão
     }
     function codigo() { var f = $('travaForm'); if (!f) return; f.hidden = false; $('travaCod').hidden = true; setTimeout(function () { try { $('travaPin').focus(); } catch (e) {} }, 50); }
+    var automatico = false;
     function face() {
+      var foiAuto = automatico; automatico = false;
       var b = $('travaFace'); if (b) b.disabled = true; msg('Olhe para o iPhone…');
       Face.assercao(Face.local()).then(function (p) {
         if (!Face.local()) lsSet(LS.FACE, JSON.stringify({ id: p.id }));
@@ -894,7 +901,7 @@
         });
       }, function (e) {
         var b2 = $('travaFace'); if (b2) b2.disabled = false;
-        msg(Face.motivo(e) + ' Toque para tentar de novo ou use o código.');
+        msg(foiAuto ? 'Toque em qualquer lugar da tela para abrir com Face ID.' : Face.motivo(e) + ' Toque para tentar de novo ou use o código.');
       });
     }
     return { pronta: pronta, bloquear: bloquear, exigir: exigir, precisa: precisa, aberta: function () { return aberta; }, marcarUso: marcarUso };
@@ -976,26 +983,30 @@
     var I = window.JarvisIntro; if (!I || !I.saudacoesPrecisa || !I.saudacoesPrecisa()) return;
     chamar('saudacoes', []).then(function (r) { if (r && r.dia) I.saudacoesGuardar(r); }, function () {});
   }
-  /** Mark VIII: o que a Mariana fala ao abrir. 1ª do dia: saudação + resumo do dia. Depois: boas-vindas com o que ainda falta (ou dia finalizado). */
+  /** Mark VIII: a fala acompanha a tela. Na entrada (intro) ela só cumprimenta; o que importa (resumo do dia, ou "você ainda tem N
+      pendências") é falado na tela principal, quando os números já estão à vista. Devolve a função que a abertura chama ao sair da intro. */
   function definirFalaEntrada(cheia) {
-    var I = window.JarvisIntro; if (!I || !I.definirVoz) return;
+    var I = window.JarvisIntro; if (!I || !I.definirVoz) return function () {};
     var pedir = function (t) { return chamar('frase', [t]).then(function (r) { return r && r.b64; }); };
+    var est = { saudou: false, saudFim: false, introFim: false, dito: false };
+    function parte2() {
+      if (est.dito || !est.introFim || (est.saudou && !est.saudFim)) return;
+      est.dito = true;
+      setTimeout(function () { // já na tela principal
+        var A = window.CentralAPI, d = window.DADOS || {};
+        if (cheia) { chamar('voz', []).then(function (r) { if (r && r.mp3) I.tocarB64(r.mp3, 'resumo'); }, function () {}); return; }
+        var n = A && A.itens ? A.itens().filter(A.ehPendente).length : 0, t;
+        if (n > 0) t = 'No que posso te ajudar? Você ainda tem ' + n + (n === 1 ? ' pendência' : ' pendências') + ' hoje.';
+        else { var xp = d.xpKaio || 0, por = d.xpPorNivel || 100; t = 'Seu dia está finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.'; }
+        I.falarFrase(t, pedir);
+      }, 450);
+    }
     I.definirVoz(function (per) {
-      var A = window.CentralAPI, d = window.DADOS || {};
-      if (cheia) {
-        I.tocarSaudacao(per, function () {
-          chamar('voz', []).then(function (r) { if (r && r.mp3) I.tocarB64(r.mp3, 'resumo'); }, function () {});
-        });
-        return;
-      }
-      var n = A && A.itens ? A.itens().filter(A.ehPendente).length : 0, t;
-      if (n > 0) t = 'Bem-vindo de volta, Kaio. No que posso te ajudar? Você ainda tem ' + n + (n === 1 ? ' pendência' : ' pendências') + ' hoje.';
-      else {
-        var xp = d.xpKaio || 0, por = d.xpPorNivel || 100;
-        t = 'Tudo certo, Kaio. Seu dia foi finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.';
-      }
-      I.falarFrase(t, pedir);
+      est.saudou = true;
+      var fim = function () { est.saudFim = true; parte2(); };
+      if (cheia) I.tocarSaudacao(per, fim); else I.falarFrase('Bem-vindo de volta, Kaio.', pedir, fim);
     });
+    return function () { est.introFim = true; parte2(); setTimeout(function () { est.saudFim = true; parte2(); }, 9000); }; // garantia: nada fica preso
   }
   function abertura() {
     buscarSaudacoes();
@@ -1003,8 +1014,8 @@
     // Mark VI 6.2.0: o "dia" é o de São Paulo (intro longa uma vez por dia, mesmo com o iPhone em outro fuso)
     var I = window.JarvisIntro, hoje = I && I.diaSP ? I.diaSP() : hojeLocal(), cheia = I && I.modoDoDia ? I.modoDoDia(lsGet(LS.INTRO)) === 'cheia' : lsGet(LS.INTRO) !== hoje;
     lsSet(LS.INTRO, hoje);
-    var depois = function () { abrirAlvo(alvo); alvo = null; setTimeout(convites, 600); };
-    definirFalaEntrada(cheia);
+    var fimIntro = definirFalaEntrada(cheia);
+    var depois = function () { abrirAlvo(alvo); alvo = null; fimIntro(); setTimeout(convites, 600); };
     if (window.JarvisIntro && !(alvo && !cheia)) JarvisIntro.mostrar(cheia ? 'cheia' : 'curta', depois); else depois();
   }
   function iniciarApp(d, travar) {
@@ -2942,7 +2953,7 @@
       return { segs: segs, w: w, h: h };
     }
 
-    function cinema(el, oi, versao, fim) {
+    function cinema(el, oi, versao, fim, rapido) {
       var b = document.body, d0 = dadosHud(), agora = new Date(), marca = marcaApp();
       var face = (function () { try { return !!localStorage.getItem('jarvis.face'); } catch (e) { return false; } })();
       var boot = [linhaBoot('J.A.R.V.I.S.', 'INICIALIZANDO'), linhaBoot('BIOMETRIA', face ? 'FACE ID · OK' : 'APARELHO · OK')];
@@ -2958,9 +2969,10 @@
         '<div class="cn-pn br" aria-hidden="true"><i>URGENTES</i><b class="cn-ur">' + (d0.ok ? d0.urgentes : '—') + '</b><span>vencidos ou hoje</span></div>' +
         '<div class="cn-oi"><b>' + esc(oi) + '</b></div>' +
         '<div class="intro-pula" aria-hidden="true">toque para pular</div>';
-      el.classList.add('cinema');
+      el.classList.add('cinema'); if (rapido) el.classList.add('rapido');
       b.classList.add('intro-esconde'); b.classList.add('intro-nucleo');
-      var audioReal = tocarVinheta();
+      var KT = rapido ? 2.3 : 1; // Mark VIII: aberturas seguintes passam a mesma linha do tempo 2,3x mais rápido (sem a vinheta musical)
+      var audioReal = rapido ? false : tocarVinheta();
 
       var cv = el.querySelector('canvas'), x = cv.getContext && cv.getContext('2d');
       var dpr = Math.min(window.devicePixelRatio || 1, 2), W = 0, H = 0, R = 0, CX = 0, CY = 0, DIAG = 0;
@@ -3045,7 +3057,7 @@
         for (var i = 0; i < lst.length; i += 4) { x.moveTo(lst[i], lst[i + 1]); x.lineTo(lst[i + 2], lst[i + 3]); } x.stroke(); }
       var BK = [[], [], [], []], BQ = [];
       function quadro(ms) {
-        var t = (ms - t0) / 1000; if (!x) return;
+        var t = (ms - t0) / 1000 * KT; if (!x) return;
         if (t > 0.05) fase('f-scan'); if (t > 0.35) fase('f-boot'); if (t > 1.2) fase('f-reator'); if (t > 1.85) fase('f-nucleo');
         if (t > 3.0) fase('f-nome'); if (t > 4.4) fase('f-paineis'); if (t > 4.7) fase('f-oi'); if (t > 6.3) fase('f-zoom'); if (t > 6.75) fase('f-monta'); if (t > 7.75) fase('f-fim');
         digita(t);
@@ -3159,7 +3171,7 @@
         x.globalCompositeOperation = 'source-over';
         if (voo > 0 && window.CentralHud && CentralHud.pintar) { var aH = ease(faixa(t, 6.55, 7.5)); if (aH > 0) CentralHud.pintar(x, ccx, ccy, sz, ms, aH); }
       }
-      function loop(ms) { if (acabou) return; quadro(ms); if (ms - t0 >= DUR * 1000) { sair(); return; } raf = requestAnimationFrame(loop); }
+      function loop(ms) { if (acabou) return; quadro(ms); if ((ms - t0) / 1000 * KT >= DUR) { sair(); return; } raf = requestAnimationFrame(loop); }
       function sair(ja) {
         if (acabou) return; acabou = true; cancelAnimationFrame(raf); ativo = null;
         if (!falou) { falou = true; falarSaudacao(); } // como antes: a intro longa sempre traz a saudação falada
@@ -3190,7 +3202,7 @@
       var versao = (window.JARVIS_APP_VERSAO && String(window.JARVIS_APP_VERSAO).indexOf('__') < 0) ? window.JARVIS_APP_VERSAO : '';
       var el = document.createElement('div'); el.className = 'intro ' + (cheia ? 'longa' : 'curta') + (calmo ? ' calmo' : ''); el.id = 'intro';
       el.setAttribute('role', 'status'); el.setAttribute('aria-label', oi);
-      if (cheia && !calmo) { document.body.appendChild(el); cinema(el, oi, versao, fim); return; } // Mark VI 6.3: intro cinematográfica
+      if (!calmo) { document.body.appendChild(el); cinema(el, oi, versao, fim, !cheia); return; } // Mark VIII: a mesma arte em toda abertura (rápida nas seguintes)
       el.innerHTML =
         '<canvas class="intro-cv" aria-hidden="true"></canvas>' +
         (cheia ? '<div class="intro-hud-l" aria-hidden="true">' + esc(marcaApp().toUpperCase()) + (versao ? ' · ' + esc(versao) : '') + '</div>' +
