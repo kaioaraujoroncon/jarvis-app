@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Jarvis · Central Mark VII (7.0.0) · gerado por build_pages.js; edite os arquivos do Apps Script, não este. -->
+<!-- Jarvis · Central Mark VII (7.1.0) · a partir daqui o código-fonte é ESTE arquivo (GitHub); o build_pages.js do Apps Script não deve mais sobrescrevê-lo. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -23,7 +23,7 @@
     --red:#B3141F; --red2:#8E0F18; --gold:#D4A72C; --arc:#3FC1E8;
     --bg:#0E0F13; --bg2:#121319; --card:#15171D; --card2:#1C1E26; --bd:#23262F; --bd2:#2F333E;
     --tx:#ECEDEF; --tx2:#C5C9D1; --mut:#8C929D; --ok:#1E9E5A; --warn:#E0B000; --bad:#E5484D;
-    --r:10px; --tabH:52px;
+    --r:10px; --tabH:52px; --sab:calc(env(safe-area-inset-bottom) * .42);
     --fonte:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;
   }
   * { box-sizing:border-box; }
@@ -70,7 +70,7 @@
   .ico svg { fill:currentColor; }
   .ico:active { background:var(--card2); }
 
-  .wrap { max-width:760px; margin:0 auto; padding:6px calc(14px + env(safe-area-inset-right)) calc(var(--tabH) + 76px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left)); }
+  .wrap { max-width:760px; margin:0 auto; padding:6px calc(14px + env(safe-area-inset-right)) calc(var(--tabH) + 76px + var(--sab)) calc(14px + env(safe-area-inset-left)); }
 
   /* Resumo do dia */
   .resumo-dia { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; padding:10px 2px 0; }
@@ -229,20 +229,20 @@
   .bi-top .mut { font-size:12px; }
 
   /* Barra de envio + abas inferiores */
-  .fixo { position:fixed; left:0; right:0; bottom:calc(var(--tabH) + env(safe-area-inset-bottom)); z-index:15; padding:0 calc(10px + env(safe-area-inset-right)) 8px calc(10px + env(safe-area-inset-left)); pointer-events:none; transform:translateY(130%); opacity:0; transition:transform .2s, opacity .2s; }
+  .fixo { position:fixed; left:0; right:0; bottom:calc(var(--tabH) + var(--sab)); z-index:15; padding:0 calc(10px + env(safe-area-inset-right)) 8px calc(10px + env(safe-area-inset-left)); pointer-events:none; transform:translateY(130%); opacity:0; transition:transform .2s, opacity .2s; }
   .fixo.on { transform:none; opacity:1; }
   .fixo-in { pointer-events:auto; max-width:740px; margin:0 auto; display:flex; gap:10px; align-items:center; background:#1B1D24; border:1px solid var(--bd2); border-radius:12px; padding:7px 7px 7px 12px; box-shadow:0 6px 20px rgba(0,0,0,.35); }
   .fixo-info { flex:1; font-size:12.5px; color:var(--mut); min-width:0; }
   .fixo-info b { color:var(--tx) !important; }
   .enviar { flex:0 0 auto; background:var(--red); color:#fff; border:0; border-radius:8px; padding:8px 12px; font-weight:600; font-size:13.5px; }
   .enviar:disabled { opacity:.5; }
-  .tabbar { position:fixed; left:0; right:0; bottom:0; z-index:16; display:flex; background:rgba(14,15,19,.96); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-top:1px solid var(--bd); padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  .tabbar { position:fixed; left:0; right:0; bottom:0; z-index:16; display:flex; background:rgba(14,15,19,.96); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-top:1px solid var(--bd); padding:0 env(safe-area-inset-right) var(--sab) env(safe-area-inset-left); }
   .tabbar button { flex:1; height:var(--tabH); border:0; background:none; color:var(--mut); font-size:10.5px; font-weight:500; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
   .tabbar svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
   .tabbar button.on { color:var(--tx); }
   .tabbar button.on svg { stroke:var(--gold); }
 
-  .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--tabH) + 64px + env(safe-area-inset-bottom)); width:max-content; max-width:92%; background:#22252E; border:1px solid var(--bd2); border-radius:10px; padding:9px 12px; font-size:13.5px; z-index:95; display:none; box-shadow:0 8px 24px rgba(0,0,0,.4); }
+  .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--tabH) + 64px + var(--sab)); width:max-content; max-width:92%; background:#22252E; border:1px solid var(--bd2); border-radius:10px; padding:9px 12px; font-size:13.5px; z-index:95; display:none; box-shadow:0 8px 24px rgba(0,0,0,.4); }
   .toast.bad { border-color:#5A1D22; }
   .toast button { margin-left:10px; background:none; border:none; color:var(--arc); font-weight:600; }
 
@@ -315,6 +315,8 @@
   .hud-top { display:flex; gap:10px; align-items:stretch; }
   .hud-core { position:relative; flex:0 0 150px; height:150px; }
   .hud-core canvas { position:absolute; inset:0; width:150px; height:150px; display:block; }
+  .hud-core::before, .hud-core::after { content:''; position:absolute; width:12px; height:12px; border:solid rgba(var(--hc),.55); pointer-events:none; }
+  .hud-core::before { left:0; top:0; border-width:1px 0 0 1px; } .hud-core::after { right:0; bottom:0; border-width:0 1px 1px 0; }
   .hud-core-tx { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none; }
   .hud-core-tx b { font:200 40px/1 "SF Pro Display",-apple-system,"Helvetica Neue",sans-serif; color:#E6F7FC; font-variant-numeric:tabular-nums; text-shadow:0 0 16px rgba(var(--hc),.5); }
   .hud-core-tx i { font:500 8.5px/1 var(--mono); font-style:normal; letter-spacing:.22em; color:var(--ouro); margin-top:5px; }
@@ -612,7 +614,7 @@
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '7.0.0'; window.JARVIS_APP_MARCA = 'Mark VII'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '7.1.0'; window.JARVIS_APP_MARCA = 'Mark VII'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -632,7 +634,7 @@
   var LS = { TOKEN: 'jarvis.token', ID: 'jarvis.aparelho.id', CACHE: 'jarvis.cache.dados', PUSHDIA: 'jarvis.push.dia', PUSHNAO: 'jarvis.push.dispensado',
     FACE: 'jarvis.face', FACENAO: 'jarvis.face.dispensado', USO: 'jarvis.uso', INTRO: 'jarvis.intro.dia' };
   var ACOES = ['carregarDados', 'salvarResposta', 'enviarLote', 'carregarAgenda', 'decidirPlano', 'resumoCentral', 'pushInfo', 'salvarPush', 'testarPush', 'removerPush', 'aparelhos', 'revogar',
-    'desbloquear', 'desbloquearPin', 'faceRegistrar', 'faceDesligar', 'travar', 'voz'];
+    'desbloquear', 'desbloquearPin', 'faceRegistrar', 'faceDesligar', 'travar', 'voz', 'saudacoes'];
   var LIVRES = { parear: 1, entrarFace: 1, desbloquear: 1, desbloquearPin: 1, ping: 1, travar: 1 }; // não esperam a trava
   var iniciado = false, memToken = '';
   try { localStorage.removeItem('jarvis.modo'); } catch (e) {} // Mark III: modo "abrir direto" não existe mais
@@ -970,7 +972,12 @@
     var ss = document.querySelectorAll('script[type="text/x-central"]');
     for (var i = 0; i < ss.length; i++) { var n = document.createElement('script'); n.text = ss[i].textContent; ss[i].parentNode.replaceChild(n, ss[i]); }
   }
+  function buscarSaudacoes() {
+    var I = window.JarvisIntro; if (!I || !I.saudacoesPrecisa || !I.saudacoesPrecisa()) return;
+    chamar('saudacoes', []).then(function (r) { if (r && r.dia) I.saudacoesGuardar(r); }, function () {});
+  }
   function abertura() {
+    buscarSaudacoes();
     // intro: completa na 1ª abertura do dia, curta nas outras; depois o link da notificação; depois 1 convite por vez
     // Mark VI 6.2.0: o "dia" é o de São Paulo (intro longa uma vez por dia, mesmo com o iPhone em outro fuso)
     var I = window.JarvisIntro, hoje = I && I.diaSP ? I.diaSP() : hojeLocal(), cheia = I && I.modoDoDia ? I.modoDoDia(lsGet(LS.INTRO)) === 'cheia' : lsGet(LS.INTRO) !== hoje;
@@ -2094,6 +2101,22 @@
     x.strokeStyle = 'rgba(' + CIANO + ',.55)'; x.lineWidth = 1.4 * e;
     for (k = 0; k < 3; k++) { var b0 = -ang * 0.5 + k * 2.094; x.beginPath(); x.arc(cx, cy, R * 0.66, b0, b0 + 1.2); x.stroke(); }
     x.fillStyle = 'rgba(' + OURO + ',.9)'; var ao = ang * 0.35; x.beginPath(); x.arc(cx + Math.cos(ao) * R * 0.66, cy + Math.sin(ao) * R * 0.66, 2 * e, 0, 7); x.fill();
+    /* Mark VII 7.1 — mais Jarvis: varredura de radar com rastro, anel tracejado em contra-giro, hexágono central que respira e 3 satélites */
+    var pulso = calmo ? 0.5 : (Math.sin(tt * 1.7) + 1) / 2;
+    if (!calmo) {
+      var sa = tt * 1.1;
+      for (k = 0; k < 16; k++) { x.strokeStyle = 'rgba(' + CIANO + ',' + ((1 - k / 16) * 0.2).toFixed(3) + ')'; x.lineWidth = R * 0.5; x.beginPath(); x.arc(cx, cy, R * 0.5, sa - k * 0.06 - 0.06, sa - k * 0.06); x.stroke(); }
+      x.strokeStyle = 'rgba(' + CIANO + ',.7)'; x.lineWidth = Math.max(0.8, 1.1 * e); x.beginPath(); x.moveTo(cx + Math.cos(sa) * R * 0.25, cy + Math.sin(sa) * R * 0.25); x.lineTo(cx + Math.cos(sa) * R * 0.75, cy + Math.sin(sa) * R * 0.75); x.stroke();
+    }
+    x.save(); x.setLineDash([2 * e, 6 * e]); x.lineDashOffset = -ang * 14 * e; x.strokeStyle = 'rgba(' + CIANO + ',.32)'; x.lineWidth = Math.max(0.6, e); x.beginPath(); x.arc(cx, cy, R * 1.0, 0, 7); x.stroke(); x.restore();
+    var hr = R * (0.2 + 0.015 * pulso), hg = x.createRadialGradient(cx, cy, 0, cx, cy, hr * 2.2);
+    hg.addColorStop(0, 'rgba(' + CIANO + ',' + (0.30 + 0.25 * pulso).toFixed(3) + ')'); hg.addColorStop(1, 'rgba(' + CIANO + ',0)');
+    x.fillStyle = hg; x.beginPath(); x.arc(cx, cy, hr * 2.2, 0, 7); x.fill();
+    x.strokeStyle = 'rgba(' + OURO + ',' + (0.5 + 0.4 * pulso).toFixed(3) + ')'; x.lineWidth = Math.max(0.8, 1.3 * e); x.beginPath();
+    for (k = 0; k < 6; k++) { var ha = ang * 0.25 + k * Math.PI / 3; k ? x.lineTo(cx + Math.cos(ha) * hr, cy + Math.sin(ha) * hr) : x.moveTo(cx + Math.cos(ha) * hr, cy + Math.sin(ha) * hr); }
+    x.closePath(); x.stroke();
+    for (k = 0; k < 3; k++) { var sg = ang * (0.8 + k * 0.35) + k * 2.1, sr = R * (0.36 + k * 0.05); x.fillStyle = 'rgba(' + CIANO + ',.95)'; x.shadowColor = 'rgba(' + CIANO + ',.9)'; x.shadowBlur = 6 * e; x.beginPath(); x.arc(cx + Math.cos(sg) * sr, cy + Math.sin(sg) * sr, 1.4 * e, 0, 7); x.fill(); }
+    x.shadowBlur = 0;
     x.restore();
   }
   function loop(t) { if (!visivel()) { raf = 0; return; } if (t - ult > 33 && !document.body.classList.contains('intro-nucleo')) { ult = t; quadro(t); } raf = requestAnimationFrame(loop); } // durante a intro o reator dela está por cima
@@ -2775,6 +2798,31 @@
     }
     contexto(); // cria já (suspenso no iOS) para decodificar a vinheta antes da intro; o 1º toque liga
 
+    /* ---- Saudação da Mariana (Mark VII 7.1): vem do servidor uma vez, fica no aparelho e toca em TODA abertura ---- */
+    var SAUD_CH = 'jarvis.saudacoes.v1', bufsSaud = {};
+    function saudLer() { try { return JSON.parse(localStorage.getItem(SAUD_CH) || 'null'); } catch (e) { return null; } }
+    function saudGuardar(r) { try { localStorage.setItem(SAUD_CH, JSON.stringify({ dia: r.dia, tarde: r.tarde, noite: r.noite, em: diaSP(new Date()) })); } catch (e) {} bufsSaud = {}; }
+    function saudPrecisa() { var s = saudLer(); return !s || !s.dia || s.em !== diaSP(new Date()); } // renova 1x por dia (barato: ~45 KB)
+    function bytesDe(b64) { var bin = atob(b64), n = bin.length, u = new Uint8Array(n); for (var i = 0; i < n; i++) u[i] = bin.charCodeAt(i); return u; }
+    function tocarPorAudio(b64) {
+      try { var a = new Audio(URL.createObjectURL(new Blob([bytesDe(b64)], { type: 'audio/mpeg' }))); a.volume = 0.95; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    }
+    /** Toca a saudação do período. Sem arquivo ainda (1ª vez), fica em silêncio. Devolve true se havia o que tocar. */
+    function tocarSaudacao(per) {
+      var s = saudLer(), b64 = s && (s[per] || s.dia); if (!b64) return false;
+      var c = contexto();
+      if (c && c.state === 'running') {
+        var tocar = function (buf) { try { var g = c.createGain(); g.gain.value = 0.95; var f = c.createBufferSource(); f.buffer = buf; f.connect(g); g.connect(c.destination); f.start(0); } catch (e) { tocarPorAudio(b64); } };
+        if (bufsSaud[per]) { tocar(bufsSaud[per]); return true; }
+        try {
+          var ab = bytesDe(b64).buffer, ok = function (d) { bufsSaud[per] = d; tocar(d); }, p = c.decodeAudioData(ab, ok, function () { tocarPorAudio(b64); });
+          if (p && p.then) p.then(ok, function () {});
+          return true;
+        } catch (e) {}
+      }
+      tocarPorAudio(b64); return true;
+    }
+
     /* ---- partículas ---- */
     function esfera(n) { // pontos espalhados por igual na esfera (espiral de Fibonacci)
       var ps = [], g = Math.PI * (3 - Math.sqrt(5));
@@ -3087,7 +3135,7 @@
 
     /* Voz da saudação: um só ponto de troca. Hoje: JarvisFala.saudar(periodo) (voz/otimo-dia.mp3, como antes).
        Para a voz nova: JarvisIntro.definirVoz(function (periodo) { ... }) ou troque VOZ_SAUDACAO em JarvisFala. */
-    var vozSaudacao = function (periodo) { if (window.JarvisFala && JarvisFala.saudar) JarvisFala.saudar(periodo); };
+    var vozSaudacao = function (periodo) { if (!tocarSaudacao(periodo) && window.JarvisFala && JarvisFala.saudar) JarvisFala.saudar(periodo); };
     function periodo(d) { var h = partesSP(d).h; return h >= 5 && h < 12 ? 'dia' : h >= 12 && h < 18 ? 'tarde' : 'noite'; }
     function falarSaudacao() { try { vozSaudacao(periodo()); } catch (e) {} }
 
@@ -3117,12 +3165,12 @@
       function medir() { W = window.innerWidth; H = window.innerHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.width = W + 'px'; cv.style.height = H + 'px';
         R = Math.min(W, H) * (cheia ? 0.3 : 0.2); CX = W / 2; CY = H * (cheia ? 0.45 : 0.42); el.style.setProperty('--cy', CY + 'px'); el.style.setProperty('--r', R + 'px'); }
       medir();
-      var N = cheia ? 760 : 380, ps = esfera(N), alvos = [];
+      var N = cheia ? 540 : 300, ps = esfera(N), alvos = [];
       if (cheia && !calmo) { alvos = pontosTexto('JARVIS', Math.min(W * 0.78, 420), Math.round(N * 0.72)); for (var i = 0; i < alvos.length; i++) { ps[i].alvo = true; ps[i].tx = alvos[i].x; ps[i].ty = alvos[i].y; } }
       var DUR = calmo ? (cheia ? 1800 : 1000) : (cheia ? 6300 : 1300), t0 = performance.now(), raf = 0, acabou = false, falou = false, fases = {};
 
       function fase(nome) { if (fases[nome]) return; fases[nome] = true; el.classList.add(nome); el.setAttribute('data-fase', nome);
-        if (nome === 'f-oi' && cheia && !falou) { falou = true; falarSaudacao(); } // saudação falada de sempre, depois da vinheta
+        if (nome === 'f-oi' && !falou) { falou = true; falarSaudacao(); } // saudação falada de sempre, depois da vinheta
         if (nome === 'f-monta') { b.classList.add('intro-monta'); }
       }
       function quadro(agoraMs) {
@@ -3180,7 +3228,7 @@
       function limparCorpo() { b.classList.remove('intro-esconde'); b.classList.remove('intro-monta'); }
       function sair(ja) {
         if (acabou) return; acabou = true; cancelAnimationFrame(raf); ativo = null;
-        if (cheia && !falou) { falou = true; falarSaudacao(); } // como antes: a intro longa sempre traz a saudação falada
+        if (!falou) { falou = true; falarSaudacao(); } // como antes: a intro longa sempre traz a saudação falada
         if (ja) pararVinheta(); else tocandoIntro = false;
         el.classList.add('sai'); limparCorpo();
         window.removeEventListener('resize', medir); document.removeEventListener('visibilitychange', oculto);
@@ -3194,7 +3242,8 @@
       else raf = requestAnimationFrame(loop);
     }
     return { mostrar: mostrar, saudacao: saudacao, diaSP: diaSP, modoDoDia: modoDoDia, horaTx: horaTx, dataTx: dataTx, periodo: periodo, dadosHud: dadosHud,
-      definirVoz: function (fn) { if (typeof fn === 'function') vozSaudacao = fn; } };
+      definirVoz: function (fn) { if (typeof fn === 'function') vozSaudacao = fn; },
+      saudacoesPrecisa: saudPrecisa, saudacoesGuardar: saudGuardar };
   })();
   window.JarvisIntro = Intro;
 
@@ -3262,9 +3311,9 @@
     /** Saudação neural (sem dados pessoais). Se o iPhone não deixar tocar sem toque, fica em silêncio. */
     /* Arquivos da saudação falada por período. Hoje só existe o de 'dia' (os outros usam o mesmo, como antes).
        Quando o Kaio escolher a voz nova: gerar os MP3 e trocar só aqui (ex.: tarde: 'voz/otima-tarde.mp3'). */
-    var VOZ_SAUDACAO = { dia: 'voz/otimo-dia.mp3', tarde: '', noite: '' };
+    var VOZ_SAUDACAO = { dia: '', tarde: '', noite: '' }; // Mark VII 7.1: sem voz masculina de reserva; a saudação vem da Mariana (Intro)
     function saudar(periodo) {
-      var f = VOZ_SAUDACAO[periodo] || VOZ_SAUDACAO.dia;
+      var f = VOZ_SAUDACAO[periodo] || VOZ_SAUDACAO.dia; if (!f) return;
       try { var a = new Audio(f); a.volume = 0.9; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
     }
     if (window.speechSynthesis && speechSynthesis.getVoices) try { speechSynthesis.getVoices(); } catch (e) {}
