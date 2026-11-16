@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Jarvis · Central Mark VII (7.1.0) · a partir daqui o código-fonte é ESTE arquivo (GitHub); o build_pages.js do Apps Script não deve mais sobrescrevê-lo. -->
+<!-- Jarvis · Central Mark VIII (8.0.0) · a partir daqui o código-fonte é ESTE arquivo (GitHub); o build_pages.js do Apps Script não deve mais sobrescrevê-lo. -->
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -11,7 +11,7 @@
 <title>Jarvis</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="application-name" content="Jarvis">
-<meta name="description" content="Central Mark VII do Kaio">
+<meta name="description" content="Central Mark VIII do Kaio">
 <meta name="referrer" content="no-referrer">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -503,7 +503,7 @@
       <span class="logo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2d38"/><stop offset="1" stop-color="#14161c"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd666"/><stop offset="1" stop-color="#E0B000"/></linearGradient><radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#3FC1E8" stop-opacity=".55"/><stop offset="1" stop-color="#3FC1E8" stop-opacity="0"/></radialGradient></defs><rect rx="112" fill="url(#bg)"/><circle cx="256" cy="256" r="200" fill="url(#glow)"/><path d="M256.0 106.0 A150 150 0 0 1 360.1987555688496 148.09902994920233" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M385.9038105676658 181.0 A150 150 0 0 1 401.5443589413995 292.28828433995017" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M385.9038105676658 331.0 A150 150 0 0 1 297.3456033725499 400.1892543907478" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M256.0 406.0 A150 150 0 0 1 151.8012444311504 363.9009700507977" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M126.0961894323342 331.0 A150 150 0 0 1 110.45564105860052 219.7117156600499" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M126.0961894323342 181.0 A150 150 0 0 1 214.65439662745018 111.81074560925214" stroke="#3FC1E8" stroke-width="22" fill="none" stroke-linecap="round"/><circle cx="256" cy="256" r="98" fill="none" stroke="#3FC1E8" stroke-opacity=".45" stroke-width="6"/><path d="M256 186 L318 294 L194 294 Z" fill="url(#gold)"/><circle cx="256" cy="258" r="20" fill="#14161c"/></svg></span>
       <div class="marca-tx">
         <div class="marca-t">Jarvis</div>
-        <div class="marca-s" id="versao">Mark V</div>
+        <div class="marca-s" id="versao">Mark VIII</div>
       </div>
     </div>
     <button class="sync" id="sync" type="button" title="Estado do salvamento">…</button>
@@ -614,7 +614,7 @@
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '7.1.0'; window.JARVIS_APP_MARCA = 'Mark VII'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '8.0.0'; window.JARVIS_APP_MARCA = 'Mark VIII'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -634,7 +634,7 @@
   var LS = { TOKEN: 'jarvis.token', ID: 'jarvis.aparelho.id', CACHE: 'jarvis.cache.dados', PUSHDIA: 'jarvis.push.dia', PUSHNAO: 'jarvis.push.dispensado',
     FACE: 'jarvis.face', FACENAO: 'jarvis.face.dispensado', USO: 'jarvis.uso', INTRO: 'jarvis.intro.dia' };
   var ACOES = ['carregarDados', 'salvarResposta', 'enviarLote', 'carregarAgenda', 'decidirPlano', 'resumoCentral', 'pushInfo', 'salvarPush', 'testarPush', 'removerPush', 'aparelhos', 'revogar',
-    'desbloquear', 'desbloquearPin', 'faceRegistrar', 'faceDesligar', 'travar', 'voz', 'saudacoes'];
+    'desbloquear', 'desbloquearPin', 'faceRegistrar', 'faceDesligar', 'travar', 'voz', 'saudacoes', 'frase'];
   var LIVRES = { parear: 1, entrarFace: 1, desbloquear: 1, desbloquearPin: 1, ping: 1, travar: 1 }; // não esperam a trava
   var iniciado = false, memToken = '';
   try { localStorage.removeItem('jarvis.modo'); } catch (e) {} // Mark III: modo "abrir direto" não existe mais
@@ -976,6 +976,27 @@
     var I = window.JarvisIntro; if (!I || !I.saudacoesPrecisa || !I.saudacoesPrecisa()) return;
     chamar('saudacoes', []).then(function (r) { if (r && r.dia) I.saudacoesGuardar(r); }, function () {});
   }
+  /** Mark VIII: o que a Mariana fala ao abrir. 1ª do dia: saudação + resumo do dia. Depois: boas-vindas com o que ainda falta (ou dia finalizado). */
+  function definirFalaEntrada(cheia) {
+    var I = window.JarvisIntro; if (!I || !I.definirVoz) return;
+    var pedir = function (t) { return chamar('frase', [t]).then(function (r) { return r && r.b64; }); };
+    I.definirVoz(function (per) {
+      var A = window.CentralAPI, d = window.DADOS || {};
+      if (cheia) {
+        I.tocarSaudacao(per, function () {
+          chamar('voz', []).then(function (r) { if (r && r.mp3) I.tocarB64(r.mp3, 'resumo'); }, function () {});
+        });
+        return;
+      }
+      var n = A && A.itens ? A.itens().filter(A.ehPendente).length : 0, t;
+      if (n > 0) t = 'Bem-vindo de volta, Kaio. No que posso te ajudar? Você ainda tem ' + n + (n === 1 ? ' pendência' : ' pendências') + ' hoje.';
+      else {
+        var xp = d.xpKaio || 0, por = d.xpPorNivel || 100;
+        t = 'Tudo certo, Kaio. Seu dia foi finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.';
+      }
+      I.falarFrase(t, pedir);
+    });
+  }
   function abertura() {
     buscarSaudacoes();
     // intro: completa na 1ª abertura do dia, curta nas outras; depois o link da notificação; depois 1 convite por vez
@@ -983,6 +1004,7 @@
     var I = window.JarvisIntro, hoje = I && I.diaSP ? I.diaSP() : hojeLocal(), cheia = I && I.modoDoDia ? I.modoDoDia(lsGet(LS.INTRO)) === 'cheia' : lsGet(LS.INTRO) !== hoje;
     lsSet(LS.INTRO, hoje);
     var depois = function () { abrirAlvo(alvo); alvo = null; setTimeout(convites, 600); };
+    definirFalaEntrada(cheia);
     if (window.JarvisIntro && !(alvo && !cheia)) JarvisIntro.mostrar(cheia ? 'cheia' : 'curta', depois); else depois();
   }
   function iniciarApp(d, travar) {
@@ -1124,7 +1146,7 @@
     function fechar() { f.remove(); }
     f.addEventListener('click', function (e) { if (e.target === f || e.target.hasAttribute('data-x')) fechar(); });
     var D = window.DADOS || {}, gi = Guarda.info();
-    $('ajVer').textContent = 'Jarvis · Central ' + (D.marca || 'Mark V') + (window.JARVIS_APP_VERSAO && String(window.JARVIS_APP_VERSAO).indexOf('__') < 0 ? ' ' + window.JARVIS_APP_VERSAO : '') + ' · servidor ' + (D.versao || '?') + ' · ' + nomeAparelho() + (gi.persistente ? ' · armazenamento persistente' : '');
+    $('ajVer').textContent = 'Jarvis · Central ' + (D.marca || 'Mark VIII') + (window.JARVIS_APP_VERSAO && String(window.JARVIS_APP_VERSAO).indexOf('__') < 0 ? ' ' + window.JARVIS_APP_VERSAO : '') + ' · servidor ' + (D.versao || '?') + ' · ' + nomeAparelho() + (gi.persistente ? ' · armazenamento persistente' : '');
     $('ajAtual').onclick = function () { fechar(); if (window.CentralAPI) CentralAPI.recarregar(); };
     $('ajSair').onclick = function () { if (confirm('Desconectar este aparelho? Para voltar, digite o código de pareamento de novo.')) sair(); };
     Face.disponivel().then(function (ok) {
@@ -1852,7 +1874,7 @@
   }
 
   // Mark VI 6.2.0: o rótulo mostra a versão do app (vem do build do Pages; no Apps Script fica só a Marca)
-  function rotuloVersao(d) { var v = window.JARVIS_APP_VERSAO, m = window.JARVIS_APP_MARCA; return ((m && String(m).indexOf('__') < 0 ? m : '') || d.marca || 'Mark V') /* Mark VII: o nome vem do build do app (o servidor pode estar numa versão anterior) */ + (v && String(v).indexOf('__') < 0 ? ' ' + v : ''); }
+  function rotuloVersao(d) { var v = window.JARVIS_APP_VERSAO, m = window.JARVIS_APP_MARCA; return ((m && String(m).indexOf('__') < 0 ? m : '') || d.marca || 'Mark VIII') /* Mark VII: o nome vem do build do app (o servidor pode estar numa versão anterior) */ + (v && String(v).indexOf('__') < 0 ? ' ' + v : ''); }
   function iniciar(d) {
     $('banners').innerHTML = '';
     if (d.erro) {
@@ -2807,20 +2829,41 @@
     function tocarPorAudio(b64) {
       try { var a = new Audio(URL.createObjectURL(new Blob([bytesDe(b64)], { type: 'audio/mpeg' }))); a.volume = 0.95; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
     }
-    /** Toca a saudação do período. Sem arquivo ainda (1ª vez), fica em silêncio. Devolve true se havia o que tocar. */
-    function tocarSaudacao(per) {
-      var s = saudLer(), b64 = s && (s[per] || s.dia); if (!b64) return false;
-      var c = contexto();
+    /** Toca um MP3 (base64) pelo AudioContext já destravado no 1º toque (iOS); sem contexto, cai no <audio>. fim() ao terminar. */
+    function tocarB64(b64, chave, fim) {
+      if (!b64) { fim && fim(); return false; }
+      var c = contexto(), feito = false, acabar = function () { if (!feito) { feito = true; fim && fim(); } };
+      var porAudio = function () {
+        try { var a = new Audio(URL.createObjectURL(new Blob([bytesDe(b64)], { type: 'audio/mpeg' }))); a.volume = 0.95; a.onended = acabar; a.onerror = acabar; var p = a.play(); if (p && p.catch) p.catch(acabar); } catch (e) { acabar(); }
+      };
       if (c && c.state === 'running') {
-        var tocar = function (buf) { try { var g = c.createGain(); g.gain.value = 0.95; var f = c.createBufferSource(); f.buffer = buf; f.connect(g); g.connect(c.destination); f.start(0); } catch (e) { tocarPorAudio(b64); } };
-        if (bufsSaud[per]) { tocar(bufsSaud[per]); return true; }
+        var tocar = function (buf) { try { var g = c.createGain(); g.gain.value = 0.95; var f = c.createBufferSource(); f.buffer = buf; f.connect(g); g.connect(c.destination); f.onended = acabar; f.start(0); } catch (e) { porAudio(); } };
+        if (chave && bufsSaud[chave]) { tocar(bufsSaud[chave]); return true; }
         try {
-          var ab = bytesDe(b64).buffer, ok = function (d) { bufsSaud[per] = d; tocar(d); }, p = c.decodeAudioData(ab, ok, function () { tocarPorAudio(b64); });
+          var ab = bytesDe(b64).buffer, ok = function (d) { if (chave) bufsSaud[chave] = d; tocar(d); }, p = c.decodeAudioData(ab, ok, porAudio);
           if (p && p.then) p.then(ok, function () {});
           return true;
         } catch (e) {}
       }
-      tocarPorAudio(b64); return true;
+      porAudio(); return true;
+    }
+    /** Toca a saudação do período. Sem arquivo ainda (1ª vez), fica em silêncio. Devolve true se havia o que tocar. */
+    function tocarSaudacao(per, fim) {
+      var s = saudLer(), b64 = s && (s[per] || s.dia); if (!b64) { fim && fim(); return false; }
+      return tocarB64(b64, per, fim);
+    }
+    /** Mark VIII: frases com dados do momento ("você ainda tem 15 pendências"). Geradas no servidor (voz da Mariana) e guardadas no aparelho. */
+    var FR_CH = 'jarvis.frases.v1';
+    function frasesLer() { try { return JSON.parse(localStorage.getItem(FR_CH) || '{}') || {}; } catch (e) { return {}; } }
+    function frasesGuardar(t, b64) {
+      try { var f = frasesLer(), ks = Object.keys(f); while (ks.length >= 4) delete f[ks.shift()]; f[t] = b64; localStorage.setItem(FR_CH, JSON.stringify(f)); } catch (e) {}
+    }
+    /** pedir(texto) -> Promise<b64>; toca assim que chegar (instantâneo se o mesmo texto já foi falado antes). */
+    function falarFrase(texto, pedir, fim) {
+      var f = frasesLer(); if (f[texto]) return tocarB64(f[texto], 'fr:' + texto, fim);
+      if (!pedir) { fim && fim(); return false; }
+      pedir(texto).then(function (b64) { if (b64) { frasesGuardar(texto, b64); tocarB64(b64, 'fr:' + texto, fim); } else fim && fim(); }, function () { fim && fim(); });
+      return true;
     }
 
     /* ---- partículas ---- */
@@ -3243,7 +3286,7 @@
     }
     return { mostrar: mostrar, saudacao: saudacao, diaSP: diaSP, modoDoDia: modoDoDia, horaTx: horaTx, dataTx: dataTx, periodo: periodo, dadosHud: dadosHud,
       definirVoz: function (fn) { if (typeof fn === 'function') vozSaudacao = fn; },
-      saudacoesPrecisa: saudPrecisa, saudacoesGuardar: saudGuardar };
+      saudacoesPrecisa: saudPrecisa, saudacoesGuardar: saudGuardar, tocarB64: tocarB64, tocarSaudacao: tocarSaudacao, falarFrase: falarFrase };
   })();
   window.JarvisIntro = Intro;
 
