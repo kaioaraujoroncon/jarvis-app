@@ -1,0 +1,10 @@
+{
+  "appId": "br.com.kaioaraujo.jarvis",
+  "appName": "Jarvis",
+  "webDir": "www",
+  "ios": { "contentInset": "never", "backgroundColor": "#0E0F13", "limitsNavigationsToAppBoundDomains": false },
+  "plugins": {
+    "SplashScreen": { "launchAutoHide": true, "backgroundColor": "#0E0F13" },
+    "StatusBar": { "style": "DARK", "overlaysWebView": true }
+  }
+}
