@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jarvis v2 (teste Supabase)</title>
+<style>body{font-family:system-ui,sans-serif;background:#0b1020;color:#e8ecf5;margin:0;padding:16px;max-width:640px;margin:auto}input,button{font-size:16px;padding:12px;border-radius:10px;border:1px solid #334;background:#141b33;color:#fff;width:100%;box-sizing:border-box;margin-top:8px}button{background:#2f6bff;border:0}.it{background:#141b33;border-radius:12px;padding:12px;margin:8px 0}.s{opacity:.7;font-size:13px}#msg{margin-top:10px}</style></head>
+<body><h2>Jarvis v2</h2><p class="s">Página de teste ligada ao Supabase. O app oficial continua em index.html.</p>
+<div id="login"><input id="email" type="email" placeholder="seu e-mail" autocomplete="email"><button id="enviar">Enviar link de acesso</button></div>
+<div id="app" hidden><div class="s" id="quem"></div><div id="lista"></div><button id="sair">Sair</button></div>
+<div id="msg" class="s"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var sb=supabase.createClient('https://qydpjcudcnirhybwlnhs.supabase.co','sb_publishable_41C_vG_CaaYvwiNhyGb88A_yQgSwqC1');
+var $=function(i){return document.getElementById(i)};
+function msg(t){$('msg').textContent=t}
+$('enviar').onclick=async function(){var e=$('email').value.trim();if(!e)return msg('Digite o e-mail.');msg('Enviando...');
+var r=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:false}});
+msg(r.error?('Erro: '+r.error.message):'Link enviado. Abra o e-mail neste aparelho.')};
+$('sair').onclick=async function(){await sb.auth.signOut();location.reload()};
+async function mostrar(s){$('login').hidden=true;$('app').hidden=false;$('quem').textContent='Conectado: '+s.user.email;
+var r=await sb.from('itens').select('id,titulo,prazo,status,tipo').eq('ativo',true).order('prazo',{ascending:true,nullsFirst:false});
+if(r.error)return msg('Erro ao ler: '+r.error.message);
+$('lista').innerHTML='';r.data.forEach(function(i){var d=document.createElement('div');d.className='it';
+var a=document.createElement('div');a.textContent=i.titulo;var b=document.createElement('div');b.className='s';b.textContent=(i.prazo||'sem prazo')+' · '+i.tipo+' · '+i.status;d.appendChild(a);d.appendChild(b);$('lista').appendChild(d)});
+msg(r.data.length+' itens ativos.')}
+sb.auth.getSession().then(function(x){if(x.data.session)mostrar(x.data.session)});
+sb.auth.onAuthStateChange(function(ev,s){if(s&&ev==='SIGNED_IN')mostrar(s)});
+</script></body></html>
