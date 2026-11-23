@@ -13,7 +13,7 @@ button{background:#2f6bff;border:0;cursor:pointer}button.sec{background:#1d2747}
 textarea{width:100%;margin-top:8px;min-height:44px}#msg{position:fixed;left:0;right:0;bottom:0;background:#141b33;padding:10px 14px;font-size:14px}
 </style></head><body>
 <div id="login"><h2>Jarvis v2</h2><p class="s">Entre com o seu e-mail. Você recebe um link de acesso.</p>
-<input class="full" id="email" type="email" placeholder="seu e-mail" autocomplete="email"><button class="full" id="enviar">Enviar link de acesso</button></div>
+<input class="full" id="email" type="email" placeholder="seu e-mail" autocomplete="email"><button class="full" id="enviar">Enviar código e link de acesso</button><input class="full" id="cod" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Código do e-mail" hidden><button class="full ok" id="entrar" hidden>Entrar com o código</button></div>
 <div id="app" hidden><div class="top"><h2>Jarvis v2</h2><span class="xp" id="xp">XP 0</span></div>
 <div class="s" id="quem"></div><button class="sec full" id="ouvir">🔊 Ouvir resumo do dia</button><div class="chips" id="chips"></div><div id="lista"></div>
 <button class="sec full" id="sair">Sair</button></div>
@@ -29,7 +29,8 @@ function br(d){return d?d.split('-').reverse().join('/'):'sem prazo'}
 function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
 $('enviar').onclick=async function(){var e=$('email').value.trim();if(!e)return msg('Digite o e-mail.');msg('Enviando...');
 var r=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:false}});
-msg(r.error?('Erro: '+r.error.message):'Link enviado. Abra o e-mail neste aparelho.')};
+if(r.error)return msg('Erro: '+r.error.message);msg('Enviado. Digite o código do e-mail ou toque no link.');$('cod').hidden=false;$('entrar').hidden=false};
+$('entrar').onclick=async function(){var e=$('email').value.trim(),c=$('cod').value.replace(/\s/g,'');if(!e||!c)return msg('Digite o e-mail e o código.');msg('Entrando...');var r=await sb.auth.verifyOtp({email:e,token:c,type:'email'});if(r.error)return msg('Erro: '+r.error.message);if(r.data&&r.data.session)mostrar(r.data.session)};
 $('sair').onclick=async function(){await sb.auth.signOut();location.reload()};
 var F={decidir:function(i){return i.status==='aberto'||(i.status==='adiado'&&(!i.adiado_ate||i.adiado_ate<=hoje()))},
 missoes:function(i){return i.missao===true&&i.status!=='respondido'},
