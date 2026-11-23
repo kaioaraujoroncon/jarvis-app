@@ -15,7 +15,7 @@ textarea{width:100%;margin-top:8px;min-height:44px}#msg{position:fixed;left:0;ri
 <div id="login"><h2>Jarvis v2</h2><p class="s">Entre com o seu e-mail. Você recebe um link de acesso.</p>
 <input class="full" id="email" type="email" placeholder="seu e-mail" autocomplete="email"><button class="full" id="enviar">Enviar link de acesso</button></div>
 <div id="app" hidden><div class="top"><h2>Jarvis v2</h2><span class="xp" id="xp">XP 0</span></div>
-<div class="s" id="quem"></div><div class="chips" id="chips"></div><div id="lista"></div>
+<div class="s" id="quem"></div><button class="sec full" id="ouvir">🔊 Ouvir resumo do dia</button><div class="chips" id="chips"></div><div id="lista"></div>
 <button class="sec full" id="sair">Sair</button></div>
 <div id="msg"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -66,6 +66,12 @@ var r=await sb.from('itens').select('*').eq('ativo',true);
 if(r.error)return msg('Erro ao ler: '+r.error.message);itens=r.data;
 var x=await sb.from('xp_eventos').select('pontos');xpTotal=x.data?x.data.reduce(function(a,b){return a+(b.pontos||0)},0):0;
 msg('');desenhar()}
+
+function resumoTexto(){var h=new Date().getHours();var s=h<12?'Bom dia':(h<18?'Boa tarde':'Boa noite');var d=itens.filter(F.decidir).sort(function(a,b){return (a.prazo||'9999')<(b.prazo||'9999')?-1:1});
+var at=d.filter(function(i){return i.prazo&&i.prazo<hoje()}).length;var t=s+', Kaio. Você tem '+d.length+(d.length===1?' item para decidir':' itens para decidir')+(at?', e '+at+(at===1?' está atrasado':' estão atrasados'):'')+'.';
+if(d.length){t+=' Os primeiros são: '+d.slice(0,3).map(function(i){return i.titulo.replace(/[?:]/g,'')}).join('. ')+'.'}var m=itens.filter(F.missoes).length;if(m)t+=' Missões do dia: '+m+'.';return t}
+$('ouvir').onclick=function(){var ss=window.speechSynthesis;if(!ss)return msg('Este aparelho não tem voz.');if(ss.speaking){ss.cancel();return msg('')}
+var u=new SpeechSynthesisUtterance(resumoTexto());u.lang='pt-BR';var v=ss.getVoices().filter(function(x){return /pt[-_]BR/i.test(x.lang)})[0];if(v)u.voice=v;u.onend=function(){msg('')};msg('Falando... toque de novo para parar.');ss.speak(u)};
 sb.auth.getSession().then(function(x){if(x.data.session)mostrar(x.data.session)});
 sb.auth.onAuthStateChange(function(ev,s){if(s&&ev==='SIGNED_IN'&&$('app').hidden)mostrar(s)});
 </script></body></html>
