@@ -1,26 +1,71 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Jarvis v2 (teste Supabase)</title>
-<style>body{font-family:system-ui,sans-serif;background:#0b1020;color:#e8ecf5;margin:0;padding:16px;max-width:640px;margin:auto}input,button{font-size:16px;padding:12px;border-radius:10px;border:1px solid #334;background:#141b33;color:#fff;width:100%;box-sizing:border-box;margin-top:8px}button{background:#2f6bff;border:0}.it{background:#141b33;border-radius:12px;padding:12px;margin:8px 0}.s{opacity:.7;font-size:13px}#msg{margin-top:10px}</style></head>
-<body><h2>Jarvis v2</h2><p class="s">Página de teste ligada ao Supabase. O app oficial continua em index.html.</p>
-<div id="login"><input id="email" type="email" placeholder="seu e-mail" autocomplete="email"><button id="enviar">Enviar link de acesso</button></div>
-<div id="app" hidden><div class="s" id="quem"></div><div id="lista"></div><button id="sair">Sair</button></div>
-<div id="msg" class="s"></div>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jarvis v2</title>
+<style>
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;background:#0b1020;color:#e8ecf5;margin:0;padding:14px;padding-bottom:60px;max-width:680px;margin:auto}
+h2{margin:6px 0}input,button,textarea{font-size:16px;padding:11px;border-radius:10px;border:1px solid #2a3558;background:#141b33;color:#fff;font-family:inherit}
+button{background:#2f6bff;border:0;cursor:pointer}button.sec{background:#1d2747}button.ok{background:#1f9d62}button:disabled{opacity:.5}
+.full{width:100%;margin-top:8px}.top{display:flex;justify-content:space-between;align-items:center}.xp{background:#1d2747;border-radius:20px;padding:6px 12px;font-size:14px}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:10px 0}.chips button{white-space:nowrap;background:#1d2747;padding:8px 12px;font-size:14px}.chips button.on{background:#2f6bff}
+.it{background:#141b33;border-radius:14px;padding:13px;margin:10px 0}.t{font-weight:600;line-height:1.3}.s{opacity:.7;font-size:13px;margin-top:4px}.late{color:#ff7a7a;opacity:1}
+.nota{white-space:pre-wrap;font-size:14px;opacity:.85;margin-top:8px;background:#0f1630;padding:9px;border-radius:8px}
+.ops{display:flex;flex-direction:column;gap:6px;margin-top:10px}.row{display:flex;gap:6px;margin-top:8px}.row input{flex:1;min-width:0}
+textarea{width:100%;margin-top:8px;min-height:44px}#msg{position:fixed;left:0;right:0;bottom:0;background:#141b33;padding:10px 14px;font-size:14px}
+</style></head><body>
+<div id="login"><h2>Jarvis v2</h2><p class="s">Entre com o seu e-mail. Você recebe um link de acesso.</p>
+<input class="full" id="email" type="email" placeholder="seu e-mail" autocomplete="email"><button class="full" id="enviar">Enviar link de acesso</button></div>
+<div id="app" hidden><div class="top"><h2>Jarvis v2</h2><span class="xp" id="xp">XP 0</span></div>
+<div class="s" id="quem"></div><div class="chips" id="chips"></div><div id="lista"></div>
+<button class="sec full" id="sair">Sair</button></div>
+<div id="msg"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 var sb=supabase.createClient('https://qydpjcudcnirhybwlnhs.supabase.co','sb_publishable_41C_vG_CaaYvwiNhyGb88A_yQgSwqC1');
 var $=function(i){return document.getElementById(i)};
-function msg(t){$('msg').textContent=t}
+var itens=[],filtro='decidir',uid=null,xpTotal=0;
+function msg(t){$('msg').textContent=t||''}
+function hoje(){return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function br(d){return d?d.split('-').reverse().join('/'):'sem prazo'}
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
 $('enviar').onclick=async function(){var e=$('email').value.trim();if(!e)return msg('Digite o e-mail.');msg('Enviando...');
 var r=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:false}});
 msg(r.error?('Erro: '+r.error.message):'Link enviado. Abra o e-mail neste aparelho.')};
 $('sair').onclick=async function(){await sb.auth.signOut();location.reload()};
-async function mostrar(s){$('login').hidden=true;$('app').hidden=false;$('quem').textContent='Conectado: '+s.user.email;
-var r=await sb.from('itens').select('id,titulo,prazo,status,tipo').eq('ativo',true).order('prazo',{ascending:true,nullsFirst:false});
-if(r.error)return msg('Erro ao ler: '+r.error.message);
-$('lista').innerHTML='';r.data.forEach(function(i){var d=document.createElement('div');d.className='it';
-var a=document.createElement('div');a.textContent=i.titulo;var b=document.createElement('div');b.className='s';b.textContent=(i.prazo||'sem prazo')+' · '+i.tipo+' · '+i.status;d.appendChild(a);d.appendChild(b);$('lista').appendChild(d)});
-msg(r.data.length+' itens ativos.')}
+var F={decidir:function(i){return i.status==='aberto'||(i.status==='adiado'&&(!i.adiado_ate||i.adiado_ate<=hoje()))},
+missoes:function(i){return i.missao===true&&i.status!=='respondido'},
+adiados:function(i){return i.status==='adiado'},
+respondidos:function(i){return i.status==='respondido'}};
+var NOMES={decidir:'Para decidir',missoes:'Missões',adiados:'Adiados',respondidos:'Respondidos'};
+function chips(){var c=$('chips');c.innerHTML='';Object.keys(F).forEach(function(k){var n=itens.filter(F[k]).length;var b=el('button',k===filtro?'on':'',NOMES[k]+' '+n);b.onclick=function(){filtro=k;desenhar()};c.appendChild(b)})}
+function desenhar(){chips();var L=$('lista');L.innerHTML='';var v=itens.filter(F[filtro]).sort(function(a,b){return (a.prazo||'9999')<(b.prazo||'9999')?-1:1});
+if(!v.length)L.appendChild(el('div','s','Nada aqui.'));v.forEach(function(i){L.appendChild(card(i))});$('xp').textContent='XP '+xpTotal}
+function card(i){var d=el('div','it');d.appendChild(el('div','t',i.titulo));
+var atras=i.prazo&&i.prazo<hoje()&&i.status!=='respondido';
+var s=el('div','s'+(atras?' late':''),br(i.prazo)+(atras?' (atrasado)':'')+' · '+i.tipo+' · '+i.status+(i.adiado_ate?' até '+br(i.adiado_ate):'')+(i.xp?' · '+i.xp+' XP':''));d.appendChild(s);
+if(i.nota){var n=el('div','nota',i.nota);d.appendChild(n)}
+if(i.status==='respondido'){return d}
+var ta=el('textarea');ta.placeholder='Comentário (opcional)';d.appendChild(ta);
+var ops=el('div','ops');var lista=Array.isArray(i.opcoes)&&i.opcoes.length?i.opcoes:['Feito'];
+lista.forEach(function(o){var b=el('button',lista.length===1?'ok':'',o);b.onclick=function(){responder(i,o,ta.value.trim(),b)};ops.appendChild(b)});d.appendChild(ops);
+var r=el('div','row');var di=el('input');di.type='date';di.min=hoje();var ba=el('button','sec','Adiar');ba.onclick=function(){if(!di.value)return msg('Escolha a data para adiar.');adiar(i,di.value,ta.value.trim(),ba)};r.appendChild(di);r.appendChild(ba);d.appendChild(r);return d}
+async function responder(i,esc,extra,btn){btn.disabled=true;msg('Salvando...');
+var a=await sb.from('respostas').insert({user_id:uid,item_id:i.id,resposta:esc,extra:extra||null});
+if(a.error){btn.disabled=false;return msg('Erro: '+a.error.message)}
+var b=await sb.from('itens').update({status:'respondido',respondido_em:new Date().toISOString(),adiado_ate:null,atualizado_em:new Date().toISOString()}).eq('id',i.id);
+if(b.error){btn.disabled=false;return msg('Erro: '+b.error.message)}
+if(i.xp){var x=await sb.from('xp_eventos').insert({user_id:uid,item_id:i.id,pontos:i.xp,motivo:'resposta'});if(!x.error)xpTotal+=i.xp}
+i.status='respondido';msg('Salvo.');desenhar()}
+async function adiar(i,data,extra,btn){btn.disabled=true;msg('Salvando...');
+var a=await sb.from('respostas').insert({user_id:uid,item_id:i.id,resposta:'adiar',extra:('adiar_para: '+data+(extra?' | '+extra:''))});
+if(a.error){btn.disabled=false;return msg('Erro: '+a.error.message)}
+var b=await sb.from('itens').update({status:'adiado',adiado_ate:data,atualizado_em:new Date().toISOString()}).eq('id',i.id);
+if(b.error){btn.disabled=false;return msg('Erro: '+b.error.message)}
+i.status='adiado';i.adiado_ate=data;msg('Adiado para '+br(data)+'.');desenhar()}
+async function mostrar(s){uid=s.user.id;$('login').hidden=true;$('app').hidden=false;$('quem').textContent='Conectado: '+s.user.email;msg('Carregando...');
+var r=await sb.from('itens').select('*').eq('ativo',true);
+if(r.error)return msg('Erro ao ler: '+r.error.message);itens=r.data;
+var x=await sb.from('xp_eventos').select('pontos');xpTotal=x.data?x.data.reduce(function(a,b){return a+(b.pontos||0)},0):0;
+msg('');desenhar()}
 sb.auth.getSession().then(function(x){if(x.data.session)mostrar(x.data.session)});
-sb.auth.onAuthStateChange(function(ev,s){if(s&&ev==='SIGNED_IN')mostrar(s)});
+sb.auth.onAuthStateChange(function(ev,s){if(s&&ev==='SIGNED_IN'&&$('app').hidden)mostrar(s)});
 </script></body></html>
