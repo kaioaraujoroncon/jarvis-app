@@ -654,7 +654,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '16.1.0'; window.JARVIS_APP_MARCA = 'Mark XVI'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '16.1.1'; window.JARVIS_APP_MARCA = 'Mark XVI'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -3420,7 +3420,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
         var tocar = function (buf) { try { var f = c.createBufferSource(); f.buffer = buf; f.connect(cadeiaVoz(c)); f.onended = acabar; f.start(0); } catch (e) { porAudio(); } };
         if (chave && bufsSaud[chave]) { tocar(bufsSaud[chave]); return true; }
         try {
-          var ab = bytesDe(b64).buffer, ok = function (d) { if (chave) bufsSaud[chave] = d; tocar(d); }, p = c.decodeAudioData(ab, ok, porAudio);
+          var ab = bytesDe(b64).buffer, feitoDec = false, ok = function (d) { if (feitoDec) return; feitoDec = true; if (chave) bufsSaud[chave] = d; tocar(d); }, p = c.decodeAudioData(ab, ok, porAudio);
           if (p && p.then) p.then(ok, function () {});
           return true;
         } catch (e) {}
