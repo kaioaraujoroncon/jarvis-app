@@ -47,15 +47,15 @@ if(i.nota){var n=el('div','nota',i.nota);d.appendChild(n)}
 if(i.status==='respondido'||i.status==='fechado'){return d}
 var ta=el('textarea');ta.placeholder='Comentário (opcional)';d.appendChild(ta);
 var ops=el('div','ops');var lista=Array.isArray(i.opcoes)&&i.opcoes.length?i.opcoes:['Feito'];
-lista.forEach(function(o){var b=el('button',lista.length===1?'ok':'',o);b.onclick=function(){responder(i,o,ta.value.trim(),b)};ops.appendChild(b)});d.appendChild(ops);
+lista.forEach(function(o){var b=el('button',lista.length===1?'ok':'',o);b.onclick=function(){responder(i,o,ta.value.trim(),b,lista.length===1&&!(Array.isArray(i.opcoes)&&i.opcoes.length))};ops.appendChild(b)});d.appendChild(ops);
 d.appendChild(el('div','s','Adiar para a data:'));var r=el('div','row');var di=el('input');di.type='date';di.min=hoje();var ba=el('button','sec','Adiar');ba.onclick=function(){if(!di.value)return msg('Escolha a data para adiar.');adiar(i,di.value,ta.value.trim(),ba)};r.appendChild(di);r.appendChild(ba);d.appendChild(r);return d}
-async function responder(i,esc,extra,btn){btn.disabled=true;msg('Salvando...');
-var a=await sb.from('respostas').insert({user_id:uid,item_id:i.id,resposta:esc,extra:extra||null});
+async function responder(i,esc,extra,btn,feito){btn.disabled=true;msg('Salvando...');var st=feito?'fechado':'respondido';
+var a=await sb.from('respostas').insert({user_id:uid,item_id:i.id,resposta:feito?'[feito]':esc,extra:extra||null});
 if(a.error){btn.disabled=false;return msg('Erro: '+a.error.message)}
-var b=await sb.from('itens').update({status:'respondido',respondido_em:new Date().toISOString(),adiado_ate:null,atualizado_em:new Date().toISOString()}).eq('id',i.id);
+var b=await sb.from('itens').update({status:st,respondido_em:new Date().toISOString(),adiado_ate:null,atualizado_em:new Date().toISOString()}).eq('id',i.id);
 if(b.error){btn.disabled=false;return msg('Erro: '+b.error.message)}
 if(i.xp){var x=await sb.from('xp_eventos').insert({user_id:uid,item_id:i.id,pontos:i.xp,motivo:'resposta'});if(!x.error)xpTotal+=i.xp}
-i.status='respondido';msg('Salvo.');desenhar()}
+i.status=st;msg('Salvo.');desenhar()}
 async function adiar(i,data,extra,btn){btn.disabled=true;msg('Salvando...');
 var a=await sb.from('respostas').insert({user_id:uid,item_id:i.id,resposta:'adiar',extra:('adiar_para: '+data+(extra?' | '+extra:''))});
 if(a.error){btn.disabled=false;return msg('Erro: '+a.error.message)}
