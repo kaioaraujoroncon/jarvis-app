@@ -654,7 +654,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '16.0.0'; window.JARVIS_APP_MARCA = 'Mark XVI'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '16.1.0'; window.JARVIS_APP_MARCA = 'Mark XVI'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -3370,7 +3370,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
     contexto(); // cria já (suspenso no iOS) para decodificar a vinheta antes da intro; o 1º toque liga
 
     /* ---- Saudação da Mariana (Mark VII 7.1): vem do servidor uma vez, fica no aparelho e toca em TODA abertura ---- */
-    var SAUD_CH = 'jarvis.saudacoes.v1', bufsSaud = {};
+    var SAUD_CH = 'jarvis.saudacoes.v2', bufsSaud = {};
     function saudLer() { try { return JSON.parse(localStorage.getItem(SAUD_CH) || 'null'); } catch (e) { return null; } }
     function saudGuardar(r) { try { localStorage.setItem(SAUD_CH, JSON.stringify({ dia: r.dia, tarde: r.tarde, noite: r.noite, em: diaSP(new Date()) })); } catch (e) {} bufsSaud = {}; }
     function saudPrecisa() { var s = saudLer(); return !s || !s.dia || s.em !== diaSP(new Date()); } // renova 1x por dia (barato: ~45 KB)
@@ -3397,6 +3397,16 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
       }
     }
     /** Toca um MP3 (base64) pelo AudioContext já destravado no 1º toque (iOS); sem contexto, cai no <audio>. fim() ao terminar. */
+    /** Voz mais forte: compressor suave + ganho (padrão 2x; ajustável em localStorage 'jarvis.ganhoVoz', 1 a 4) + limitador de picos, para não estourar. */
+    function cadeiaVoz(c) {
+      var ganho = 2; try { var gv = parseFloat(localStorage.getItem('jarvis.ganhoVoz')); if (gv >= 1 && gv <= 4) ganho = gv; } catch (e) {}
+      var k = c.createDynamicsCompressor(), g = c.createGain(), l = c.createDynamicsCompressor();
+      k.threshold.value = -22; k.knee.value = 8; k.ratio.value = 4; k.attack.value = 0.004; k.release.value = 0.2;
+      g.gain.value = ganho;
+      l.threshold.value = -3; l.knee.value = 0; l.ratio.value = 20; l.attack.value = 0.001; l.release.value = 0.06;
+      k.connect(g); g.connect(l); l.connect(c.destination);
+      return k;
+    }
     function tocarB64(b64, chave, fim) {
       if (!b64) { fim && fim(); return false; }
       var c = contexto(), feito = false, acabar = function () { if (!feito) { feito = true; fim && fim(); } };
@@ -3404,10 +3414,10 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
         try { var a = (vozLiberada && elVoz) ? elVoz : new Audio(); a.src = URL.createObjectURL(new Blob([bytesDe(b64)], { type: 'audio/mpeg' })); a.volume = 0.95; a.onended = acabar; a.onerror = acabar; var p = a.play();
           if (p && p.catch) p.catch(function () { acabar(); }); } catch (e) { acabar(); }
       };
-      if (vozLiberada && elVoz) { porAudio(); return true; }
+      if (vozLiberada && elVoz && !(c && c.state === 'running')) { porAudio(); return true; }
       if (c && c.state !== 'running') { try { c.resume(); } catch (e) {} }
       if (c && c.state === 'running') {
-        var tocar = function (buf) { try { var g = c.createGain(); g.gain.value = 0.95; var f = c.createBufferSource(); f.buffer = buf; f.connect(g); g.connect(c.destination); f.onended = acabar; f.start(0); } catch (e) { porAudio(); } };
+        var tocar = function (buf) { try { var f = c.createBufferSource(); f.buffer = buf; f.connect(cadeiaVoz(c)); f.onended = acabar; f.start(0); } catch (e) { porAudio(); } };
         if (chave && bufsSaud[chave]) { tocar(bufsSaud[chave]); return true; }
         try {
           var ab = bytesDe(b64).buffer, ok = function (d) { if (chave) bufsSaud[chave] = d; tocar(d); }, p = c.decodeAudioData(ab, ok, porAudio);
@@ -3423,7 +3433,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
       return tocarB64(b64, per, fim);
     }
     /** Mark VIII: frases com dados do momento ("você ainda tem 15 pendências"). Geradas no servidor (voz da Mariana) e guardadas no aparelho. */
-    var FR_CH = 'jarvis.frases.v1';
+    var FR_CH = 'jarvis.frases.v2';
     function frasesLer() { try { return JSON.parse(localStorage.getItem(FR_CH) || '{}') || {}; } catch (e) { return {}; } }
     function frasesGuardar(t, b64) {
       try { var f = frasesLer(), ks = Object.keys(f); while (ks.length >= 12) delete f[ks.shift()]; f[t] = b64; localStorage.setItem(FR_CH, JSON.stringify(f)); } catch (e) {}
