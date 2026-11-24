@@ -643,7 +643,7 @@
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '14.0.0'; window.JARVIS_APP_MARCA = 'Mark XIV'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '14.1.0'; window.JARVIS_APP_MARCA = 'Mark XIV'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -1139,10 +1139,23 @@
     var ss = document.querySelectorAll('script[type="text/x-central"]');
     for (var i = 0; i < ss.length; i++) { var n = document.createElement('script'); n.text = ss[i].textContent; ss[i].parentNode.replaceChild(n, ss[i]); }
   }
-  function esperaAgenda(cb) { var A = window.CentralAPI, t0 = Date.now(), feito = false; (function p() { if (feito) return; if (!A || !A.agendaPronta || A.agendaPronta() || Date.now() - t0 > 2500) { feito = true; cb(); } else setTimeout(p, 150); })(); }
+  function esperaAgenda(cb, ms) { var A = window.CentralAPI, t0 = Date.now(), feito = false; (function p() { if (feito) return; if (!A || !A.agendaPronta || A.agendaPronta() || Date.now() - t0 > (ms || 2500)) { feito = true; cb(); } else setTimeout(p, 150); })(); }
+  /** Tarefas de hoje ou atrasadas que o Kaio ainda não fechou (inclui as que ele já respondeu e continuam abertas). */
+  function tarefasHoje(A) {
+    try { var h = A.hoje(); return (A.itens ? A.itens() : []).filter(function (it) { return it.status !== 'fechado' && !A.ehPendente(it) && it.prazo && it.prazo <= h && !(it.status === 'adiado' && it.adiado_ate && it.adiado_ate > h); }).length; } catch (e) { return 0; }
+  }
+  /** Fala para quando não há decisão pendente: nunca diz "dia finalizado" se ainda há tarefa ou compromisso. */
+  function textoSemPend(A, d, max) {
+    var tar = tarefasHoje(A), ag = agendaTx(A, max || 1), p = ['Você não tem decisões pendentes.'];
+    if (tar) p.push('Mas tem ' + tar + (tar === 1 ? ' tarefa para hoje ou atrasada.' : ' tarefas para hoje ou atrasadas.'));
+    if (ag) p.push(ag);
+    if (!tar && !ag) { var xp = (d && d.xpKaio) || 0, por = (d && d.xpPorNivel) || 100; return 'Seu dia está finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.'; }
+    return p.join(' ');
+  }
   function agendaTx(A, max) {
     try {
       var ag = A && A.agenda ? A.agenda() : [], h = A.hoje(), d = new Date(), agora = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+      if (!ag.length) { try { var cc = JSON.parse(lsGet('jarvis.agenda.cache') || 'null'); if (cc && cc.dia === h && cc.ev) ag = cc.ev; } catch (e0) {} }
       var hora = function (hm) { var p = String(hm).split(':'), hh = +p[0], mm = +p[1]; return hh + (mm ? ' e ' + mm : (hh === 1 ? ' hora' : ' horas')); };
       var prox = ag.filter(function (e) { return e.dia === h && !/^✅/.test(String(e.t || '')) && (e.todoDia || !e.fim || e.fim > agora); });
       if (!prox.length) return '';
@@ -1171,16 +1184,15 @@
             var its = A && A.itens ? A.itens().filter(A.ehPendente) : [], urg = 0;
             its.forEach(function (it) { var b = A.bucket ? A.bucket(it) : ''; if (b === 'vencido' || b === 'hoje') urg++; });
             var tx = its.length ? ('Hoje você tem ' + its.length + (its.length === 1 ? ' pendência' : ' pendências') + (urg ? ', sendo ' + urg + (urg === 1 ? ' para hoje ou atrasada' : ' para hoje ou atrasadas') : '') + '. Vamos começar pelo mais urgente.')
-              : 'Você não tem nenhuma decisão pendente hoje.';
-            var agx = agendaTx(A, 2); tx += agx ? ' ' + agx : (its.length ? '' : ' Aproveite o dia!');
+              : textoSemPend(A, d, 2);
             I.falarFrase(tx, pedir);
           };
-          esperaAgenda(function () { chamar('voz', []).then(function (r) { if (r && r.mp3 && r.data === hojeS) I.tocarB64(r.mp3, 'resumo'); else resumoNaHora(); }, resumoNaHora); });
+          esperaAgenda(function () { chamar('voz', []).then(function (r) { if (r && r.mp3 && r.data === hojeS) I.tocarB64(r.mp3, 'resumo'); else resumoNaHora(); }, resumoNaHora); }, 6000);
           return;
         }
         var n = A && A.itens ? A.itens().filter(A.ehPendente).length : 0, t;
         if (n > 0) t = 'No que posso te ajudar? Você ainda tem ' + n + (n === 1 ? ' pendência' : ' pendências') + ' hoje.';
-        else { var ag1 = agendaTx(A, 1); if (ag1) t = 'Você não tem decisões pendentes. ' + ag1; else { var xp = d.xpKaio || 0, por = d.xpPorNivel || 100; t = 'Seu dia está finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.'; } }
+        else t = textoSemPend(A, d, 1);
         I.falarFrase(t, pedir);
       }, 450);
     }
@@ -1198,7 +1210,7 @@
     var pedir = function (t) { return chamar('frase', [t]).then(function (r) { return r && r.b64; }); };
     var n = A && A.itens ? A.itens().filter(A.ehPendente).length : 0, resto, t1, t2;
     if (n > 0) resto = 'Você ainda tem ' + n + (n === 1 ? ' pendência' : ' pendências') + ' hoje. Como posso te ajudar?';
-    else { var ag1 = agendaTx(A, 1); if (ag1) resto = 'Você não tem decisões pendentes. ' + ag1; else { var xp = d.xpKaio || 0, por = d.xpPorNivel || 100; resto = 'Seu dia está finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.'; } }
+    else resto = textoSemPend(A, d, 1);
     var tudo = 'Bem-vindo de volta, Kaio. ' + resto;
     if (I.temFrase(tudo)) { I.falarFrase(tudo, pedir); return; }
     // ainda não existe a frase inteira: toca as duas partes já guardadas e prepara a inteira para a próxima vez
@@ -2119,7 +2131,7 @@
   var agenda = null;
   function carregarAgenda() {
     if (!JRUN().carregarAgenda) return;
-    JRUN().withSuccessHandler(function (r) { agenda = r.eventos || []; desenharAgenda(); atualizarGeral(); if (window.CentralTelas) CentralTelas.desenhar(); })
+    JRUN().withSuccessHandler(function (r) { agenda = r.eventos || []; try { lsSet('jarvis.agenda.cache', JSON.stringify({ dia: hoje, ev: agenda })); } catch (eC) {} desenharAgenda(); atualizarGeral(); if (window.CentralTelas) CentralTelas.desenhar(); })
       .withFailureHandler(function (e) { agenda = []; $('agendaHoje').innerHTML = '<div class="mut">Agenda indisponível: ' + esc((e && e.message) || '') + '</div>'; }).carregarAgenda();
   }
   function desenharAgenda() {
