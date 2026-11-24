@@ -1,7 +1,7 @@
 /* Jarvis · service worker do app (Mark XIV): notificações (com badge e link direto para o item) + abre rápido/offline. Sem segredos.
    Rede primeiro para os arquivos do app; os dados (script.google.com) não passam pelo cache.
    O cache "jarvis-guarda" (cópia do token do aparelho, feita pelo app) nunca é apagado aqui. */
-var CACHE = 'jarvis-14.0.0';
+var CACHE = 'jarvis-14.1.0';
 var GUARDA = 'jarvis-guarda';
 var ARQS = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'badge-72.png', 'voz/vinheta.mp3'];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ARQS); }).then(function () { return self.skipWaiting(); })); });
@@ -11,7 +11,7 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   var u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== self.location.origin) return; // o app do Google passa direto
-  e.respondWith(fetch(e.request).then(function (r) { var cp = r.clone(); if (r.ok) caches.open(CACHE).then(function (c) { c.put(e.request.mode === 'navigate' ? './' : e.request, cp); }); return r; })
+  e.respondWith(fetch(e.request, { cache: 'no-cache' }).then(function (r) { var cp = r.clone(); if (r.ok) caches.open(CACHE).then(function (c) { c.put(e.request.mode === 'navigate' ? './' : e.request, cp); }); return r; })
     .catch(function () { return caches.match(e.request, { ignoreSearch: e.request.mode === 'navigate' }).then(function (r) { return r || caches.match('./'); }); }));
 });
 self.addEventListener('push', function (e) {
