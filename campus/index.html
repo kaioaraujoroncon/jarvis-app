@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Jarvis · Campus 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: jogo de gestão alegre, mas com acabamento de produto
+   IDEA: o campus da empresa visto de cima, como uma maquete viva
+   PICTURE: a própria cena 3D ocupando a tela inteira
+   COLOUR/TYPE: céu e grama reais; HUD em vidro escuro, ciano Jarvis + dourado; Plus Jakarta Sans
+   LAYOUT: cena cheia; topo com escritório e relatório; andares à direita; XP e abas embaixo */
+:root{--hud:rgba(13,17,23,.86);--line:rgba(255,255,255,.1);--ink:#f2f5f9;--mut:#9aa4b2;--cy:#3a8fd6;--au:#eab308;--ok:#34d399;--wa:#fbbf24;--la:#f87171}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#9fd3f5;font:15px/1.4 "Plus Jakarta Sans",system-ui,sans-serif;color:var(--ink)}
+canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:fixed;z-index:5;pointer-events:none}
+.hud>*{pointer-events:auto}
+.glass{background:var(--hud);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px}
+#top{left:10px;right:10px;top:calc(10px + env(safe-area-inset-top));display:grid;gap:8px}
+#offices{display:flex;gap:6px;padding:5px;border-radius:999px;justify-self:start}
+#offices button{border:0;border-radius:999px;padding:8px 14px;font:700 13px inherit;font-family:inherit;color:var(--mut);background:transparent;min-height:36px;cursor:pointer}
+#offices button.on{background:#fff;color:#0d1117}
+#rel{padding:8px 12px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+#rel .t{display:none}
+#rel>div{display:flex;align-items:baseline;gap:5px}
+#rel b{font-size:19px;font-weight:800;line-height:1}
+#rel span{font-size:12px;color:#cbd5e1}
+#floors{display:flex;gap:4px;padding:4px;border-radius:999px}
+#floors button{flex:1;min-height:36px;border:0;border-radius:999px;background:transparent;color:var(--ink);font:700 12.5px "Plus Jakarta Sans",sans-serif;cursor:pointer;white-space:nowrap}
+#floors button.on{background:var(--cy);color:#fff}
+#bottom{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));padding:9px 14px 4px}
+#xp{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);font-weight:600}
+#xp b{color:var(--ink)}
+#bar{height:6px;border-radius:9px;background:#1f2937;margin:5px 0 4px;overflow:hidden}
+#bar i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--ok),var(--cy));border-radius:9px;transition:width .6s}
+#tabs{display:grid;grid-template-columns:repeat(4,1fr)}
+#tabs button{border:0;background:none;color:var(--mut);font:600 11px inherit;font-family:inherit;min-height:44px;cursor:pointer;display:grid;justify-items:center;gap:2px}
+#tabs button.on{color:var(--ink)}
+#tabs svg{width:22px;height:22px}
+#labels{position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.tag{position:absolute;left:0;top:0;transform:translate(-50%,-100%);white-space:nowrap;background:rgba(13,17,23,.88);color:#fff;font-weight:700;font-size:12px;padding:3px 9px 3px 7px;border-radius:999px;border:1.5px solid var(--ok);display:flex;align-items:center;gap:5px;pointer-events:auto;cursor:pointer}
+.tag i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.tag.warn{border-color:var(--wa)}.tag.warn i{background:var(--wa)}
+.tag.late{border-color:var(--la)}.tag.late i{background:var(--la)}
+.tag.me{border-color:var(--cy);background:#0b3442}.tag.me i{background:var(--cy)}
+.room{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;font-size:11px;font-weight:800;color:#1f2937;background:rgba(255,255,255,.82);padding:2px 8px;border-radius:8px}
+.room.out{background:rgba(13,17,23,.7);color:#fff}
+#sheet{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));max-height:62vh;overflow:auto;padding:16px;transform:translateY(120%);transition:transform .35s cubic-bezier(.2,.8,.2,1);z-index:8}
+#sheet.open{transform:none}
+#sheet h2{margin:0 0 2px;font-size:20px}
+#sheet .sub{color:var(--mut);font-size:13px;margin-bottom:12px}
+#sheet .x{position:absolute;right:10px;top:10px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.08);color:#fff;font-size:20px;cursor:pointer}
+.task{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.task .d{width:9px;height:9px;border-radius:50%;flex:none}
+.task .n{flex:1;font-size:14px}
+.task small{display:block;color:var(--mut);font-size:12px}
+.btn{border:0;border-radius:12px;padding:9px 12px;min-height:40px;font:700 13px inherit;font-family:inherit;background:var(--cy);color:#06202a;cursor:pointer;white-space:nowrap}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff}
+.btn:disabled{opacity:.45}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.note{font-size:12px;color:var(--mut);margin-top:12px}
+.bot{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.bot .av{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;flex:none}
+.prog{height:6px;border-radius:6px;background:#1f2937;overflow:hidden;margin-top:5px}.prog i{display:block;height:100%;background:var(--au)}
+#toast{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.6);opacity:0;z-index:9;font-weight:800;font-size:30px;color:var(--au);text-shadow:0 2px 10px #000a;pointer-events:none;transition:.5s}
+#toast.show{opacity:1;transform:translate(-50%,-90%) scale(1)}
+#hint{left:50%;transform:translateX(-50%);bottom:calc(148px + env(safe-area-inset-bottom));padding:8px 14px;font-size:12.5px;font-weight:600;border-radius:999px;transition:opacity .5s;white-space:nowrap}
+#load{position:fixed;inset:0;display:grid;place-items:center;background:#0d1117;z-index:20;color:var(--mut);font-weight:600;transition:opacity .6s}
+#joy,#act,#fol{pointer-events:auto}
+#joy{left:16px;bottom:calc(132px + env(safe-area-inset-bottom));width:100px;height:100px;border-radius:50%;background:rgba(13,17,23,.35);border:2px solid rgba(255,255,255,.5);touch-action:none;display:grid;place-items:center}
+#joy i{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 4px 14px #0005;pointer-events:none}
+#act{right:14px;bottom:calc(140px + env(safe-area-inset-bottom));min-height:52px;max-width:58vw;padding:0 20px;border-radius:999px;border:0;background:#f2d84b;color:#1f2937;font:800 15px "Plus Jakarta Sans",sans-serif;box-shadow:0 6px 18px #0006;cursor:pointer;animation:pop .25s}
+#fol{right:14px;bottom:calc(204px + env(safe-area-inset-bottom));min-height:44px;width:44px;padding:0;display:grid;place-items:center;color:#fff;font:700 12px "Plus Jakarta Sans",sans-serif;border-radius:999px;cursor:pointer}
+#fol.on{background:var(--cy);color:#fff}
+@keyframes pop{from{transform:scale(.7)}to{transform:none}}
+.say{background:#ffffff12;border-radius:14px;padding:10px 12px;margin:0 0 10px;font-size:14px}
+.form label{display:grid;gap:4px;font-size:12px;color:var(--mut);margin-bottom:10px}
+.form input,.form select{font:16px "Plus Jakarta Sans",sans-serif;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0d1117;color:#fff;min-height:44px}
+.tag.pes{border-color:#fff}.tag.pes i{background:#fff}
+#hint{bottom:calc(250px + env(safe-area-inset-bottom))}
+#mode{left:50%;transform:translateX(-50%);top:calc(178px + env(safe-area-inset-top));padding:6px 8px 6px 14px;border-radius:999px;font-size:12px;font-weight:600;display:flex;gap:8px;align-items:center;white-space:nowrap;max-width:94vw}
+#mode button{border:0;border-radius:999px;padding:6px 12px;font:700 12px "Plus Jakarta Sans",sans-serif;background:var(--cy);color:#fff;min-height:32px;cursor:pointer}
+@media (min-width:700px){#top{grid-template-columns:auto minmax(0,420px);justify-content:space-between;align-items:start}#bottom,#sheet{left:50%;right:auto;width:520px;transform:translateX(-50%)}#sheet{transform:translate(-50%,120%)}#sheet.open{transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){#sheet,#bar i,#toast{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="load">Montando o campus… <small style="opacity:.6">v7</small></div>
+
+<div id="top" class="hud">
+  <div id="offices" class="glass"><button data-o="escola" class="on"><img src="logo.png" alt="" style="height:18px;vertical-align:-4px;margin-right:6px">Escola Prosperi</button><button data-o="pessoal">Pessoal</button></div>
+  <div id="rel" class="glass">
+    <div class="t"><span>Relatório de hoje</span><span id="relSub">7 funcionários</span></div>
+    <div><b id="nOk" style="color:var(--ok)">0</b><span>no prazo</span></div>
+    <div><b id="nWa" style="color:var(--wa)">0</b><span>chegando</span></div>
+    <div><b id="nLa" style="color:var(--la)">0</b><span>atrasadas</span></div>
+  </div>
+  <div id="floors" class="glass">
+  <button data-f="-1" class="on">Campus</button><button data-f="0">Térreo</button><button data-f="1">1º andar</button><button data-f="2">2º andar</button>
+</div>
+</div>
+
+
+<div id="mode" class="hud glass" style="display:none"></div>
+<div id="hint" class="hud glass">Use o controle para andar com você · toque num lugar para ir até ele</div>
+<div id="joy" class="hud"><i></i></div>
+<button id="act" class="hud" style="display:none"></button>
+<button id="fol" class="hud glass" aria-label="Seguir meu boneco"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></button>
+
+<div id="bottom" class="hud glass">
+  <div id="xp"><span>Nível <b id="lv">3</b> · <b id="xpn">220</b> XP</span><span id="xpNext">faltam 80 para o nível 4</span></div>
+  <div id="bar"><i></i></div>
+  <div id="tabs">
+    <button data-t="campus" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>Campus</button>
+    <button data-t="tarefas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>Tarefas</button>
+    <button data-t="missoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Missões</button>
+    <button data-t="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4.5v9L12 20l-8-4.5v-9z"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/></svg>Equipe</button>
+  </div>
+</div>
+
+<div id="sheet" class="hud glass"><button class="x" id="sx" aria-label="Fechar">×</button><div id="sc"></div></div>
+<div id="toast"></div>
+
+<script>
+(function(){function show(m){var l=document.getElementById('load');if(l){l.style.opacity=1;l.innerHTML='<div style="padding:24px;text-align:center;max-width:340px">O campus n\u00e3o carregou neste aparelho.<br><small style="color:#f87171;word-break:break-word">'+String(m).replace(/</g,'&lt;')+'</small></div>';}}
+window.addEventListener('error',function(e){show(e.message||'erro');});
+setTimeout(function(){var l=document.getElementById('load');if(l&&l.parentNode&&l.style.opacity!=='0')show('Demorou demais para abrir. Versão v7.');},15000);
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))show('Este navegador n\u00e3o liberou o 3D (WebGL).');}catch(e){show(e.message);}})();
+</script>
+<script src="app.js"></script>
+</body>
+</html>

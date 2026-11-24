@@ -11,6 +11,7 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   var u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== self.location.origin) return; // o app do Google passa direto
+  if (u.pathname.indexOf('/campus/') !== -1) return; // o Campus 3D tem cache próprio e não pode ocupar a cópia offline do app
   e.respondWith(fetch(e.request, { cache: 'no-cache' }).then(function (r) { var cp = r.clone(); if (r.ok) caches.open(CACHE).then(function (c) { c.put(e.request.mode === 'navigate' ? './' : e.request, cp); }); return r; })
     .catch(function () { return caches.match(e.request, { ignoreSearch: e.request.mode === 'navigate' }).then(function (r) { return r || caches.match('./'); }); }));
 });
