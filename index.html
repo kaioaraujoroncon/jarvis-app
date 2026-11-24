@@ -832,9 +832,22 @@
       var lg = document.createElement('div'); lg.className = 'sb-leg'; lg.textContent = 'Vermelho: atrasadas · Amarelo: chegando · Verde: no prazo'; el.appendChild(lg);
     });
   }
+  function sbChaveBot(nome, area) {
+    var f = function (s) { s = String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); if (/zeus/.test(s)) return 'zeus'; if (/plutus|dinheiro|financ/.test(s)) return 'plutus'; if (/remat/.test(s)) return 'remat'; if (/hermes|comercial/.test(s)) return 'hermes'; if (/manut/.test(s)) return 'manut'; if (/federer|smash/.test(s)) return 'smash'; if (/santos|dumont|viage/.test(s)) return 'santos'; if (/pessoal|negocio/.test(s)) return 'pessoal'; if (/gestao|demeter|atena/.test(s)) return 'gestao'; return ''; };
+    return f(nome) || f(area);
+  }
+  function sbChaves() {
+    var c = sbCliente(); if (!c || !SBESC) return Promise.resolve();
+    return Promise.all([c.from('bots').select('nome,area_id').eq('escritorio_id', SBESC.id), c.from('areas').select('id,nome')]).then(function (x) {
+      if (x[0].error || !x[0].data) return;
+      var ar = {}, ks = []; (x[1].data || []).forEach(function (a) { ar[a.id] = a.nome; });
+      x[0].data.forEach(function (b) { var k = sbChaveBot(b.nome, ar[b.area_id]); if (k && ks.indexOf(k) < 0) ks.push(k); });
+      window.JARVIS_ESC_KEYS = ks;
+    }).catch(function () {});
+  }
   function sbCarregar(r) {
     return sbEscritorios().then(function (l) { SBESC = sbEscolher(l); sbDesenharEscr(l); return sbMesclar(r); })
-      .then(function (r2) { sbResumo(); return r2; }).catch(function () { return r; });
+      .then(function (r2) { return sbChaves().then(function () { sbResumo(); return r2; }); }).catch(function () { return r; });
   }
   document.addEventListener('click', function (e) { if (e.target && e.target.closest && e.target.closest('[data-v="bots"]')) sbResumo(); });
 
@@ -1126,6 +1139,17 @@
     var ss = document.querySelectorAll('script[type="text/x-central"]');
     for (var i = 0; i < ss.length; i++) { var n = document.createElement('script'); n.text = ss[i].textContent; ss[i].parentNode.replaceChild(n, ss[i]); }
   }
+  function esperaAgenda(cb) { var A = window.CentralAPI, t0 = Date.now(), feito = false; (function p() { if (feito) return; if (!A || !A.agendaPronta || A.agendaPronta() || Date.now() - t0 > 2500) { feito = true; cb(); } else setTimeout(p, 150); })(); }
+  function agendaTx(A, max) {
+    try {
+      var ag = A && A.agenda ? A.agenda() : [], h = A.hoje(), d = new Date(), agora = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+      var hora = function (hm) { var p = String(hm).split(':'), hh = +p[0], mm = +p[1]; return hh + (mm ? ' e ' + mm : (hh === 1 ? ' hora' : ' horas')); };
+      var prox = ag.filter(function (e) { return e.dia === h && !/^✅/.test(String(e.t || '')) && (e.todoDia || !e.fim || e.fim > agora); });
+      if (!prox.length) return '';
+      var lim = prox.slice(0, max || 1).map(function (e) { return (e.todoDia ? 'o dia todo' : (e.ini <= agora ? 'agora' : 'às ' + hora(e.ini))) + ', ' + String(e.t || '').replace(/^[^A-Za-zÀ-ÿ0-9]+/, '').replace(/\s+/g, ' ').trim(); });
+      return (lim.length === 1 ? 'Seu próximo compromisso é ' : 'Seus próximos compromissos são ') + lim.join('; ') + '.';
+    } catch (e) { return ''; }
+  }
   function buscarSaudacoes() {
     var I = window.JarvisIntro; if (!I || !I.saudacoesPrecisa || !I.saudacoesPrecisa()) return;
     chamar('saudacoes', []).then(function (r) { if (r && r.dia) I.saudacoesGuardar(r); }, function () {});
@@ -1147,15 +1171,16 @@
             var its = A && A.itens ? A.itens().filter(A.ehPendente) : [], urg = 0;
             its.forEach(function (it) { var b = A.bucket ? A.bucket(it) : ''; if (b === 'vencido' || b === 'hoje') urg++; });
             var tx = its.length ? ('Hoje você tem ' + its.length + (its.length === 1 ? ' pendência' : ' pendências') + (urg ? ', sendo ' + urg + (urg === 1 ? ' para hoje ou atrasada' : ' para hoje ou atrasadas') : '') + '. Vamos começar pelo mais urgente.')
-              : 'Você não tem nenhuma pendência hoje. Aproveite o dia!';
+              : 'Você não tem nenhuma decisão pendente hoje.';
+            var agx = agendaTx(A, 2); tx += agx ? ' ' + agx : (its.length ? '' : ' Aproveite o dia!');
             I.falarFrase(tx, pedir);
           };
-          chamar('voz', []).then(function (r) { if (r && r.mp3 && r.data === hojeS) I.tocarB64(r.mp3, 'resumo'); else resumoNaHora(); }, resumoNaHora);
+          esperaAgenda(function () { chamar('voz', []).then(function (r) { if (r && r.mp3 && r.data === hojeS) I.tocarB64(r.mp3, 'resumo'); else resumoNaHora(); }, resumoNaHora); });
           return;
         }
         var n = A && A.itens ? A.itens().filter(A.ehPendente).length : 0, t;
         if (n > 0) t = 'No que posso te ajudar? Você ainda tem ' + n + (n === 1 ? ' pendência' : ' pendências') + ' hoje.';
-        else { var xp = d.xpKaio || 0, por = d.xpPorNivel || 100; t = 'Seu dia está finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.'; }
+        else { var ag1 = agendaTx(A, 1); if (ag1) t = 'Você não tem decisões pendentes. ' + ag1; else { var xp = d.xpKaio || 0, por = d.xpPorNivel || 100; t = 'Seu dia está finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.'; } }
         I.falarFrase(t, pedir);
       }, 450);
     }
@@ -1167,12 +1192,13 @@
     return function () { est.introFim = true; parte2(); setTimeout(function () { est.saudFim = true; parte2(); }, 9000); }; // garantia: nada fica preso
   }
   /** Mark XIII: entrada que não é a primeira do dia — Face ID e, no mesmo instante, a Mariana: "Bem-vindo de volta… você ainda tem N pendências…". */
-  function falaRapida() {
+  function falaRapida() { var A0 = window.CentralAPI, n0 = A0 && A0.itens ? A0.itens().filter(A0.ehPendente).length : 0; if (n0 > 0) falaRapida0(); else esperaAgenda(falaRapida0); }
+  function falaRapida0() {
     var I = window.JarvisIntro, A = window.CentralAPI, d = window.DADOS || {}; if (!I || !I.falarFrase) return;
     var pedir = function (t) { return chamar('frase', [t]).then(function (r) { return r && r.b64; }); };
     var n = A && A.itens ? A.itens().filter(A.ehPendente).length : 0, resto, t1, t2;
     if (n > 0) resto = 'Você ainda tem ' + n + (n === 1 ? ' pendência' : ' pendências') + ' hoje. Como posso te ajudar?';
-    else { var xp = d.xpKaio || 0, por = d.xpPorNivel || 100; resto = 'Seu dia está finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.'; }
+    else { var ag1 = agendaTx(A, 1); if (ag1) resto = 'Você não tem decisões pendentes. ' + ag1; else { var xp = d.xpKaio || 0, por = d.xpPorNivel || 100; resto = 'Seu dia está finalizado. Parabéns! Você está no nível ' + (Math.floor(xp / por) + 1) + ', com ' + xp + ' pontos de experiência.'; } }
     var tudo = 'Bem-vindo de volta, Kaio. ' + resto;
     if (I.temFrase(tudo)) { I.falarFrase(tudo, pedir); return; }
     // ainda não existe a frase inteira: toca as duas partes já guardadas e prepara a inteira para a próxima vez
@@ -2116,7 +2142,7 @@
   window.CentralAPI = {
     iniciar: function (d) { iniciar(d); }, recarregarSilencioso: function () { if (!ocupado() && !naFila().length && !enviando) recarregarSilencioso(); }, recarregar: recarregar,
     esc: esc, toast: toast, irPara: irPara, cor: cor, ddmm: ddmm, somaDias: somaDias, ehPendente: ehPendente, bucket: bucket,
-    dados: function () { return D; }, agenda: function () { return agenda || []; }, itens: function () { return itens; }, hoje: function () { return hoje; },
+    dados: function () { return D; }, agenda: function () { return agenda || []; }, agendaPronta: function () { return agenda !== null; }, itens: function () { return itens; }, hoje: function () { return hoje; },
     /** Mark VI 6.4: filtra a lista "Para decidir" por área ('' = todas) e rola até ela. */
     filtrarArea: function (a) {
       pref.aba = 'pend'; pref.area = a || ''; fixos = {}; editando = {}; salvarPref(); atualizarGeral(); desenharLista();
@@ -2348,7 +2374,7 @@
   'use strict';
   var API = window.CentralAPI; if (!API) return;
   var esc = API.esc;
-  var BOTS = [
+  var BOTS_TODOS = [
     { k: 'zeus', nm: 'Zeus', area: 'Comando geral', cor: '#D4A72C', tipo: 'alto', extra: 'raio', mx: .5, my: .225 },
     { k: 'gestao', nm: 'Deméter & Atena', area: 'Gestão', cor: '#2F6FDB', tipo: 'domo', mx: .19, my: .225 },
     { k: 'plutus', nm: 'Plutus', area: 'Dinheiro', cor: '#1E9E5A', tipo: 'caixa', mx: .81, my: .225 },
@@ -2359,6 +2385,7 @@
     { k: 'pessoal', nm: 'Pessoal & Negócios', area: 'Pessoal', cor: '#D96BA0', tipo: 'alto', mx: .3, my: .875 },
     { k: 'santos', nm: 'Santos Dumont', area: 'Viagens', cor: '#8B5CF6', tipo: 'domo', extra: 'helice', mx: .7, my: .875 }
   ];
+  var BOTS = BOTS_TODOS.slice();
   var JARVIS = { k: 'jarvis', nm: 'Jarvis', area: 'Central · leva suas decisões', cor: '#3FC1E8', tipo: 'orbe' };
   function botDe(it) {
     var s = String((it.bot || '') + ' ' + (it.area || '')).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -2406,6 +2433,7 @@
 
   /* ---------------- Montagem ---------------- */
   function montar(alvo) {
+    var ksE = window.JARVIS_ESC_KEYS; BOTS = ksE && ksE.length ? BOTS_TODOS.filter(function (b) { return ksE.indexOf(b.k) >= 0; }) : BOTS_TODOS.slice();
     alvo.className = 'jogo';
     alvo.innerHTML = '<canvas id="cv" aria-label="Escritório dos bots. Toque num robô para ver a fila dele."></canvas><div class="bot-info" id="botInfo"><span class="mut">Toque num robô para ver a fila dele.</span></div>';
     var cv = document.getElementById('cv');
