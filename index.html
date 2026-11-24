@@ -840,14 +840,14 @@
 
   function sbMesclar(r) {
     var c = sbCliente();
-    return Promise.all([c.from('itens').select('*').eq('ativo', true), c.from('bots').select('id,nome,emoji,area_id'), c.from('areas').select('id,nome')]).then(function (x) {
+    return Promise.all([c.from('itens').select('*'), c.from('bots').select('id,nome,emoji,area_id'), c.from('areas').select('id,nome')]).then(function (x) {
       if (x[0].error) throw x[0].error;
-      var tem = {}; (r.itens || []).forEach(function (i) { tem[i.id] = 1; });
+      var tem = {}, mapa = {}; (r.itens || []).forEach(function (i) { tem[i.id] = 1; mapa[i.id] = i; });
       var bots = {}; (x[1].data || []).forEach(function (b) { bots[b.id] = b; });
       var areas = {}; (x[2].data || []).forEach(function (a) { areas[a.id] = a; });
       var novos = 0, fora = {};
       (x[0].data || []).forEach(function (s) {
-        if (SBESC && s.escritorio_id && s.escritorio_id !== SBESC.id) { fora[s.id] = 1; return; } if (tem[s.id]) return;
+        if (s.ativo === false || (SBESC && s.escritorio_id && s.escritorio_id !== SBESC.id)) { fora[s.id] = 1; return; } if (tem[s.id]) { var o = mapa[s.id]; if (o) { if (s.titulo) o.titulo = s.titulo; o.prazo = s.prazo || ''; if (s.nota != null) o.nota = s.nota; if (s.status && s.status !== o.status) { o.status = s.status; if (s.status === 'aberto') o.resposta = null; } o.adiado_ate = s.adiado_ate || ''; } return; }
         var b = bots[s.bot_id] || {}, a = areas[s.area_id] || {};
         r.itens.push({ id: s.id, area: a.nome || 'Outros', bot: b.nome || '', tipo: s.tipo || '', titulo: s.titulo || '', nota: s.nota || '', prazo: s.prazo || '', xp: s.xp || 0,
           opcoes: Array.isArray(s.opcoes) ? s.opcoes : [], efeitos: Array.isArray(s.efeitos) ? s.efeitos : [], acoesNaOpcao: [], ordem: r.itens.length, plano: null,
