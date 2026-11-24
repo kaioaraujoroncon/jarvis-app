@@ -3,7 +3,7 @@
 <title>Jarvis v2</title>
 <style>
 *{box-sizing:border-box}body{font-family:system-ui,-apple-system,sans-serif;background:#0b1020;color:#e8ecf5;margin:0;padding:14px;padding-bottom:60px;max-width:680px;margin:auto}
-h2{margin:6px 0}input,button,textarea{font-size:16px;padding:11px;border-radius:10px;border:1px solid #2a3558;background:#141b33;color:#fff;font-family:inherit}
+h2{margin:6px 0}input,button,textarea{color-scheme:dark;font-size:16px;padding:11px;border-radius:10px;border:1px solid #2a3558;background:#141b33;color:#fff;font-family:inherit}
 button{background:#2f6bff;border:0;cursor:pointer}button.sec{background:#1d2747}button.ok{background:#1f9d62}button:disabled{opacity:.5}
 .full{width:100%;margin-top:8px}.top{display:flex;justify-content:space-between;align-items:center}.xp{background:#1d2747;border-radius:20px;padding:6px 12px;font-size:14px}
 .chips{display:flex;gap:6px;overflow-x:auto;margin:10px 0}.chips button{white-space:nowrap;background:#1d2747;padding:8px 12px;font-size:14px}.chips button.on{background:#2f6bff}
@@ -33,7 +33,7 @@ if(r.error)return msg('Erro: '+r.error.message);msg('Enviado. Digite o código d
 $('entrar').onclick=async function(){var e=$('email').value.trim(),c=$('cod').value.replace(/\s/g,'');if(!e||!c)return msg('Digite o e-mail e o código.');msg('Entrando...');var r=await sb.auth.verifyOtp({email:e,token:c,type:'email'});if(r.error)return msg('Erro: '+r.error.message);if(r.data&&r.data.session)mostrar(r.data.session)};
 $('sair').onclick=async function(){await sb.auth.signOut();location.reload()};
 var F={decidir:function(i){return i.status==='aberto'||(i.status==='adiado'&&(!i.adiado_ate||i.adiado_ate<=hoje()))},
-missoes:function(i){return i.missao===true&&i.status!=='respondido'},
+missoes:function(i){return i.missao===true&&(i.status==='aberto'||i.status==='adiado')},
 adiados:function(i){return i.status==='adiado'},
 respondidos:function(i){return i.status==='respondido'}};
 var NOMES={decidir:'Para decidir',missoes:'Missões',adiados:'Adiados',respondidos:'Respondidos'};
@@ -44,11 +44,11 @@ function card(i){var d=el('div','it');d.appendChild(el('div','t',i.titulo));
 var atras=i.prazo&&i.prazo<hoje()&&i.status!=='respondido';
 var s=el('div','s'+(atras?' late':''),br(i.prazo)+(atras?' (atrasado)':'')+' · '+i.tipo+' · '+i.status+(i.adiado_ate?' até '+br(i.adiado_ate):'')+(i.xp?' · '+i.xp+' XP':''));d.appendChild(s);
 if(i.nota){var n=el('div','nota',i.nota);d.appendChild(n)}
-if(i.status==='respondido'){return d}
+if(i.status==='respondido'||i.status==='fechado'){return d}
 var ta=el('textarea');ta.placeholder='Comentário (opcional)';d.appendChild(ta);
 var ops=el('div','ops');var lista=Array.isArray(i.opcoes)&&i.opcoes.length?i.opcoes:['Feito'];
 lista.forEach(function(o){var b=el('button',lista.length===1?'ok':'',o);b.onclick=function(){responder(i,o,ta.value.trim(),b)};ops.appendChild(b)});d.appendChild(ops);
-var r=el('div','row');var di=el('input');di.type='date';di.min=hoje();var ba=el('button','sec','Adiar');ba.onclick=function(){if(!di.value)return msg('Escolha a data para adiar.');adiar(i,di.value,ta.value.trim(),ba)};r.appendChild(di);r.appendChild(ba);d.appendChild(r);return d}
+d.appendChild(el('div','s','Adiar para a data:'));var r=el('div','row');var di=el('input');di.type='date';di.min=hoje();var ba=el('button','sec','Adiar');ba.onclick=function(){if(!di.value)return msg('Escolha a data para adiar.');adiar(i,di.value,ta.value.trim(),ba)};r.appendChild(di);r.appendChild(ba);d.appendChild(r);return d}
 async function responder(i,esc,extra,btn){btn.disabled=true;msg('Salvando...');
 var a=await sb.from('respostas').insert({user_id:uid,item_id:i.id,resposta:esc,extra:extra||null});
 if(a.error){btn.disabled=false;return msg('Erro: '+a.error.message)}
