@@ -654,7 +654,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '16.1.4'; window.JARVIS_APP_MARCA = 'Mark XVI'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '16.1.5'; window.JARVIS_APP_MARCA = 'Mark XVI'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -1342,6 +1342,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
     var I = window.JarvisIntro; if (!I || !I.definirVoz) return function () {};
     var pedir = function (t) { return chamar('frase', [t]).then(function (r) { return r && r.b64; }); };
     var est = { saudou: false, saudFim: false, introFim: false, dito: false };
+    var vozPre = cheia ? chamar('voz', []).catch(function () { return null; }) : null; // pede o áudio já na entrada, sem esperar a agenda
     function parte2() {
       if (est.dito || !est.introFim || (est.saudou && !est.saudFim)) return;
       est.dito = true;
@@ -1356,7 +1357,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
               : textoSemPend(A, d, 2);
             I.falarFrase(tx, pedir);
           };
-          esperaAgenda(function () { chamar('voz', []).then(function (r) { if (r && r.mp3 && r.data === hojeS) I.tocarB64(r.mp3, 'resumo'); else resumoNaHora(); }, resumoNaHora); }, 6000);
+          vozPre.then(function (r) { if (r && r.mp3 && r.data === hojeS) I.tocarB64(r.mp3, 'resumo'); else esperaAgenda(resumoNaHora, 4000); });
           return;
         }
         var n = A && A.itens ? A.itens().filter(A.ehPendente).length : 0, t;
