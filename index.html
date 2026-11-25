@@ -654,7 +654,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
 })();
 </script>
 
-<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '16.1.6'; window.JARVIS_APP_MARCA = 'Mark XVI'; window.DADOS = null;</script>
+<script>window.JARVIS_AMBIENTE = 'pages'; window.JARVIS_APP_VERSAO = '16.1.7'; window.JARVIS_APP_MARCA = 'Mark XVI'; window.DADOS = null;</script>
 <script>
 /* Cliente.html · Mark V — liga a tela ao Apps Script com o token do aparelho.
    - No app "Jarvis" (GitHub Pages): fetch POST text/plain → /exec (sem login do Google, sem preflight de CORS).
@@ -3410,23 +3410,25 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
     }
     /** Para qualquer voz do app que esteja tocando (abertura, resumo, saudação), para o Ouvir não tocar por cima. */
     function pararVozApp() {
-      try { if (window.__fonteVoz) { window.__fonteVoz.stop(0); } } catch (e) {}
-      window.__fonteVoz = null;
-      try { if (window.__audioVoz) { window.__audioVoz.pause(); } } catch (e) {}
+      (window.__fontesVoz || []).forEach(function (f) { try { f.stop(0); } catch (e) {} });
+      window.__fontesVoz = [];
+      (window.__audiosVoz || []).forEach(function (a) { try { a.pause(); } catch (e) {} });
+      window.__audiosVoz = [];
       try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
     }
     window.__pararVozApp = pararVozApp;
     function tocarB64(b64, chave, fim) {
       if (!b64) { fim && fim(); return false; }
+      if (window.__vozBloqueada) { fim && fim(); return false; } // o Ouvir está ativo: áudio da abertura que chegou atrasado não toca por cima
       var c = contexto(), feito = false, acabar = function () { if (!feito) { feito = true; fim && fim(); } };
       var porAudio = function () {
-        try { var a = (vozLiberada && elVoz) ? elVoz : new Audio(); a.src = URL.createObjectURL(new Blob([bytesDe(b64)], { type: 'audio/mpeg' })); a.volume = 0.95; a.onended = acabar; a.onerror = acabar; window.__audioVoz = a; var p = a.play();
+        try { var a = (vozLiberada && elVoz) ? elVoz : new Audio(); a.src = URL.createObjectURL(new Blob([bytesDe(b64)], { type: 'audio/mpeg' })); a.volume = 0.95; a.onended = acabar; a.onerror = acabar; (window.__audiosVoz = window.__audiosVoz || []).push(a); var p = a.play();
           if (p && p.catch) p.catch(function () { acabar(); }); } catch (e) { acabar(); }
       };
       if (vozLiberada && elVoz && !(c && c.state === 'running')) { porAudio(); return true; }
       if (c && c.state !== 'running') { try { c.resume(); } catch (e) {} }
       if (c && c.state === 'running') {
-        var tocar = function (buf) { try { var f = c.createBufferSource(); f.buffer = buf; f.connect(cadeiaVoz(c)); window.__fonteVoz = f; f.onended = acabar; f.start(0); } catch (e) { porAudio(); } };
+        var tocar = function (buf) { try { var f = c.createBufferSource(); f.buffer = buf; f.connect(cadeiaVoz(c)); (window.__fontesVoz = window.__fontesVoz || []).push(f); f.onended = acabar; f.start(0); } catch (e) { porAudio(); } };
         if (chave && bufsSaud[chave]) { tocar(bufsSaud[chave]); return true; }
         try {
           var ab = bytesDe(b64).buffer, feitoDec = false, ok = function (d) { if (feitoDec) return; feitoDec = true; if (chave) bufsSaud[chave] = d; tocar(d); }, p = c.decodeAudioData(ab, ok, porAudio);
@@ -3910,7 +3912,7 @@ details.sb-sec>summary::-webkit-details-marker{display:none}.sb-bd{padding:0 12p
       if (miss.length) t.push('Missões do dia: ' + lista(miss) + '.');
       return t.join(' ');
     }
-    function botao(on, tx) { var b = $('btnOuvir'); if (!b) return; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.querySelector('span').textContent = tx || (on ? 'Parar' : 'Ouvir'); }
+    function botao(on, tx) { window.__vozBloqueada = !!on; var b = $('btnOuvir'); if (!b) return; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.querySelector('span').textContent = tx || (on ? 'Parar' : 'Ouvir'); }
     function parar() {
       if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
       if (window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
