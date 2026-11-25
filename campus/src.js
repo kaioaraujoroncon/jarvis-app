@@ -118,7 +118,7 @@ for(let z=-46;z<60;z+=10){ tree(-96,z,1.2); tree(96,z,1.2); }
 
 /* praça de entrada e caminhos */
 flat(world,30,12,'#e7e5e4',0,0.03,20);
-flat(world,4,6,'#e7e5e4',0,0.03,29);
+[-11.5,11.5].forEach(x=>{ flat(world,3.2,8,'#e7e5e4',x,0.03,29); for(let k=0;k<4;k++) flat(world,2.6,.45,'#f8fafc',x,0.045,33.2+k*1.1); }); // duas passagens de pedestres, uma de cada lado do letreiro
 flat(world,70,3.4,'#e7e5e4',-48,0.03,20); flat(world,64,3.4,'#e7e5e4',42,0.03,20);
 flat(world,3.4,60,'#e7e5e4',-30,0.03,-8);
 const sign = new THREE.Mesh(new THREE.PlaneGeometry(16,2.5), new THREE.MeshBasicMaterial({map:rainbowTex('ESCOLA PROSPERI','',{bg:'#ffffff'}),toneMapped:false}));
@@ -637,7 +637,7 @@ async function loadLive(){
       const d={id:b.id,ids:[b.id],nome:b.nome,emo:b.emoji||(b.tipo==='pessoa'?'👤':'🤖'),cor:b.cor||PAL[hashN(b.id)%6],sala,tipo:b.tipo||'bot',papel:b.missao||(mod?mod.nome:(b.tipo==='pessoa'?'Equipe':'Agente')),tarefas,criado:b.id.startsWith('app-')};
       seen[key]=d; list.push(d); }
     list.forEach(d=>{ d.tarefas.sort((a,b)=>({la:0,wa:1,ok:2}[a[1]]-{la:0,wa:1,ok:2}[b[1]])); d.st=d.tarefas.some(t=>t[1]==='la')?'la':d.tarefas.some(t=>t[1]==='wa')?'wa':'ok'; });
-    OFFICES[e.id]={nome:e.nome,placa:(kind==='escola'?'ESCOLA ':'')+e.nome.toUpperCase().replace(/^ESCOLA ESCOLA /,'ESCOLA '),kind,bots:list};
+    OFFICES[e.id]={nome:e.nome,placa:(kind==='escola'&&!/^escola/i.test(e.nome)?'ESCOLA ':'')+e.nome.toUpperCase(),kind,bots:list};
   }
   xp=(xpr.data||[]).reduce((s,r)=>s+(r.pontos||0),0);
   if(!OFFICES[office]) office=Object.keys(OFFICES).find(k=>OFFICES[k].kind==='escola')||Object.keys(OFFICES)[0];

@@ -28,7 +28,7 @@ function linhaEv(e) { const passou = !e.dia_inteiro && new Date(e.fim || e.inici
 const botDe = (id) => S.bots.find((b) => b.id === id);
 const escDe = (id) => S.esc.find((e) => e.id === id);
 const filtroEsc = (x) => S.office === 'todos' || x.escritorio_id === S.office;
-const filtroEv = (e) => S.office === 'todos' || e.escritorio_id === S.office;
+const filtroEv = () => true; // a agenda é sua: aparece em qualquer filtro
 
 /* ---------- dados ---------- */
 async function carregar() {
@@ -84,7 +84,7 @@ function telaHoje() {
   ${chipsEsc()}
   <div class="stats"><div class="stat"><b style="color:var(--la)">${la}</b><span>atrasadas</span></div><div class="stat"><b style="color:var(--wa)">${wa}</b><span>vencem logo</span></div><div class="stat"><b style="color:var(--ok)">${ok}</b><span>no prazo</span></div></div>
   ${(() => { const hj = hojeISO(); const evs = (S.ev || []).filter((e) => diaDe(e.inicio) === hj && filtroEv(e)); const prox = evs.filter((e) => e.dia_inteiro || new Date(e.fim || e.inicio) >= new Date());
-    return evs.length ? `<div class="secth"><h2>Agenda de hoje</h2><a href="#agenda" data-go="agenda" class="small" style="font-weight:700">${evs.length} no dia</a></div>${(prox.length ? prox : evs.slice(-2)).slice(0, 4).map(linhaEv).join('')}` : ''; })()}
+    return evs.length ? `<div class="secth"><h2>Agenda de hoje</h2><a href="#agenda" data-go="agenda" class="small" style="font-weight:700">${prox.length} pela frente · ${evs.length} no dia</a></div>${(prox.length ? prox : evs.slice(-2)).slice(0, 8).map(linhaEv).join('')}${prox.length > 8 ? `<a href="#agenda" data-go="agenda" class="small" style="display:block;padding:10px 0;font-weight:700">Ver mais ${prox.length - 8} na agenda</a>` : ''}` : ''; })()}
   <div class="secth"><h2>Pede você agora</h2><a href="#agenda" data-go="agenda" class="small" style="font-weight:700">Ver agenda</a></div>
   ${its.filter((t) => t.status !== 'respondido').slice(0, 5).map(linhaItem).join('') || '<div class="empty">Nada novo pedindo você.</div>'}
   ${its.some((t) => t.status === 'respondido') ? `<div class="secth"><h2>Em andamento</h2><span class="small muted">${its.filter((t) => t.status === 'respondido').length} já respondidas</span></div>${its.filter((t) => t.status === 'respondido').slice(0, 6).map(linhaItem).join('')}` : ''}
