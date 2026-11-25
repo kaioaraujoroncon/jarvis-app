@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Jarvis · Conversa com Plutus</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#121212;text-decoration:none}a:hover{color:#2F5BFF}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F6F5F1;color:#121212;font-family:'Plus Jakarta Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+  <div style="padding:54px 16px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #E4E2DC">
+    <a href="Escritorio.dc.html" aria-label="Voltar ao escritório" style="width:44px;height:44px;border-radius:14px;display:grid;place-items:center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#121212" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    </a>
+    <div style="width:40px;height:40px;border-radius:12px;background:#E3F2EA;display:grid;place-items:center;font-size:13px;font-weight:800">PL</div>
+    <div style="flex:1">
+      <div style="font-size:16px;font-weight:800">Plutus</div>
+      <div style="font-size:12px;font-weight:600;color:#55534F">Financeiro · 1º andar · <span style="color:#C8372A">1 atrasada</span></div>
+    </div>
+  </div>
+
+  <div style="flex:1;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:10px">
+    <div style="align-self:flex-start;max-width:82%;background:#FFFFFF;border:1px solid #E4E2DC;border-radius:18px 18px 18px 6px;padding:10px 13px;font-size:15px;line-height:1.42">Kaio, a conferência dos boletos vencidos está parada desde domingo. São 6 famílias, total abaixo do mês passado.</div>
+    <div style="align-self:flex-start;max-width:82%;background:#FFFFFF;border:1px solid #E4E2DC;border-radius:18px 18px 18px 6px;padding:10px 13px;font-size:15px;line-height:1.42">Quer que eu mande o lembrete padrão para elas e te mostre quem respondeu amanhã às 8h?</div>
+
+    <div style="align-self:stretch;background:#FFFFFF;border:1px solid #E4E2DC;border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;font-weight:800">Conferir boletos vencidos</div>
+        <span style="font-size:11px;font-weight:800;color:#C8372A;background:#FBE3DF;border-radius:999px;padding:3px 8px">atrasada · 2 dias</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onClick="{{ confirm }}" style="all:unset;cursor:pointer;flex:1;text-align:center;font-size:13px;font-weight:800;padding:11px 0;border-radius:12px;background:{{ cBg }};color:{{ cInk }}">{{ cLabel }}</button>
+        <button style="all:unset;cursor:pointer;flex:1;text-align:center;font-size:13px;font-weight:700;padding:11px 0;border-radius:12px;background:#F6F5F1;border:1px solid #E4E2DC">Adiar 1 dia</button>
+      </div>
+    </div>
+
+    <div style="align-self:flex-end;max-width:78%;background:#121212;color:#F6F5F1;border-radius:18px 18px 6px 18px;padding:10px 13px;font-size:15px;line-height:1.42">Pode mandar. E me avisa se alguém pedir renegociação.</div>
+    <div style="align-self:flex-start;max-width:82%;background:#FFFFFF;border:1px solid #E4E2DC;border-radius:18px 18px 18px 6px;padding:10px 13px;font-size:15px;line-height:1.42">Feito o envio. Amanhã às 8h trago quem respondeu. A tarefa só vira concluída quando você confirmar.</div>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto">
+      <button style="all:unset;cursor:pointer;font-size:13px;font-weight:700;padding:9px 12px;border-radius:999px;background:#FFFFFF;border:1px solid #E4E2DC">O que mais está pendente?</button>
+      <button style="all:unset;cursor:pointer;font-size:13px;font-weight:700;padding:9px 12px;border-radius:999px;background:#FFFFFF;border:1px solid #E4E2DC">Chamar para reunião</button>
+    </div>
+  </div>
+
+  <div style="padding:10px 14px 30px;display:flex;gap:8px;align-items:center;border-top:1px solid #E4E2DC">
+    <label style="flex:1;display:block">
+      <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Mensagem para Plutus</span>
+      <input placeholder="Escreva para o Plutus" style="width:100%;box-sizing:border-box;font:16px 'Plus Jakarta Sans',sans-serif;padding:12px 14px;border-radius:14px;border:1px solid #E4E2DC;background:#FFFFFF;color:#121212">
+    </label>
+    <button aria-label="Falar por voz" style="all:unset;cursor:pointer;width:48px;height:48px;border-radius:14px;background:#2F5BFF;display:grid;place-items:center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { ok:false }; }
+  renderVals() {
+    const ok = this.state.ok;
+    return { confirm: () => this.setState({ ok: !ok }), cBg: ok ? '#1B7F52' : '#121212', cInk: '#F6F5F1', cLabel: ok ? 'Confirmado · +30 XP' : 'Confirmar feito' };
+  }
+}
+</script>
+</body>
+</html>
