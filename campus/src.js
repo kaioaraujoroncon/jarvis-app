@@ -584,7 +584,7 @@ function openJarvis(){ const bots=OFFICES[office].bots; const late=bots.flatMap(
   document.getElementById('cobrar').onclick=()=>{ const quem=[...new Set(late.map(x=>x.b.nome))].join(', '); toast('Cobrança enviada'); sc.querySelector('.note').textContent='Jarvis cobrou: '+quem+'.'; }; }
 /* falas ao conversar */
 const FALA={la:['Tô atrasado nisso, me dá uma força?','Isso aqui venceu, preciso da sua decisão.'],wa:['Tá chegando o prazo, já tô em cima.','Faltam poucos dias, vou fechar.'],ok:['Tudo em dia por aqui!','Sem pendência, chefe.']};
-const _openBot=openBot; openBot=function(b,talk){ _openBot(b); if(LIVE&&!b.pessoa) liveChat(b); if(talk){ const f=FALA[b.st]; sc.querySelector('.sub').insertAdjacentHTML('afterend',`<div class="say">“${esc(f[Math.floor(Math.random()*f.length)])}”</div>`); } };
+const _openBot=openBot; openBot=function(b,talk){ _openBot(b); if(LIVE&&!b.pessoa) liveChat(b); if(talk&&!LIVE){ const f=FALA[b.st]; sc.querySelector('.sub').insertAdjacentHTML('afterend',`<div class="say">“${esc(f[Math.floor(Math.random()*f.length)])}”</div>`); } };
 /* pessoas da equipe (adicionadas por você) */
 let pessoaAgents=[]; const PKEY=()=>'jarvis.campus.pessoas.'+office;
 const loadP=()=>{ try{ return JSON.parse(localStorage.getItem(PKEY())||'[]'); }catch(e){ return []; } };
@@ -698,7 +698,7 @@ async function liveChat(b){
   const box=document.getElementById('lc');
   const load=async()=>{ if(!document.getElementById('lc')){ clearInterval(chatTimer); return; } const r=await sb.from('conversa_mensagens').select('autor,texto,status,criado_em').in('bot_id',b.ids||[b.id]).order('criado_em',{ascending:false}).limit(6); if(r.error) return;
     const ms=r.data.reverse(); const ult=ms[ms.length-1]; const esp=ult&&ult.autor==='kaio'&&['pendente','lendo'].includes(ult.status);
-    box.innerHTML=ms.map(m=>`<div class="lb ${m.autor==='kaio'?'me':''}">${esc(m.texto)}</div>`).join('')+(esp?`<div class="lb w">${Date.now()-new Date(ult.criado_em)>180000?'Sem resposta ainda. O OpenBot responde com o computador ligado.':esc(b.nome)+' está lendo…'}</div>`:'')||'<div class="note">Mande a primeira mensagem.</div>'; };
+    box.innerHTML=ms.map(m=>`<div class="lb ${m.autor==='kaio'?'me':''}">${esc(m.texto)}</div>`).join('')+(esp?`<div class="lb w">${ult.status==='lendo'?esc(b.nome)+' está lendo…':Date.now()-new Date(ult.criado_em)>180000?'Entregue. Ainda sem resposta: o OpenBot responde quando o computador está ligado.':'Entregue. Aguardando '+esc(b.nome)+'…'}</div>`:'')||'<div class="note">Mande a primeira mensagem.</div>'; };
   await load(); chatTimer=setInterval(load,5000);
   document.getElementById('lcf').onsubmit=async e=>{ e.preventDefault(); const i=document.getElementById('lci'), t=i.value.trim(); if(!t) return; i.value='';
     const u=(await sb.auth.getUser()).data.user; const r=await sb.from('conversa_mensagens').insert({user_id:u.id,bot_id:b.id,autor:'kaio',texto:t});

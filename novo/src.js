@@ -117,7 +117,7 @@ function telaChat() {
     <div class="grow"><div style="font-weight:800">${esc(b.nome)}</div><div class="m muted">${esc([b.missao, escDe(b.escritorio_id)?.nome].filter(Boolean).join(' · '))}</div></div></div>
   ${tarefas.length ? `<details style="margin-bottom:6px"><summary class="small" style="font-weight:700;cursor:pointer">${tarefas.length} tarefa${tarefas.length > 1 ? 's' : ''} aberta${tarefas.length > 1 ? 's' : ''}</summary>${tarefas.map(linhaItem).join('')}</details>` : ''}
   <div class="chat" id="chat">${ms.map((m) => `<div class="b ${m.autor === 'kaio' ? 'me' : 'bot'}">${esc(m.texto)}</div>`).join('') || `<div class="empty">Mande a primeira mensagem para ${esc(b.nome)}.</div>`}
-  ${esperando ? `<div class="b wait">${velho ? 'Ainda sem resposta. O OpenBot responde quando o computador estiver ligado.' : esc(b.nome) + ' está lendo…'}</div>` : ''}</div>
+  ${esperando ? `<div class="b wait">${ult.status === 'lendo' ? esc(b.nome) + ' está lendo…' : velho ? 'Entregue. Ainda sem resposta: o OpenBot responde quando o computador está ligado.' : 'Entregue. Aguardando ' + esc(b.nome) + '…'}</div>` : ''}</div>
   <div class="composer"><form id="send"><label style="flex:1;display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Mensagem</span><input id="msg" maxlength="4000" autocomplete="off" placeholder="Escreva para ${esc(b.nome)}"></label><button class="btn ac" type="submit">Enviar</button></form></div>`;
 }
 function telaVoce() {
