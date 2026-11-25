@@ -20,19 +20,28 @@ const hojeISO = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.ge
 const fmtData = (iso) => { if (!iso) return 'sem data'; const [y, m, d] = iso.split('-'); return `${d}/${m}`; };
 function diasAte(iso) { if (!iso) return null; const a = new Date(iso + 'T12:00:00'), b = new Date(hojeISO() + 'T12:00:00'); return Math.round((a - b) / 864e5); }
 function quando(it) { const d = diasAte(it.prazo); if (d === null) return 'sem prazo'; if (d < -1) return `atrasada há ${-d} dias`; if (d === -1) return 'venceu ontem'; if (d === 0) return 'vence hoje'; if (d === 1) return 'vence amanhã'; return `vence em ${d} dias · ${fmtData(it.prazo)}`; }
+const diaDe = (ts) => { const d = new Date(ts); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const hora = (e) => e.dia_inteiro ? 'dia todo' : new Date(e.inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const calNome = (e) => /prosperi/i.test(e.calendario) ? 'Agenda da escola' : 'Sua agenda';
+function linhaEv(e) { const passou = !e.dia_inteiro && new Date(e.fim || e.inicio) < new Date();
+  return `<div class="row" style="opacity:${passou ? .5 : 1}"><div style="width:52px;flex:none;font-size:13px;font-weight:800;color:var(--mut)">${esc(hora(e))}</div><div class="grow"><div class="t">${esc(e.titulo.replace(/^[⏱✅💸]\s*/u, ''))}</div><div class="m muted">${esc(calNome(e))}${e.recorrente ? ' · repete' : ''}</div></div></div>`; }
 const botDe = (id) => S.bots.find((b) => b.id === id);
 const escDe = (id) => S.esc.find((e) => e.id === id);
 const filtroEsc = (x) => S.office === 'todos' || x.escritorio_id === S.office;
+const filtroEv = (e) => S.office === 'todos' || e.escritorio_id === S.office;
 
 /* ---------- dados ---------- */
 async function carregar() {
-  const [e, b, i, x, rs] = await Promise.all([
+  const ini = new Date(); ini.setDate(ini.getDate() - 1); const fimJ = new Date(); fimJ.setDate(fimJ.getDate() + 21);
+  const [e, b, i, x, rs, ev] = await Promise.all([
     sb.from('escritorios').select('id,nome,emoji,ordem').order('ordem'),
     sb.from('bots').select('id,nome,emoji,tipo,sala,missao,escritorio_id').eq('ativo', true).order('nome'),
     sb.from('itens_situacao').select('id,bot_id,titulo,prazo,xp,situacao,status,escritorio_id,bot_nome,bot_emoji').eq('ativo', true).in('situacao', ['atrasado', 'chegando', 'no_prazo']),
     sb.from('xp_eventos').select('pontos'),
     sb.from('respostas').select('item_id,resposta,extra,criado_em').order('criado_em', { ascending: false }).limit(600),
+    sb.from('agenda_eventos').select('id,calendario,titulo,descricao,inicio,fim,dia_inteiro,recorrente,escritorio_id').gte('inicio', ini.toISOString()).lt('inicio', fimJ.toISOString()).order('inicio'),
   ]);
+  S.ev = ev.error ? [] : ev.data.sort((a, b) => String(a.inicio).localeCompare(String(b.inicio)));
   for (const r of [e, b, i, x]) if (r.error) throw r.error;
   S.resp = {}; (rs.data || []).forEach((r) => { if (!(r.item_id in S.resp)) S.resp[r.item_id] = (r.resposta === 'texto' || !r.resposta) ? (r.extra || 'respondida') : r.resposta; });
   S.esc = e.data; S.bots = b.data;
@@ -74,6 +83,8 @@ function telaHoje() {
   <h1>${saud}, Kaio.</h1><p class="say">${esc(frase)}</p>
   ${chipsEsc()}
   <div class="stats"><div class="stat"><b style="color:var(--la)">${la}</b><span>atrasadas</span></div><div class="stat"><b style="color:var(--wa)">${wa}</b><span>vencem logo</span></div><div class="stat"><b style="color:var(--ok)">${ok}</b><span>no prazo</span></div></div>
+  ${(() => { const hj = hojeISO(); const evs = (S.ev || []).filter((e) => diaDe(e.inicio) === hj && filtroEv(e)); const prox = evs.filter((e) => e.dia_inteiro || new Date(e.fim || e.inicio) >= new Date());
+    return evs.length ? `<div class="secth"><h2>Agenda de hoje</h2><a href="#agenda" data-go="agenda" class="small" style="font-weight:700">${evs.length} no dia</a></div>${(prox.length ? prox : evs.slice(-2)).slice(0, 4).map(linhaEv).join('')}` : ''; })()}
   <div class="secth"><h2>Pede você agora</h2><a href="#agenda" data-go="agenda" class="small" style="font-weight:700">Ver agenda</a></div>
   ${its.filter((t) => t.status !== 'respondido').slice(0, 5).map(linhaItem).join('') || '<div class="empty">Nada novo pedindo você.</div>'}
   ${its.some((t) => t.status === 'respondido') ? `<div class="secth"><h2>Em andamento</h2><span class="small muted">${its.filter((t) => t.status === 'respondido').length} já respondidas</span></div>${its.filter((t) => t.status === 'respondido').slice(0, 6).map(linhaItem).join('')}` : ''}
@@ -84,7 +95,7 @@ function telaAgenda() {
   const base = new Date(hoje + 'T12:00:00'); const dow = (base.getDay() + 6) % 7; base.setDate(base.getDate() - dow);
   const dias = [...Array(7)].map((_, i) => { const d = new Date(base); d.setDate(d.getDate() + i); return d.toISOString().slice(0, 10); });
   const its = S.itens.filter(filtroEsc);
-  const cor = (iso) => { const l = its.filter((t) => t.prazo === iso); if (!l.length) return 'transparent'; return l.some((t) => t.situacao === 'atrasado') ? 'var(--la)' : l.some((t) => t.situacao === 'chegando') ? 'var(--wa)' : 'var(--ok)'; };
+  const cor = (iso) => { const l = its.filter((t) => t.prazo === iso); if (!l.length) return (S.ev || []).some((e) => diaDe(e.inicio) === iso && filtroEv(e)) ? 'var(--mut2)' : 'transparent'; return l.some((t) => t.situacao === 'atrasado') ? 'var(--la)' : l.some((t) => t.situacao === 'chegando') ? 'var(--wa)' : 'var(--ok)'; };
   const W = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
   const doDia = its.filter((t) => t.prazo === S.day);
   const atras = S.day === hoje ? its.filter((t) => t.prazo && t.prazo < hoje) : [];
@@ -92,10 +103,11 @@ function telaAgenda() {
   return `<div class="top"><h1>Agenda</h1></div>${chipsEsc()}
   <div class="week">${dias.map((d, i) => `<button class="day ${d === S.day ? 'on' : ''}" data-day="${d}"><small>${W[i]}</small><b>${+d.slice(8)}</b><span class="dot" style="background:${cor(d)}"></span></button>`).join('')}</div>
   ${atras.length ? `<div class="secth"><h2>Ficou para trás</h2></div>${atras.map(linhaItem).join('')}` : ''}
-  <div class="secth"><h2>${S.day === hoje ? 'Hoje' : esc(fmtData(S.day))}</h2></div>
+  ${(() => { const evs = (S.ev || []).filter((e) => diaDe(e.inicio) === S.day && filtroEv(e)); return `<div class="secth"><h2>${S.day === hoje ? 'Hoje' : esc(fmtData(S.day))} · agenda</h2><span class="small muted">${evs.length}</span></div>${evs.map(linhaEv).join('') || '<div class="empty">Nada na agenda.</div>'}`; })()}
+  <div class="secth"><h2>Prazos de tarefas</h2></div>
   ${doDia.map(linhaItem).join('') || '<div class="empty">Nenhum prazo neste dia.</div>'}
   ${semData.length ? `<div class="secth"><h2>Sem data</h2></div>${semData.map(linhaItem).join('')}` : ''}
-  <p class="small muted" style="margin-top:18px">Prazos das tarefas dos bots e do Notion. Os eventos do Google Agenda entram na próxima etapa.</p>`;
+  <p class="small muted" style="margin-top:18px">Agenda do Google (sua e da escola) e tarefas do Notion.</p>`;
 }
 function ultima(botId) { for (let i = S.msgs.length - 1; i >= 0; i--) if (S.msgs[i].bot_id === botId) return S.msgs[i]; return null; }
 function telaConversas() {
