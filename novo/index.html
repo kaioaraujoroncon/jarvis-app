@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F6F5F1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Jarvis</title>
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Jarvis · app novo. Agenda calma e minimalista; o jogo fica no Escritório. */
+:root{--bg:#F6F5F1;--card:#FFFFFF;--line:#E4E2DC;--ink:#121212;--mut:#55534F;--mut2:#6B6A66;--ac:#2F5BFF;--la:#C8372A;--wa:#A86A00;--ok:#1B7F52;--laBg:#FBE3DF;--waBg:#FFF1CC;--okBg:#E3F2EA}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.45 "Plus Jakarta Sans",system-ui,sans-serif}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--ac);text-decoration:none}
+#app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+main{flex:1;padding:calc(18px + env(safe-area-inset-top)) 20px calc(110px + env(safe-area-inset-bottom))}
+h1{margin:0;font-size:32px;line-height:1.08;font-weight:800;letter-spacing:-.02em}
+h2{margin:0;font-size:15px;font-weight:800}
+.muted{color:var(--mut)}.small{font-size:13px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.pill{font-size:12px;font-weight:700;padding:6px 10px;border-radius:999px;background:var(--ink);color:var(--bg);white-space:nowrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;min-height:36px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat b{display:block;font-size:24px;font-weight:800;line-height:1.1}
+.stat span{font-size:12px;font-weight:600;color:var(--mut)}
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.av{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:17px;flex:none;background:#EFEDE7}
+.grow{flex:1;min-width:0}
+.t{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m{font-size:12.5px;font-weight:600}
+.ck{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;flex:none}
+.ck.done{background:var(--ok);border-color:var(--ok)}
+.ck svg{width:18px;height:18px}
+.secth{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 6px}
+.campus{display:block;position:relative;border-radius:20px;overflow:hidden;height:150px;margin-top:18px;background:#A9DCF7}
+.campus img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 43%}
+.campus div{position:absolute;left:12px;right:12px;bottom:12px;display:flex;justify-content:space-between;align-items:center;background:rgba(18,18,18,.84);color:#fff;border-radius:14px;padding:10px 12px}
+.say{font-size:16px;color:#3A3936;margin-top:8px}
+.empty{padding:22px 0;color:var(--mut);font-size:14px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:8px 10px calc(10px + env(safe-area-inset-bottom));z-index:5}
+nav .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:end}
+nav button{border:0;background:none;display:grid;justify-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--mut2);min-height:44px;padding:0}
+nav button.on{color:var(--ink);font-weight:800}
+nav svg{width:22px;height:22px}
+nav .mid{justify-self:center;width:58px;height:58px;margin-top:-24px;border-radius:18px;background:var(--ac);color:#fff;place-items:center;box-shadow:0 8px 18px rgba(47,91,255,.35)}
+nav .mid svg{width:26px;height:26px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:14px 0}
+.day{border:0;background:none;border-radius:14px;padding:8px 0;display:grid;justify-items:center;gap:3px}
+.day.on{background:var(--ink);color:var(--bg)}
+.day small{font-size:11px;font-weight:600;opacity:.75}.day b{font-size:17px}
+.dot{width:5px;height:5px;border-radius:50%}
+.chat{display:flex;flex-direction:column;gap:8px;padding:10px 0 90px}
+.b{max-width:84%;padding:10px 13px;font-size:15px;line-height:1.42;white-space:pre-wrap;word-wrap:break-word}
+.b.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-radius:18px 18px 18px 6px}
+.b.me{align-self:flex-end;background:var(--ink);color:var(--bg);border-radius:18px 18px 6px 18px}
+.b.wait{align-self:flex-start;color:var(--mut);font-size:13px;border:1px dashed var(--line);border-radius:14px}
+.composer{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:10px 14px calc(12px + env(safe-area-inset-bottom));z-index:6}
+.composer form{max-width:520px;margin:0 auto;display:flex;gap:8px}
+.composer input{flex:1;font-size:16px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card)}
+.btn{border:0;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:800;padding:0 16px;min-height:48px}
+.btn.ac{background:var(--ac);color:#fff}
+.back{border:0;background:none;width:44px;height:44px;display:grid;place-items:center;margin-left:-10px}
+.form{display:grid;gap:12px;margin-top:20px}
+.form label{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--mut)}
+.form input{font-size:16px;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card)}
+.err{color:var(--la);font-size:13px;font-weight:600}
+.toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-120%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;transition:transform .3s;z-index:20}
+.toast.show{transform:translateX(-50%)}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="app"><main id="main"><p class="muted">Abrindo o Jarvis…</p></main></div>
+<nav id="nav" hidden><div class="in">
+  <button data-tab="hoje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Hoje</button>
+  <button data-tab="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Agenda</button>
+  <button class="mid" data-tab="escritorio" aria-label="Escritório"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5"/></svg></button>
+  <button data-tab="conversas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Conversas</button>
+  <button data-tab="voce"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Você</button>
+</div></nav>
+<div class="toast" id="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>
