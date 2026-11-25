@@ -299,6 +299,7 @@ function outdoorPath(a,b){ if(!segHits(a,b)) return [b];
   for(let i=0;i<4;i++){ const c1=C[i]; if(segHits(a,c1)) continue; for(const c2 of [C[(i+1)%4],C[(i+3)%4]]) if(!segHits(c2,b)) return [c1,c2,b]; }
   return [b]; }
 function route(a,b){
+  if(!a.o&&!b.o&&a.f===b.f&&roomAt(a.f,a.x,a.z)===roomAt(b.f,b.x,b.z)) return [{f:b.f,x:b.x,z:b.z,o:false}];
   const pts=[]; const P=(f,x,z,o=false)=>pts.push({f,x,z,o});
   let cur=a;
   if(a.o){ if(b.o){ return outdoorPath(a,b); } outdoorPath(a,{f:0,x:0,z:16,o:true}).forEach(p=>pts.push(p)); P(0,0,12); P(0,0,5); P(0,0,0); cur={f:0,x:0,z:0}; }
@@ -419,14 +420,14 @@ const STC={ok:'var(--ok)',wa:'var(--wa)',la:'var(--la)'}, STN={ok:'no prazo',wa:
 function openSheet(html){ sc.innerHTML=html; sheet.classList.add('open'); }
 function closeSheet(){ sheet.classList.remove('open'); document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t==='campus')); }
 document.getElementById('sx').onclick=closeSheet;
-function taskRows(b){ return b.tarefas.map((t,i)=>`<div class="task"><span class="d" style="background:${t[3]?'var(--cy)':STC[t[1]]}"></span><div class="n">${esc(t[0])}<small>${t[3]?'confirmada':STN[t[1]]} · +${t[2]} XP</small></div><button class="btn" data-b="${b.id}" data-i="${i}" ${t[3]?'disabled':''}>${t[3]?'Feito':'Confirmar'}</button></div>`).join(''); }
+function taskRows(b){ return b.tarefas.map((t,i)=>`<div class="task"><span class="d" style="background:${t[3]?'var(--cy)':STC[t[1]]}"></span><div class="n">${esc(t[0])}<small>${t[3]?'confirmada':STN[t[1]]} · +${t[2]} XP${t[6]&&!t[3]?' · você respondeu: '+esc(t[6]):''}</small></div><button class="btn" data-b="${b.id}" data-i="${i}" ${t[3]?'disabled':''}>${t[3]?'Feito':'Confirmar'}</button></div>`).join(''); }
 function openBot(b){ ronda(b);
   const f=b.o?'ao ar livre':['térreo','1º andar','2º andar'][b.f];
   openSheet(`<h2>${esc(b.emo)} ${esc(b.nome)}</h2><div class="sub">${esc(b.papel)} · ${esc(b.sala==='tenis'?'Quadra de tênis':ROOMNAMES[office][b.sala])} · ${f}</div>${taskRows(b)}
-  <div class="row"><button class="btn ghost" id="seeB">Ver no campus</button><button class="btn ghost" id="callB">Chamar para reunião</button></div>${LIVE?(b.tarefas.length?'':'<div class="note">Sem tarefas abertas.</div>')+`<div class="row"><button class="btn ghost" id="rmB">Tirar da equipe</button></div>`:'<div class="note">Dados de exemplo. No app, o XP só entra quando a tarefa é confirmada com evidência.</div>'}`);
+  <div class="row"><button class="btn ghost" id="seeB">Ver no campus</button><button class="btn ghost" id="callB">Chamar até você</button></div>${LIVE?(b.tarefas.length?'':'<div class="note">Sem tarefas abertas.</div>')+`<div class="row"><button class="btn ghost" id="rmB">Tirar da equipe</button></div>`:'<div class="note">Dados de exemplo. No app, o XP só entra quando a tarefa é confirmada com evidência.</div>'}`);
   if(LIVE) document.getElementById('rmB').onclick=()=>{ const el=document.getElementById('rmB'); if(el.dataset.ok){ removerAgente(b); } else { el.dataset.ok=1; el.textContent='Toque de novo para confirmar'; } };
   document.getElementById('seeB').onclick=()=>{ closeSheet(); if(!b.o) setView(b.f); setTimeout(()=>flyTo(b.m.g.position.clone().add(new THREE.Vector3(7,9,11)),b.m.g.position.clone()),b.o?0:1150); };
-  document.getElementById('callB').onclick=()=>{ const s=seats.find(s=>s.room==='reuniao'&&!s.who); if(s&&!b.tennis){ sitAt(b,s); b.timer=60; toast(b.nome+' a caminho'); } closeSheet(); };
+  document.getElementById('callB').onclick=()=>{ if(b.tennis){ toast(b.nome+' está jogando'); closeSheet(); return; } const P=player, ang=P.m.g.rotation.y; goTo(b,{f:P.o?0:P.f,x:P.x+Math.sin(ang)*1.4,z:P.z+Math.cos(ang)*1.4,o:P.o},()=>{ b.state='idle'; b.timer=45; b.m.g.rotation.y=Math.atan2(player.x-b.x,player.z-b.z); toast(b.nome+' chegou'); }); toast(b.nome+' está indo até você'); closeSheet(); };
 }
 function openDesk(){ const all=OFFICES[office].bots.filter(b=>b.tarefas.some(t=>!t[3]&&t[1]!=='ok'));
   openSheet(`<h2>Sua mesa</h2><div class="sub">${esc(ROOMNAMES[office][player.seat?.room]||'')} · o que pede a sua atenção</div>${all.map(b=>taskRows(b).replace(/<div class="n">/g,`<div class="n"><small>${esc(b.emo+' '+b.nome)}</small>`)).join('')||'<div class="note">Nada pendente. Bom trabalho.</div>'}<div class="row"><button class="btn ghost" id="up">Levantar</button></div>`);
@@ -583,7 +584,7 @@ function openJarvis(){ const bots=OFFICES[office].bots; const late=bots.flatMap(
   document.getElementById('cobrar').onclick=()=>{ const quem=[...new Set(late.map(x=>x.b.nome))].join(', '); toast('Cobrança enviada'); sc.querySelector('.note').textContent='Jarvis cobrou: '+quem+'.'; }; }
 /* falas ao conversar */
 const FALA={la:['Tô atrasado nisso, me dá uma força?','Isso aqui venceu, preciso da sua decisão.'],wa:['Tá chegando o prazo, já tô em cima.','Faltam poucos dias, vou fechar.'],ok:['Tudo em dia por aqui!','Sem pendência, chefe.']};
-const _openBot=openBot; openBot=function(b,talk){ _openBot(b); if(talk){ const f=FALA[b.st]; sc.querySelector('.sub').insertAdjacentHTML('afterend',`<div class="say">“${esc(f[Math.floor(Math.random()*f.length)])}”</div>`); } };
+const _openBot=openBot; openBot=function(b,talk){ _openBot(b); if(LIVE&&!b.pessoa) liveChat(b); if(talk){ const f=FALA[b.st]; sc.querySelector('.sub').insertAdjacentHTML('afterend',`<div class="say">“${esc(f[Math.floor(Math.random()*f.length)])}”</div>`); } };
 /* pessoas da equipe (adicionadas por você) */
 let pessoaAgents=[]; const PKEY=()=>'jarvis.campus.pessoas.'+office;
 const loadP=()=>{ try{ return JSON.parse(localStorage.getItem(PKEY())||'[]'); }catch(e){ return []; } };
@@ -615,21 +616,22 @@ const SALA_AREA={gestao:'coord',comercial:'marketing',dinheiro:'financeiro',manu
 const hashN=s=>{ let h=0; for(const c of String(s)) h=(h*31+c.charCodeAt(0))|0; return Math.abs(h); };
 function withTimeout(p,ms){ return Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('tempo esgotado')),ms))]); }
 async function loadLive(){
-  const [esc,bots,its,xpr,mods]=await Promise.all([
+  const [esc,bots,its,xpr,mods,resps]=await Promise.all([
     sb.from('escritorios').select('id,nome,emoji,cor,tipo,ordem').order('ordem'),
     sb.from('bots').select('id,nome,emoji,sala,tipo,cor,missao,modelo_slug,escritorio_id,area_id').eq('ativo',true),
     sb.from('itens_situacao').select('id,bot_id,titulo,prazo,xp,situacao,status,escritorio_id').eq('ativo',true).in('situacao',['atrasado','chegando','no_prazo']),
+    sb.from('respostas').select('item_id,resposta,extra,criado_em').order('criado_em',{ascending:false}).limit(600),
     sb.from('xp_eventos').select('pontos'),
     sb.from('agente_modelos').select('slug,nome,emoji,divisao').order('nome')]);
   for(const r of [esc,bots,its,xpr]) if(r.error) throw r.error;
-  MODELOS=mods.data||[];
+  MODELOS=mods.data||[]; const RESP={}; (resps&&resps.data||[]).forEach(r=>{ if(!RESP[r.item_id]) RESP[r.item_id]=(r.resposta==='texto'||!r.resposta)?(r.extra||''):r.resposta; });
   for(const k of Object.keys(OFFICES)) delete OFFICES[k];
   for(const e of esc.data){
     const kind=/pessoal/i.test(e.nome)||e.tipo==='pessoal'?'pessoal':'escola'; ROOMNAMES[e.id]=ROOMNAMES[kind];
     const seen={}, list=[];
     for(const b of bots.data.filter(b=>b.escritorio_id===e.id)){
       const sala=b.sala||SALA_AREA[b.area_id]||'foco', key=b.nome+'|'+sala;
-      const tarefas=its.data.filter(i=>i.bot_id===b.id&&!['fechado','respondido'].includes(i.status)).map(i=>[i.titulo||'Sem título',SITMAP[i.situacao]||'ok',i.xp||10,false,i.id,i.prazo]);
+      const tarefas=its.data.filter(i=>i.bot_id===b.id&&i.status!=='fechado').map(i=>[i.titulo||'Sem título',SITMAP[i.situacao]||'ok',i.xp||10,false,i.id,i.prazo,i.status==='respondido'?String(RESP[i.id]||'respondida').slice(0,60):'']);
       if(seen[key]){ seen[key].tarefas.push(...tarefas); seen[key].ids.push(b.id); continue; }
       const mod=MODELOS.find(m=>m.slug===b.modelo_slug);
       const d={id:b.id,ids:[b.id],nome:b.nome,emo:b.emoji||(b.tipo==='pessoa'?'👤':'🤖'),cor:b.cor||PAL[hashN(b.id)%6],sala,tipo:b.tipo||'bot',papel:b.missao||(mod?mod.nome:(b.tipo==='pessoa'?'Equipe':'Agente')),tarefas,criado:b.id.startsWith('app-')};
@@ -688,9 +690,23 @@ function formAgente(){
     if(r.error){ document.getElementById('amsg').textContent='Não salvou: '+r.error.message; return; }
     closeSheet(); toast(nome+' entrou na equipe'); await goLive(); };
 }
+let chatTimer=null;
+async function liveChat(b){
+  clearInterval(chatTimer);
+  sc.insertAdjacentHTML('beforeend',`<div class="sub" style="margin-top:14px">Conversa com ${esc(b.nome)}</div><div id="lc" class="lc"></div>
+   <form id="lcf" class="lcf"><label style="flex:1;display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Mensagem</span><input id="lci" maxlength="4000" autocomplete="off" placeholder="Escreva para ${esc(b.nome)}"></label><button class="btn" type="submit">Enviar</button></form>`);
+  const box=document.getElementById('lc');
+  const load=async()=>{ if(!document.getElementById('lc')){ clearInterval(chatTimer); return; } const r=await sb.from('conversa_mensagens').select('autor,texto,status,criado_em').in('bot_id',b.ids||[b.id]).order('criado_em',{ascending:false}).limit(6); if(r.error) return;
+    const ms=r.data.reverse(); const ult=ms[ms.length-1]; const esp=ult&&ult.autor==='kaio'&&['pendente','lendo'].includes(ult.status);
+    box.innerHTML=ms.map(m=>`<div class="lb ${m.autor==='kaio'?'me':''}">${esc(m.texto)}</div>`).join('')+(esp?`<div class="lb w">${Date.now()-new Date(ult.criado_em)>180000?'Sem resposta ainda. O OpenBot responde com o computador ligado.':esc(b.nome)+' está lendo…'}</div>`:'')||'<div class="note">Mande a primeira mensagem.</div>'; };
+  await load(); chatTimer=setInterval(load,5000);
+  document.getElementById('lcf').onsubmit=async e=>{ e.preventDefault(); const i=document.getElementById('lci'), t=i.value.trim(); if(!t) return; i.value='';
+    const u=(await sb.auth.getUser()).data.user; const r=await sb.from('conversa_mensagens').insert({user_id:u.id,bot_id:b.id,autor:'kaio',texto:t});
+    if(r.error){ toast('Não enviou'); i.value=t; return; } load(); };
+}
 async function removerAgente(b){ if(!LIVE) return; const r=await sb.from('bots').update({ativo:false}).in('id',b.ids||[b.id]); if(r.error){ toast('Não removeu'); return; } closeSheet(); toast(b.nome+' saiu da equipe'); goLive(); }
 
-buildOffice(); renderXP(); setTimeout(hideHint,7000); startLive();
+buildOffice(); renderXP(); setTimeout(hideHint,7000); startLive(); if(/\/campus\//.test(location.pathname)) document.getElementById('sair').hidden=false;
 function loop(){
   const dt=Math.min(clock.getDelta(),.05); T+=dt;
   if(fly.on){ fly.t+=dt/fly.d; const k=fly.t>=1?1:1-Math.pow(1-fly.t,3); camera.position.lerpVectors(fly.p0,fly.p1,k); controls.target.lerpVectors(fly.t0,fly.t1,k); if(fly.t>=1) fly.on=false; }

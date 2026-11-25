@@ -83,6 +83,13 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 #hint{bottom:calc(250px + env(safe-area-inset-bottom))}
 #mode{left:50%;transform:translateX(-50%);top:calc(178px + env(safe-area-inset-top));padding:6px 8px 6px 14px;border-radius:999px;font-size:12px;font-weight:600;display:flex;gap:8px;align-items:center;white-space:nowrap;max-width:94vw}
 #mode button{border:0;border-radius:999px;padding:6px 12px;font:700 12px "Plus Jakarta Sans",sans-serif;background:var(--cy);color:#fff;min-height:32px;cursor:pointer}
+#toprow{display:flex;gap:8px;align-items:center}
+#sair{display:flex;align-items:center;min-height:46px;padding:0 14px;border-radius:999px;color:#fff;font-weight:800;font-size:14px;text-decoration:none;white-space:nowrap}
+#sair[hidden]{display:none}
+.lc{display:flex;flex-direction:column;gap:6px;max-height:34vh;overflow:auto;margin-bottom:8px}
+.lb{align-self:flex-start;max-width:86%;background:#ffffff14;border-radius:14px;padding:8px 11px;font-size:14px;white-space:pre-wrap}
+.lb.me{align-self:flex-end;background:var(--cy);color:#fff}.lb.w{color:var(--mut);border:1px dashed var(--line);background:none;font-size:12.5px}
+.lcf{display:flex;gap:8px}.lcf input{flex:1;font:16px "Plus Jakarta Sans",sans-serif;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0d1117;color:#fff;min-height:44px}
 @media (min-width:700px){#top{grid-template-columns:auto minmax(0,420px);justify-content:space-between;align-items:start}#bottom,#sheet{left:50%;right:auto;width:520px;transform:translateX(-50%)}#sheet{transform:translate(-50%,120%)}#sheet.open{transform:translate(-50%,0)}}
 @media (prefers-reduced-motion:reduce){#sheet,#bar i,#toast{transition:none}}
 </style>
@@ -90,10 +97,10 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 <body>
 <canvas id="c"></canvas>
 <div id="labels"></div>
-<div id="load">Montando o campus… <small style="opacity:.6">v7</small></div>
+<div id="load">Montando o campus… <small style="opacity:.6">v8</small></div>
 
 <div id="top" class="hud">
-  <div id="offices" class="glass"><button data-o="escola" class="on"><img src="logo.png" alt="" style="height:18px;vertical-align:-4px;margin-right:6px">Escola Prosperi</button><button data-o="pessoal">Pessoal</button></div>
+  <div id="toprow"><a id="sair" class="glass" href="../novo/" hidden aria-label="Sair do campus">‹ Sair</a><div id="offices" class="glass"><button data-o="escola" class="on"><img src="logo.png" alt="" style="height:18px;vertical-align:-4px;margin-right:6px">Escola Prosperi</button><button data-o="pessoal">Pessoal</button></div></div>
   <div id="rel" class="glass">
     <div class="t"><span>Relatório de hoje</span><span id="relSub">7 funcionários</span></div>
     <div><b id="nOk" style="color:var(--ok)">0</b><span>no prazo</span></div>
@@ -129,7 +136,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 <script>
 (function(){function show(m){var l=document.getElementById('load');if(l){l.style.opacity=1;l.innerHTML='<div style="padding:24px;text-align:center;max-width:340px">O campus n\u00e3o carregou neste aparelho.<br><small style="color:#f87171;word-break:break-word">'+String(m).replace(/</g,'&lt;')+'</small></div>';}}
 window.addEventListener('error',function(e){show(e.message||'erro');});
-setTimeout(function(){var l=document.getElementById('load');if(l&&l.parentNode&&l.style.opacity!=='0')show('Demorou demais para abrir. Versão v7.');},15000);
+setTimeout(function(){var l=document.getElementById('load');if(l&&l.parentNode&&l.style.opacity!=='0')show('Demorou demais para abrir. Versão v8.');},15000);
 try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))show('Este navegador n\u00e3o liberou o 3D (WebGL).');}catch(e){show(e.message);}})();
 </script>
 <script src="app.js"></script>

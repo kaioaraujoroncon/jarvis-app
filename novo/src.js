@@ -26,15 +26,17 @@ const filtroEsc = (x) => S.office === 'todos' || x.escritorio_id === S.office;
 
 /* ---------- dados ---------- */
 async function carregar() {
-  const [e, b, i, x] = await Promise.all([
+  const [e, b, i, x, rs] = await Promise.all([
     sb.from('escritorios').select('id,nome,emoji,ordem').order('ordem'),
     sb.from('bots').select('id,nome,emoji,tipo,sala,missao,escritorio_id').eq('ativo', true).order('nome'),
     sb.from('itens_situacao').select('id,bot_id,titulo,prazo,xp,situacao,status,escritorio_id,bot_nome,bot_emoji').eq('ativo', true).in('situacao', ['atrasado', 'chegando', 'no_prazo']),
     sb.from('xp_eventos').select('pontos'),
+    sb.from('respostas').select('item_id,resposta,extra,criado_em').order('criado_em', { ascending: false }).limit(600),
   ]);
   for (const r of [e, b, i, x]) if (r.error) throw r.error;
+  S.resp = {}; (rs.data || []).forEach((r) => { if (!(r.item_id in S.resp)) S.resp[r.item_id] = (r.resposta === 'texto' || !r.resposta) ? (r.extra || 'respondida') : r.resposta; });
   S.esc = e.data; S.bots = b.data;
-  S.itens = i.data.filter((t) => !['fechado', 'respondido'].includes(t.status));
+  S.itens = i.data.filter((t) => t.status !== 'fechado');
   S.xp = x.data.reduce((s, r) => s + (r.pontos || 0), 0);
 }
 async function carregarMsgs() {
@@ -57,7 +59,7 @@ function chipsEsc() {
 function linhaItem(it) {
   const s = SIT[it.situacao] || SIT.no_prazo, b = botDe(it.bot_id);
   return `<div class="row"><div class="av" style="background:${s.bg}">${esc(b?.emoji || it.bot_emoji || '•')}</div>
-    <div class="grow"><div class="t">${esc(it.titulo || 'Sem título')}</div><div class="m" style="color:${s.c}">${esc((b?.nome || it.bot_nome || '') + ' · ' + quando(it))}</div></div>
+    <div class="grow"><div class="t">${esc(it.titulo || 'Sem título')}</div><div class="m" style="color:${s.c}">${esc((b?.nome || it.bot_nome || '') + ' · ' + quando(it))}</div>${it.status === 'respondido' && S.resp?.[it.id] ? `<div class="m muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Você respondeu: ${esc(String(S.resp[it.id]).slice(0, 80))}</div>` : ''}</div>
     <button class="ck" data-ok="${esc(it.id)}" aria-label="Confirmar feito: ${esc(it.titulo)}">${CHECK}</button></div>`;
 }
 function telaHoje() {
@@ -73,7 +75,8 @@ function telaHoje() {
   ${chipsEsc()}
   <div class="stats"><div class="stat"><b style="color:var(--la)">${la}</b><span>atrasadas</span></div><div class="stat"><b style="color:var(--wa)">${wa}</b><span>vencem logo</span></div><div class="stat"><b style="color:var(--ok)">${ok}</b><span>no prazo</span></div></div>
   <div class="secth"><h2>Pede você agora</h2><a href="#agenda" data-go="agenda" class="small" style="font-weight:700">Ver agenda</a></div>
-  ${its.slice(0, 5).map(linhaItem).join('') || '<div class="empty">Tudo em dia por aqui.</div>'}
+  ${its.filter((t) => t.status !== 'respondido').slice(0, 5).map(linhaItem).join('') || '<div class="empty">Nada novo pedindo você.</div>'}
+  ${its.some((t) => t.status === 'respondido') ? `<div class="secth"><h2>Em andamento</h2><span class="small muted">${its.filter((t) => t.status === 'respondido').length} já respondidas</span></div>${its.filter((t) => t.status === 'respondido').slice(0, 6).map(linhaItem).join('')}` : ''}
   <a class="campus" href="../campus/"><img src="campus.jpg" alt="Campus da escola visto de cima"><div><span><b style="display:block;font-size:14px">Entrar no escritório</b><span style="font-size:12px;color:#C9C7C1">${S.bots.length} na equipe</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div></a>`;
 }
 function telaAgenda() {
