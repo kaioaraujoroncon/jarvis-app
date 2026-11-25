@@ -18,3 +18,15 @@ Os arquivos `.dc.html` desta pasta são a cópia de segurança dessas telas.
 ## Regras
 - XP só por trabalho confirmado com evidência (saldo inicial 220).
 - Backup antes de cada troca grande (ramo `backup-...`).
+
+## Anotado em 25/11/2026 — salas de aula (aguardando o documento do Drive)
+- Cada turma vira uma sala no campus: alunos (quantidade real), professora e auxiliar, grade horária.
+- Por sala: ocupação, valores a receber, alunos em atraso, receitas e custos.
+- Guardar no banco só números por turma (sem nome de aluno nem CPF). Receitas e custos pelo que saiu/entrou da conta.
+- Fonte: o documento de exportação/análise interna que o Kaio está terminando no Drive. Não montar antes dele ficar pronto.
+
+## Check-up de 25/11/2026
+- Ponte Notion/Google: 3 rotinas sem falha em 24 h; endereço secreto do Google Script movido para o cofre (Vault).
+- Funções da ponte só rodam pelo agendador; tabelas internas fechadas para o app.
+- Agenda Google (pessoal + escola) no banco; falta o OpenBot mandar pela ponte a cada 10 min.
+- Conversas com bots funcionando (OpenBot responde a cada 3 min com o PC ligado).
