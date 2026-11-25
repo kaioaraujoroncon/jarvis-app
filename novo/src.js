@@ -121,16 +121,17 @@ function telaConversas() {
 }
 function telaChat() {
   const b = botDe(S.chat); if (!b) { S.chat = null; return telaConversas(); }
-  const ms = S.msgs.filter((m) => m.bot_id === b.id);
-  const ult = ms[ms.length - 1], esperando = ult && ult.autor === 'kaio' && ['pendente', 'lendo'].includes(ult.status);
+  const pessoa = b.tipo === 'pessoa';
+  const ms = S.msgs.filter((m) => m.bot_id === b.id && !(pessoa && m.autor === 'bot'));
+  const ult = ms[ms.length - 1], esperando = !pessoa && ult && ult.autor === 'kaio' && ['pendente', 'lendo'].includes(ult.status);
   const velho = esperando && Date.now() - new Date(ult.criado_em).getTime() > 3 * 60e3;
   const tarefas = S.itens.filter((t) => t.bot_id === b.id).sort((x, y) => ORD[x.situacao] - ORD[y.situacao]);
   return `<div class="top" style="justify-content:flex-start;gap:8px"><button class="back" data-back aria-label="Voltar">${BACK}</button><div class="av">${esc(b.emoji || '🤖')}</div>
     <div class="grow"><div style="font-weight:800">${esc(b.nome)}</div><div class="m muted">${esc([b.missao, escDe(b.escritorio_id)?.nome].filter(Boolean).join(' · '))}</div></div></div>
   ${tarefas.length ? `<details style="margin-bottom:6px"><summary class="small" style="font-weight:700;cursor:pointer">${tarefas.length} tarefa${tarefas.length > 1 ? 's' : ''} aberta${tarefas.length > 1 ? 's' : ''}</summary>${tarefas.map(linhaItem).join('')}</details>` : ''}
-  <div class="chat" id="chat">${ms.map((m) => `<div class="b ${m.autor === 'kaio' ? 'me' : 'bot'}">${esc(m.texto)}</div>`).join('') || `<div class="empty">Mande a primeira mensagem para ${esc(b.nome)}.</div>`}
+  <div class="chat" id="chat">${ms.map((m) => `<div class="b ${m.autor === 'kaio' ? 'me' : 'bot'}">${esc(m.texto)}</div>`).join('') || `<div class="empty">${pessoa ? 'Recados ficam guardados para ' + esc(b.nome) + ' ler quando entrar no Jarvis.' : 'Mande a primeira mensagem para ' + esc(b.nome) + '.'}</div>`}${pessoa && ms.length ? `<div class="b wait">Recado guardado. ${esc(b.nome)} lê quando entrar no Jarvis.</div>` : ''}
   ${esperando ? `<div class="b wait">${ult.status === 'lendo' ? esc(b.nome) + ' está lendo…' : velho ? 'Entregue. Ainda sem resposta: o OpenBot responde quando o computador está ligado.' : 'Entregue. Aguardando ' + esc(b.nome) + '…'}</div>` : ''}</div>
-  <div class="composer"><form id="send"><label style="flex:1;display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Mensagem</span><input id="msg" maxlength="4000" autocomplete="off" placeholder="Escreva para ${esc(b.nome)}"></label><button class="btn ac" type="submit">Enviar</button></form></div>`;
+  <div class="composer"><form id="send"><label style="flex:1;display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Mensagem</span><input id="msg" maxlength="4000" autocomplete="off" placeholder="${pessoa ? 'Recado para ' : 'Escreva para '}${esc(b.nome)}"></label><button class="btn ac" type="submit">Enviar</button></form></div>`;
 }
 function telaVoce() {
   const lv = nivel(S.xp), pct = S.xp % 100;
