@@ -1,10 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
+import { criarMeuDia } from '../shared/meudia.js';
 
 const SBURL = 'https://qydpjcudcnirhybwlnhs.supabase.co';
 const SBKEY = 'sb_publishable_41C_vG_CaaYvwiNhyGb88A_yQgSwqC1';
 const sb = createClient(SBURL, SBKEY, { auth: { persistSession: true, storageKey: 'jarvis.sb', autoRefreshToken: true } });
 
 const $ = (s) => document.querySelector(s);
+let MD = null; const MDN = { agenda: 0, tarefas: 0, notion: 0 };
 const main = $('#main'), nav = $('#nav');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const SIT = { atrasado: { c: 'var(--la)', bg: 'var(--laBg)', n: 'atrasada' }, chegando: { c: 'var(--wa)', bg: 'var(--waBg)', n: 'vence logo' }, no_prazo: { c: 'var(--ok)', bg: 'var(--okBg)', n: 'no prazo' } };
@@ -71,6 +73,11 @@ function linhaItem(it) {
     <div class="grow"><div class="t">${esc(it.titulo || 'Sem título')}</div><div class="m" style="color:${s.c}">${esc((b?.nome || it.bot_nome || '') + ' · ' + quando(it))}</div>${it.status === 'respondido' && S.resp?.[it.id] ? `<div class="m muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Você respondeu: ${esc(String(S.resp[it.id]).slice(0, 80))}</div>` : ''}</div>
     <button class="ck" data-ok="${esc(it.id)}" aria-label="Confirmar feito: ${esc(it.titulo)}">${CHECK}</button></div>`;
 }
+function cardMeuDia() {
+  return `<button class="row" data-meudia style="width:100%;border:1px solid var(--line);border-radius:16px;background:var(--card);padding:12px 14px;margin:10px 0 4px;text-align:left">
+    <div class="av" style="background:var(--ink);color:var(--bg)">✓</div><div class="grow"><div class="t" style="font-weight:800">Meu dia</div><div class="m muted">${MDN.agenda} na agenda para marcar · ${MDN.tarefas} com os setores · ${MDN.notion} do Notion</div></div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`;
+}
 function telaHoje() {
   const its = S.itens.filter(filtroEsc).sort((a, b) => ORD[a.situacao] - ORD[b.situacao] || String(a.prazo || '9').localeCompare(String(b.prazo || '9')));
   const n = (k) => its.filter((t) => t.situacao === k).length, la = n('atrasado'), wa = n('chegando'), ok = n('no_prazo');
@@ -81,6 +88,7 @@ function telaHoje() {
   const data = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   return `<div class="top"><span class="small muted" style="font-weight:600">${esc(data.charAt(0).toUpperCase() + data.slice(1))}</span><span class="pill">Nível ${nivel(S.xp)} · ${S.xp} XP</span></div>
   <h1>${saud}, Kaio.</h1><p class="say">${esc(frase)}</p>
+  ${cardMeuDia()}
   ${chipsEsc()}
   <div class="stats"><div class="stat"><b style="color:var(--la)">${la}</b><span>atrasadas</span></div><div class="stat"><b style="color:var(--wa)">${wa}</b><span>vencem logo</span></div><div class="stat"><b style="color:var(--ok)">${ok}</b><span>no prazo</span></div></div>
   ${(() => { const hj = hojeISO(); const evs = (S.ev || []).filter((e) => diaDe(e.inicio) === hj && filtroEv(e)); const prox = evs.filter((e) => e.dia_inteiro || new Date(e.fim || e.inicio) >= new Date());
@@ -100,7 +108,7 @@ function telaAgenda() {
   const doDia = its.filter((t) => t.prazo === S.day);
   const atras = S.day === hoje ? its.filter((t) => t.prazo && t.prazo < hoje) : [];
   const semData = S.day === hoje ? its.filter((t) => !t.prazo) : [];
-  return `<div class="top"><h1>Agenda</h1></div>${chipsEsc()}
+  return `<div class="top"><h1>Agenda</h1></div>${cardMeuDia()}${chipsEsc()}
   <div class="week">${dias.map((d, i) => `<button class="day ${d === S.day ? 'on' : ''}" data-day="${d}"><small>${W[i]}</small><b>${+d.slice(8)}</b><span class="dot" style="background:${cor(d)}"></span></button>`).join('')}</div>
   ${atras.length ? `<div class="secth"><h2>Ficou para trás</h2></div>${atras.map(linhaItem).join('')}` : ''}
   ${(() => { const evs = (S.ev || []).filter((e) => diaDe(e.inicio) === S.day && filtroEv(e)); return `<div class="secth"><h2>${S.day === hoje ? 'Hoje' : esc(fmtData(S.day))} · agenda</h2><span class="small muted">${evs.length}</span></div>${evs.map(linhaEv).join('') || '<div class="empty">Nada na agenda.</div>'}`; })()}
@@ -191,6 +199,7 @@ document.addEventListener('click', (e) => {
   else if (t.dataset.go) { e.preventDefault(); S.tab = t.dataset.go; render(); scrollTo(0, 0); }
   else if (t.dataset.office) { S.office = t.dataset.office; render(); }
   else if (t.dataset.day) { S.day = t.dataset.day; render(); }
+  else if (t.dataset.meudia !== undefined) MD.abrir();
   else if (t.dataset.ok) confirmar(t.dataset.ok, t);
   else if (t.dataset.chat !== undefined) { S.chat = t.dataset.chat; render(); }
   else if (t.dataset.back !== undefined) { S.chat = null; render(); }
@@ -201,7 +210,10 @@ async function iniciar(sess) {
   try { await Promise.all([carregar(), carregarMsgs()]); }
   catch (err) { main.innerHTML = `<h1>Ops</h1><p class="say">Não consegui ler o banco agora.</p><p class="err">${esc(err.message || err)}</p><button class="btn" onclick="location.reload()">Tentar de novo</button>`; return; }
   const h = location.hash.slice(1); if (['hoje', 'agenda', 'conversas', 'voce'].includes(h)) S.tab = h;
+  MD = criarMeuDia(sb, { onXP: (x) => { S.xp = x; }, onChange: (c) => Object.assign(MDN, c), onClose: () => carregar().then(render).catch(() => render()) });
+  MD.atualizar().then(() => { if (S.tab === 'hoje' || S.tab === 'agenda') render(); });
+  if (h === 'meudia') MD.abrir();
   render(); ouvirMsgs();
-  setInterval(() => { if (document.visibilityState === 'visible' && !(S.tab === 'conversas' && S.chat)) carregar().then(render).catch(() => {}); }, 120000);
+  setInterval(() => { if (document.visibilityState === 'visible' && !(S.tab === 'conversas' && S.chat) && !MD?.aberto) carregar().then(render).catch(() => {}); }, 120000);
 }
 sb.auth.getSession().then(({ data }) => data.session ? iniciar(data.session) : telaLogin()).catch(() => telaLogin('Sem conexão com o banco.'));

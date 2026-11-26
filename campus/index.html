@@ -97,11 +97,12 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 <body>
 <canvas id="c"></canvas>
 <div id="labels"></div>
-<div id="load">Montando o campus… <small style="opacity:.6">v11</small></div>
+<div id="load">Montando o campus… <small style="opacity:.6">v12</small></div>
 
 <div id="top" class="hud">
   <div id="toprow"><a id="sair" class="glass" href="../novo/" hidden aria-label="Sair do campus">‹ Sair</a><div id="offices" class="glass"><button data-o="escola" class="on"><img src="logo.png" alt="" style="height:18px;vertical-align:-4px;margin-right:6px">Escola Prosperi</button><button data-o="pessoal">Pessoal</button></div></div>
   <div id="rel" class="glass">
+    <button id="mdTop" hidden aria-label="Abrir meu dia" style="border:0;color:#fff;background:#2F5BFF;font:800 13px/1 inherit;padding:0 12px;min-height:36px;margin-right:4px;border-radius:14px;cursor:pointer;white-space:nowrap">✓ Meu dia <span id="mdTopN" style="background:#fff;color:#2F5BFF;border-radius:999px;padding:2px 6px;margin-left:2px;font-size:11px"></span></button>
     <div class="t"><span>Relatório de hoje</span><span id="relSub">7 funcionários</span></div>
     <div><b id="nOk" style="color:var(--ok)">0</b><span>no prazo</span></div>
     <div><b id="nWa" style="color:var(--wa)">0</b><span>chegando</span></div>

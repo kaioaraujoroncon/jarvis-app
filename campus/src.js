@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { createClient } from '@supabase/supabase-js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { criarMeuDia } from '../shared/meudia.js';
 {
 /* ================= DADOS DE EXEMPLO (no app real vêm do Supabase) ================= */
 const OFFICES = {
@@ -275,7 +276,7 @@ flat(world,3,40,'#e7e5e4',PX+4,0.035,PZ); flat(world,30,3,'#e7e5e4',PX,0.035,PZ+
 /* ================= PERSONAGENS ================= */
 const CAPS=new THREE.CapsuleGeometry(.22,.38,4,8), ARM=new THREE.CapsuleGeometry(.07,.45,3,6), LEG=new THREE.CapsuleGeometry(.09,.62,3,6);
 const HEX=new THREE.CylinderGeometry(.26,.26,.36,6), HEAD=new THREE.SphereGeometry(.2,12,10), EYE=new THREE.SphereGeometry(.055,8,6), PUP=new THREE.SphereGeometry(.028,6,5);
-function person({shirt='#2563eb',pants='#1f2937',skin='#e0ac7e',hair='#3f2a1d',bot=null}={}){
+function person({shirt='#2563eb',pants='#1f2937',skin='#e0ac7e',hair='#3f2a1d',bot=null,corte='curto',acessorio='',sapato='#111827'}={}){
   const g=new THREE.Group(), body=new THREE.Group(); g.add(body);
   const legs=[-.11,.11].map(x=>{ const p=new THREE.Group(); p.position.set(x,.86,0); const l=new THREE.Mesh(LEG,mat(pants)); l.position.y=-.43; l.castShadow=true; p.add(l); body.add(p); return p; });
   const t=new THREE.Mesh(CAPS,mat(bot||shirt)); t.scale.set(1,1,.72); t.position.y=1.18; t.castShadow=true; body.add(t);
@@ -283,7 +284,17 @@ function person({shirt='#2563eb',pants='#1f2937',skin='#e0ac7e',hair='#3f2a1d',b
   if(bot){ const h=new THREE.Mesh(HEX,mat(bot,{flatShading:true})); h.rotation.x=Math.PI/2; h.rotation.y=Math.PI/6; h.position.y=1.78; h.castShadow=true; body.add(h);
     [-.09,.09].forEach(x=>{ const e=new THREE.Mesh(EYE,mat('#fff')); e.position.set(x,1.8,.17); body.add(e); const p=new THREE.Mesh(PUP,mat('#111')); p.position.set(x,1.8,.22); body.add(p); });
     const an=new THREE.Mesh(EYE,mat(bot,{emissive:bot,emissiveIntensity:.6})); an.position.y=2.07; body.add(an); box(body,.02,.12,.02,'#94a3b8',0,1.95,0);
-  } else { const h=new THREE.Mesh(HEAD,mat(skin)); h.position.y=1.74; h.castShadow=true; body.add(h); const hr=new THREE.Mesh(new THREE.SphereGeometry(.21,12,8,0,Math.PI*2,0,Math.PI/2),mat(hair)); hr.position.y=1.77; body.add(hr); }
+  } else { const h=new THREE.Mesh(HEAD,mat(skin)); h.position.y=1.74; h.castShadow=true; body.add(h);
+    const hm=mat(hair);
+    if(corte!=='careca'){ const hr=new THREE.Mesh(new THREE.SphereGeometry(corte==='cacheado'?.235:.21,12,8,0,Math.PI*2,0,Math.PI/2),hm); hr.position.y=1.77; if(corte==='cacheado') hr.scale.set(1.08,1.15,1.08); body.add(hr); }
+    if(corte==='longo'){ const l=new THREE.Mesh(new THREE.BoxGeometry(.4,.42,.12),hm); l.position.set(0,1.6,-.13); body.add(l); }
+    if(corte==='rabo'){ const l=new THREE.Mesh(new THREE.CapsuleGeometry(.06,.26,3,6),hm); l.position.set(0,1.62,-.24); l.rotation.x=.35; body.add(l); }
+    if(corte==='coque'){ const l=new THREE.Mesh(new THREE.SphereGeometry(.1,10,8),hm); l.position.set(0,1.98,-.08); body.add(l); }
+    if(acessorio==='oculos'){ [-.08,.08].forEach(x=>{ const o=new THREE.Mesh(new THREE.TorusGeometry(.05,.012,6,12),mat('#111')); o.position.set(x,1.76,.19); body.add(o); }); box(body,.06,.012,.012,'#111',0,1.76,.2); }
+    if(acessorio==='bone'){ const c=new THREE.Mesh(new THREE.SphereGeometry(.22,12,8,0,Math.PI*2,0,Math.PI/2),mat(shirt)); c.position.y=1.8; body.add(c); box(body,.3,.025,.18,shirt,0,1.81,.18); }
+    if(acessorio==='cracha'){ box(body,.1,.13,.02,'#f8fafc',.08,1.15,.17); box(body,.1,.03,.021,'#2F5BFF',.08,1.2,.171); }
+  }
+  [-.11,.11].forEach((x,i)=>{ const sh=new THREE.Mesh(new THREE.BoxGeometry(.13,.08,.22),mat(bot?'#475569':sapato)); sh.position.set(0,-.84,.04); legs[i].add(sh); });
   return {g,body,legs,arms};
 }
 const agents=[]; let player=null;
@@ -322,12 +333,31 @@ function sitAt(a,s){ goTo(a,{f:s.f,x:s.x,z:s.z,o:!!s.o},()=>{ a.seat=s; s.who=a;
 let botAgents=[];
 const SALA2F={}; FLOORPLAN.forEach((fl,f)=>fl.forEach(r=>SALA2F[r.k]=f));
 function freeSeat(k){ return seats.find(s=>s.room===k&&!s.who&&!s.kaio&&s.scr) || seats.find(s=>s.room===k&&!s.who&&!s.kaio) || seats.find(s=>s.room===k&&!s.kaio&&s.who&&s.who.staff&&(s.who.seat=null,s.who.state='idle',s.who.timer=0,s.who.home=seats.find(x=>x.scr&&!x.who&&x.room==='foco')||s.who.home,s.who.sit=false,s.who=null,true)); }
+function lookDe(d){ const hh=hashN(d.id), v=d.visual||{};
+  if(d.tipo!=='pessoa') return {bot:v.camisa||d.cor};
+  return {shirt:v.camisa||d.cor, skin:v.pele||SKINS[hh%5], pants:v.calca||['#1f2937','#334155','#1e3a8a'][hh%3], hair:v.cabelo||['#1c1917','#78350f','#facc15','#a8a29e'][hh%4], corte:v.corte||(['curto','longo','rabo','coque'][hh%4]), acessorio:v.acessorio||'', sapato:v.sapato||'#111827'}; }
+function trocarVisual(ag,v){ const pos=ag.m.g.position.clone(), ry=ag.m.g.rotation.y; world.remove(ag.m.g); ag.visual=v; const m=person(lookDe(ag)); m.g.position.copy(pos); m.g.rotation.y=ry; world.add(m.g); ag.m=m; if(ag.tennis) racket(ag,'#a6cf4a'); }
+function formVisual(b){ const v={...(b.visual||{})}, L=lookDe(b), pessoa=b.tipo==='pessoa';
+  const CORES={pele:['#ffdbac','#f1c27d','#e0ac69','#c68642','#8d5524','#5c3a21'],cabelo:['#1c1917','#3f2a1d','#78350f','#b45309','#facc15','#a8a29e','#f8fafc','#7c3aed'],camisa:['#e3423b','#2F5BFF','#10b981','#f59e0b','#8b5cf6','#ec4899','#0f172a','#f8fafc','#0ea5e9','#14532d'],calca:['#1f2937','#334155','#1e3a8a','#78350f','#f8fafc','#57534e'],sapato:['#111827','#f8fafc','#78350f','#e3423b']};
+  const NOMES={pele:'Pele',cabelo:'Cabelo',camisa:pessoa?'Camisa':'Cor do corpo',calca:'Calça',sapato:'Sapato'};
+  const camposCor=pessoa?['pele','cabelo','camisa','calca','sapato']:['camisa'];
+  const cur={pele:L.skin,cabelo:L.hair,camisa:L.shirt||L.bot,calca:L.pants,sapato:L.sapato};
+  const sw=k=>`<div class="sub" style="margin:10px 0 4px;font-weight:800">${NOMES[k]}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${CORES[k].map(c=>`<button class="sw" data-k="${k}" data-c="${c}" aria-label="${NOMES[k]} ${c}" aria-pressed="${(v[k]||cur[k])===c}" style="width:36px;height:36px;border-radius:50%;background:${c};border:3px solid ${(v[k]||cur[k])===c?'#2F5BFF':'rgba(255,255,255,.5)'};cursor:pointer"></button>`).join('')}</div>`;
+  const op=(k,arr)=>`<div class="sub" style="margin:10px 0 4px;font-weight:800">${k==='corte'?'Cabelo (corte)':'Acessório'}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${arr.map(([val,n])=>`<button class="btn ${((v[k]??L[k])||'')===val?'':'ghost'}" data-op="${k}" data-v="${val}" style="min-height:38px;padding:0 12px">${n}</button>`).join('')}</div>`;
+  openSheet(`<h2>Visual · ${esc(b.nome)}</h2><div class="sub">Muda só a aparência no campus</div>${camposCor.map(sw).join('')}${pessoa?op('corte',[['curto','Curto'],['longo','Longo'],['rabo','Rabo'],['coque','Coque'],['cacheado','Cacheado'],['careca','Careca']])+op('acessorio',[['','Nada'],['oculos','Óculos'],['cracha','Crachá'],['bone','Boné']]):''}<div class="row"><button class="btn" id="vSave">Salvar visual</button><button class="btn ghost" id="vBack">Voltar</button></div>`);
+  const ag=botAgents.find(a=>a.id===b.id)||b;
+  const prev=()=>{ trocarVisual(ag,{...v}); };
+  sc.querySelectorAll('.sw').forEach(el=>el.onclick=()=>{ v[el.dataset.k]=el.dataset.c; sc.querySelectorAll(`.sw[data-k="${el.dataset.k}"]`).forEach(x=>{ const on=x===el; x.style.borderColor=on?'#2F5BFF':'rgba(255,255,255,.5)'; x.setAttribute('aria-pressed',on); }); prev(); });
+  sc.querySelectorAll('[data-op]').forEach(el=>el.onclick=()=>{ v[el.dataset.op]=el.dataset.v; sc.querySelectorAll(`[data-op="${el.dataset.op}"]`).forEach(x=>x.classList.toggle('ghost',x!==el)); prev(); });
+  document.getElementById('vBack').onclick=()=>openBot(ag);
+  document.getElementById('vSave').onclick=async()=>{ if(!LIVE){ toast('Só no app ao vivo'); return; } const r=await sb.rpc('bot_visual',{p_bot:b.id,p_visual:v}); if(r.error){ toast('Não salvou'); return; } b.visual=r.data.visual; ag.visual=r.data.visual; const d=(OFFICES[office]?.bots||[]).find(x=>x.id===b.id); if(d) d.visual=r.data.visual; toast('Visual salvo'); openBot(ag); };
+}
 function buildOffice(){
   botAgents.forEach(b=>{ world.remove(b.m.g); if(b.seat) b.seat.who=null; agents.splice(agents.indexOf(b),1); b.tag?.remove(); });
   botAgents=[];
   for(const d of OFFICES[office].bots){
-    if(d.sala==='tenis'){ const a=spawn({...d,look:{bot:d.cor},o:true,f:0,x:TX-9,z:TZ,speed:4}); a.tennis=true; racket(a,'#a6cf4a'); botAgents.push(a); continue; }
-    const s=freeSeat(d.sala)||freeSeat('foco')||seats.find(x=>!x.who&&x.scr&&!x.kaio); if(!s) continue; const hh=hashN(d.id); const a=spawn({...d,look:d.tipo==='pessoa'?{shirt:d.cor,skin:SKINS[hh%5],pants:['#1f2937','#334155','#1e3a8a'][hh%3],hair:['#1c1917','#78350f','#facc15','#a8a29e'][hh%4]}:{bot:d.cor},o:false,f:s.f,x:s.x,z:s.z});
+    if(d.sala==='tenis'){ const a=spawn({...d,look:lookDe(d),o:true,f:0,x:TX-9,z:TZ,speed:4}); a.tennis=true; racket(a,'#a6cf4a'); botAgents.push(a); continue; }
+    const s=freeSeat(d.sala)||freeSeat('foco')||seats.find(x=>!x.who&&x.scr&&!x.kaio); if(!s) continue; const hh=hashN(d.id); const a=spawn({...d,look:lookDe(d),o:false,f:s.f,x:s.x,z:s.z});
     a.seat=s; s.who=a; a.sit=true; a.state='sit'; a.timer=8+Math.random()*30; a.m.g.rotation.y=s.ry; a.home=s; botAgents.push(a);
   }
   botAgents.forEach(b=>{ const t=document.createElement('div'); t.className='tag '+({ok:'',wa:'warn',la:'late'}[b.st]); t.innerHTML='<i></i>'; t.append(b.emo+' '+b.nome); t.onclick=e=>{e.stopPropagation(); openBot(b);}; labelsEl.appendChild(t); b.tag=t; });
@@ -423,13 +453,15 @@ document.getElementById('sx').onclick=closeSheet;
 function taskRows(b){ return b.tarefas.map((t,i)=>`<div class="task"><span class="d" style="background:${t[3]?'var(--cy)':STC[t[1]]}"></span><div class="n">${esc(t[0])}<small>${t[3]?'confirmada':STN[t[1]]} · +${t[2]} XP${t[6]&&!t[3]?' · você respondeu: '+esc(t[6]):''}</small></div><button class="btn" data-b="${b.id}" data-i="${i}" ${t[3]?'disabled':''}>${t[3]?'Feito':'Confirmar'}</button></div>`).join(''); }
 function openBot(b){ ronda(b);
   const f=b.o?'ao ar livre':['térreo','1º andar','2º andar'][b.f];
-  openSheet(`<h2>${esc(b.emo)} ${esc(b.nome)}</h2><div class="sub">${esc(b.papel)} · ${esc(b.sala==='tenis'?'Quadra de tênis':ROOMNAMES[office][b.sala])} · ${f}</div>${taskRows(b)}
-  <div class="row"><button class="btn ghost" id="seeB">Ver no campus</button><button class="btn ghost" id="callB">Chamar até você</button></div>${LIVE?(b.tarefas.length?'':'<div class="note">Sem tarefas abertas.</div>')+`<div class="row"><button class="btn ghost" id="rmB">Tirar da equipe</button></div>`:'<div class="note">Dados de exemplo. No app, o XP só entra quando a tarefa é confirmada com evidência.</div>'}`);
+  openSheet(`<h2>${esc(b.emo)} ${esc(b.nome)}</h2><div class="sub">${esc(b.papel)} · ${esc(b.sala==='tenis'?'Quadra de tênis':ROOMNAMES[office][b.sala])} · ${f}</div>${taskRows(b)}${LIVE&&MD?(()=>{ const ts=MD.tarefasDo(b.ids||[b.id]); return `<div class="sub" style="margin-top:10px;font-weight:800">Direcionadas para ${esc(b.nome)} · ${ts.length}</div>`+ts.map(t=>`<div class="task"><span class="d" style="background:var(--cy)"></span><div class="n">${esc(t.titulo)}<small>mexida ${new Date(t.atualizado_em).toLocaleDateString('pt-BR')}</small></div><button class="btn" data-tf="${t.id}">Abrir</button></div>`).join('')+`<div class="row"><button class="btn" id="mdB">Setor no Meu dia</button></div>`; })():''}
+  <div class="row"><button class="btn ghost" id="seeB">Ver no campus</button><button class="btn ghost" id="callB">Chamar até você</button></div><div class="row"><button class="btn ghost" id="visB">Mudar visual</button></div>${LIVE?(b.tarefas.length?'':'<div class="note">Sem tarefas abertas.</div>')+`<div class="row"><button class="btn ghost" id="rmB">Tirar da equipe</button></div>`:'<div class="note">Dados de exemplo. No app, o XP só entra quando a tarefa é confirmada com evidência.</div>'}`);
+  if(LIVE&&MD){ document.getElementById('mdB').onclick=()=>{ closeSheet(); MD.abrirSetor(b.id); }; sc.querySelectorAll('[data-tf]').forEach(el=>el.onclick=()=>{ closeSheet(); MD.abrirTarefa(el.dataset.tf); }); }
   if(LIVE) document.getElementById('rmB').onclick=()=>{ const el=document.getElementById('rmB'); if(el.dataset.ok){ removerAgente(b); } else { el.dataset.ok=1; el.textContent='Toque de novo para confirmar'; } };
+  document.getElementById('visB').onclick=()=>formVisual(b);
   document.getElementById('seeB').onclick=()=>{ closeSheet(); if(!b.o) setView(b.f); setTimeout(()=>flyTo(b.m.g.position.clone().add(new THREE.Vector3(7,9,11)),b.m.g.position.clone()),b.o?0:1150); };
   document.getElementById('callB').onclick=()=>{ if(b.tennis){ toast(b.nome+' está jogando'); closeSheet(); return; } const P=player, ang=P.m.g.rotation.y; goTo(b,{f:P.o?0:P.f,x:P.x+Math.sin(ang)*1.4,z:P.z+Math.cos(ang)*1.4,o:P.o},()=>{ b.state='idle'; b.timer=45; b.m.g.rotation.y=Math.atan2(player.x-b.x,player.z-b.z); toast(b.nome+' chegou'); }); toast(b.nome+' está indo até você'); closeSheet(); };
 }
-function openDesk(){ const all=OFFICES[office].bots.filter(b=>b.tarefas.some(t=>!t[3]&&t[1]!=='ok'));
+function openDesk(){ if(LIVE&&meuDia()){ MD.abrir(); return; } const all=OFFICES[office].bots.filter(b=>b.tarefas.some(t=>!t[3]&&t[1]!=='ok'));
   openSheet(`<h2>Sua mesa</h2><div class="sub">${esc(ROOMNAMES[office][player.seat?.room]||'')} · o que pede a sua atenção</div>${all.map(b=>taskRows(b).replace(/<div class="n">/g,`<div class="n"><small>${esc(b.emo+' '+b.nome)}</small>`)).join('')||'<div class="note">Nada pendente. Bom trabalho.</div>'}<div class="row"><button class="btn ghost" id="up">Levantar</button></div>`);
   document.getElementById('up').onclick=()=>{ closeSheet(); const r=roomAt(player.f,player.x,player.z); goTo(player,{f:player.f,x:r?r.cx:player.x,z:r?r.s*3.5:0,o:false}); };
 }
@@ -445,6 +477,7 @@ const MISSOES=()=>{ const ts=OFFICES[office].bots.flatMap(b=>b.tarefas); const d
   return [['Confirmar 3 tarefas hoje',Math.min(done,3),3,50],['Zerar as atrasadas',lateDone,late.length||1,80],['Ronda: conversar com 5 setores',Math.min(visited.size,5),5,50],['Sentar na arquibancada',player.seat&&player.seat.room==='arquibancada'?1:0,1,0]]; };
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b)); const t=b.dataset.t;
   if(t==='campus'){ closeSheet(); setView(-1); }
+  if(t==='tarefas'&&LIVE&&meuDia()){ closeSheet(); MD.abrir(); return; }
   if(t==='tarefas'){ openSheet(`<h2>Tarefas</h2><div class="sub">${esc(OFFICES[office].nome)} · toque em Confirmar quando estiver feito</div>`+OFFICES[office].bots.map(b=>taskRows(b).replace(/<div class="n">/g,`<div class="n"><small>${esc(b.emo+' '+b.nome)}</small>`)).join('')+(LIVE?'':'<div class="note">Dados de exemplo.</div>')); }
   if(t==='missoes'){ openSheet(`<h2>Missões do dia</h2><div class="sub">Recompensa só com trabalho confirmado</div>`+MISSOES().map(m=>`<div class="task"><div class="n">${esc(m[0])}<small>${m[1]}/${m[2]} · +${m[3]} XP</small><div class="prog"><i style="width:${Math.round(m[1]/m[2]*100)}%"></i></div></div></div>`).join('')); }
   if(t==='bots'){ openSheet(`<h2>Equipe</h2><div class="sub">${esc(OFFICES[office].nome)}</div>`+botAgents.map(a=>`<div class="bot" data-id="${a.id}"><div class="av" style="background:${a.cor}33">${esc(a.emo)}</div><div class="n" style="flex:1"><b>${esc(a.nome)}</b><small style="display:block;color:var(--mut)">${esc(a.papel)}</small></div><span class="d" style="width:10px;height:10px;border-radius:50%;background:${STC[a.st]}"></span></div>`).join(''));
@@ -609,6 +642,7 @@ function openPessoa(a){ if(!a) return; openSheet(`<h2>👤 ${esc(a.nome)}</h2><d
 const SBURL='https://qydpjcudcnirhybwlnhs.supabase.co', SBKEY='sb_publishable_41C_vG_CaaYvwiNhyGb88A_yQgSwqC1';
 let sb=null, LIVE=false, session=null, MODELOS=[];
 try{ sb=createClient(SBURL,SBKEY,{auth:{persistSession:true,storageKey:'jarvis.sb',autoRefreshToken:true}}); }catch(e){ sb=null; }
+let MD=null; function meuDia(){ if(!MD&&sb) MD=criarMeuDia(sb,{onXP:v=>{ xp=v; renderXP(); },onChange:c=>{ const el=document.getElementById('mdN'); if(el) el.textContent=c.tarefas+c.agenda; const n2=document.getElementById('mdTopN'); if(n2) n2.textContent=c.agenda+c.notion||''; },onClose:()=>{ if(LIVE) loadLive().then(()=>{ const L=OFFICES[office]?.bots||[]; botAgents.forEach(ag=>{ const d=L.find(x=>x.id===ag.id); if(!d) return; ag.tarefas=d.tarefas; ag.st=d.st; if(ag.tag) ag.tag.className='tag '+({ok:'',wa:'warn',la:'late'}[d.st]); }); updateReport(); renderXP(); }).catch(()=>{}); }}); return MD; }
 const modeEl=document.getElementById('mode');
 function setMode(t,btn){ modeEl.innerHTML=''; modeEl.append(t); if(btn){ const b=document.createElement('button'); b.textContent=btn.t; b.onclick=btn.fn; modeEl.append(b); } modeEl.style.display=''; }
 const SITMAP={atrasado:'la',chegando:'wa',no_prazo:'ok'};
@@ -616,9 +650,9 @@ const SALA_AREA={gestao:'coord',comercial:'marketing',dinheiro:'financeiro',manu
 const hashN=s=>{ let h=0; for(const c of String(s)) h=(h*31+c.charCodeAt(0))|0; return Math.abs(h); };
 function withTimeout(p,ms){ return Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('tempo esgotado')),ms))]); }
 async function loadLive(){
-  const [esc,bots,its,xpr,mods,resps]=await Promise.all([
+  const [esc,bots,its,resps,xpr,mods]=await Promise.all([
     sb.from('escritorios').select('id,nome,emoji,cor,tipo,ordem').order('ordem'),
-    sb.from('bots').select('id,nome,emoji,sala,tipo,cor,missao,modelo_slug,escritorio_id,area_id').eq('ativo',true),
+    sb.from('bots').select('id,nome,emoji,sala,tipo,cor,missao,modelo_slug,escritorio_id,area_id,visual').eq('ativo',true),
     sb.from('itens_situacao').select('id,bot_id,titulo,prazo,xp,situacao,status,escritorio_id').eq('ativo',true).in('situacao',['atrasado','chegando','no_prazo']),
     sb.from('respostas').select('item_id,resposta,extra,criado_em').order('criado_em',{ascending:false}).limit(600),
     sb.from('xp_eventos').select('pontos'),
@@ -634,7 +668,7 @@ async function loadLive(){
       const tarefas=its.data.filter(i=>i.bot_id===b.id&&i.status!=='fechado').map(i=>[i.titulo||'Sem título',SITMAP[i.situacao]||'ok',i.xp||10,false,i.id,i.prazo,i.status==='respondido'?String(RESP[i.id]||'respondida').slice(0,60):'']);
       if(seen[key]){ seen[key].tarefas.push(...tarefas); seen[key].ids.push(b.id); continue; }
       const mod=MODELOS.find(m=>m.slug===b.modelo_slug);
-      const d={id:b.id,ids:[b.id],nome:b.nome,emo:b.emoji||(b.tipo==='pessoa'?'👤':'🤖'),cor:b.cor||PAL[hashN(b.id)%6],sala,tipo:b.tipo||'bot',papel:b.missao||(mod?mod.nome:(b.tipo==='pessoa'?'Equipe':'Agente')),tarefas,criado:b.id.startsWith('app-')};
+      const d={id:b.id,ids:[b.id],nome:b.nome,emo:b.emoji||(b.tipo==='pessoa'?'👤':'🤖'),cor:b.cor||PAL[hashN(b.id)%6],sala,tipo:b.tipo||'bot',papel:b.missao||(mod?mod.nome:(b.tipo==='pessoa'?'Equipe':'Agente')),tarefas,criado:b.id.startsWith('app-'),visual:b.visual||{}};
       seen[key]=d; list.push(d); }
     list.forEach(d=>{ d.tarefas.sort((a,b)=>({la:0,wa:1,ok:2}[a[1]]-{la:0,wa:1,ok:2}[b[1]])); d.st=d.tarefas.some(t=>t[1]==='la')?'la':d.tarefas.some(t=>t[1]==='wa')?'wa':'ok'; });
     OFFICES[e.id]={nome:e.nome,placa:(kind==='escola'&&!/^escola/i.test(e.nome)?'ESCOLA ':'')+e.nome.toUpperCase(),kind,bots:list};
@@ -646,7 +680,7 @@ function renderOfficeChips(){ const el=document.getElementById('offices'); el.in
   for(const [id,o] of Object.entries(OFFICES)){ const b=document.createElement('button'); b.className=id===office?'on':''; if(o.kind==='escola'||id==='escola'){ const im=document.createElement('img'); im.src='logo.png'; im.alt=''; im.style.cssText='height:18px;vertical-align:-4px;margin-right:6px'; b.append(im); } b.append(o.nome);
     b.onclick=()=>{ if(id===office) return; office=id; renderOfficeChips(); closeSheet(); buildOffice(); }; el.append(b); } }
 async function goLive(){
-  try{ await withTimeout(loadLive(),9000); LIVE=true; renderOfficeChips(); buildOffice(); renderXP(); modeEl.style.display='none'; }
+  try{ await withTimeout(loadLive(),9000); LIVE=true; renderOfficeChips(); buildOffice(); renderXP(); modeEl.style.display='none'; meuDia()?.atualizar(); const mt=document.getElementById('mdTop'); if(mt){ mt.hidden=false; mt.onclick=e=>{ e.stopPropagation(); closeSheet(); MD.abrir(); }; } const rl=document.getElementById('rel'); if(rl){ rl.style.cursor='pointer'; rl.onclick=()=>{ closeSheet(); MD.abrir(); }; } const tb=document.querySelector('#tabs [data-t=tarefas]'); if(tb&&!tb.dataset.md){ tb.dataset.md=1; tb.lastChild.textContent='Meu dia'; tb.insertAdjacentHTML('beforeend',' <b id="mdN" style="font-size:10px"></b>'); } }
   catch(e){ LIVE=false; setMode('Não consegui ler o banco agora. Mostrando exemplo.',{t:'Tentar de novo',fn:goLive}); }
 }
 async function startLive(){
